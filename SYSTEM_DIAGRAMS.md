@@ -11,7 +11,7 @@ graph TB
         COMP[React Components]
         HOOKS[Custom Hooks]
     end
-    
+
     subgraph "API Layer"
         AUTH[Auth Routes]
         APPT[Appointment Routes]
@@ -20,7 +20,7 @@ graph TB
         USER[User Routes]
         TUTOR[Tutor Routes]
     end
-    
+
     subgraph "Service Layer"
         AS[Auth Service]
         APS[Appointment Service]
@@ -30,44 +30,44 @@ graph TB
         TS[Tutor Service]
         IS[Integration Service]
     end
-    
+
     subgraph "Data Layer"
         REPO[Repositories]
         PRISMA[Prisma Client]
         DB[(PostgreSQL)]
     end
-    
+
     subgraph "External Services"
         EMAIL[Email Service]
         SMS[SMS Service]
         GCAL[Google Calendar]
         STORAGE[File Storage]
     end
-    
+
     UI --> COMP
     COMP --> HOOKS
     HOOKS --> AUTH
     HOOKS --> APPT
     HOOKS --> ASSIGN
     HOOKS --> NOTIF
-    
+
     AUTH --> AS
     APPT --> APS
     ASSIGN --> ASSIGNS
     NOTIF --> NS
     USER --> US
     TUTOR --> TS
-    
+
     AS --> REPO
     APS --> REPO
     ASSIGNS --> REPO
     NS --> REPO
     US --> REPO
     TS --> REPO
-    
+
     REPO --> PRISMA
     PRISMA --> DB
-    
+
     NS --> EMAIL
     NS --> SMS
     IS --> GCAL
@@ -88,7 +88,7 @@ graph LR
         A7[students/[id]/progress/route.ts]
         A8[tutors/availability/route.ts]
     end
-    
+
     subgraph "Services (/services/)"
         S1[auth/auth.service.ts]
         S2[appointment/appointment.service.ts]
@@ -98,14 +98,14 @@ graph LR
         S6[user/user.service.ts]
         S7[appointment/availability.service.ts]
     end
-    
+
     subgraph "Repositories (/lib/db/repositories/)"
         R1[user.repository.ts]
         R2[appointment.repository.ts]
         R3[assignment.repository.ts]
         R4[notification.repository.ts]
     end
-    
+
     A1 --> S1
     A2 --> S1
     A3 --> S2
@@ -114,7 +114,7 @@ graph LR
     A6 --> S5
     A7 --> S6
     A8 --> S7
-    
+
     S1 --> R1
     S2 --> R2
     S3 --> R2
@@ -132,23 +132,23 @@ erDiagram
     USERS ||--o| TUTORS : has
     USERS ||--o{ NOTIFICATIONS : receives
     USERS ||--o| NOTIFICATION_PREFERENCES : has
-    
+
     TUTORS ||--o{ AVAILABILITY : sets
     TUTORS ||--o{ AVAILABILITY_EXCEPTIONS : has
     TUTORS ||--o{ APPOINTMENTS : teaches
     TUTORS ||--o{ ASSIGNMENTS : creates
-    
+
     STUDENTS ||--o{ APPOINTMENTS : books
     STUDENTS ||--o{ ASSIGNMENTS : receives
     STUDENTS ||--o{ STUDENT_PROGRESS : tracks
     STUDENTS ||--o{ ASSIGNMENT_SUBMISSIONS : submits
-    
+
     APPOINTMENTS ||--o{ SESSION_COMMENTS : has
     APPOINTMENTS ||--o{ ASSIGNMENTS : generates
-    
+
     ASSIGNMENTS ||--o{ ASSIGNMENT_FILES : contains
     ASSIGNMENTS ||--o{ ASSIGNMENT_SUBMISSIONS : receives
-    
+
     USERS {
         string id PK
         string email UK
@@ -156,14 +156,14 @@ erDiagram
         string firstName
         string lastName
     }
-    
+
     STUDENTS {
         string id PK
         string userId FK
         string gradeLevel
         string subjects
     }
-    
+
     TUTORS {
         string id PK
         string userId FK
@@ -181,7 +181,7 @@ graph TB
         USER_S[UserService]
         PERM_S[PermissionService]
     end
-    
+
     subgraph "Business Services"
         APPT_S[AppointmentService]
         BOOK_S[BookingService]
@@ -189,27 +189,27 @@ graph TB
         ASSIGN_S[AssignmentService]
         GRADE_S[GradingService]
     end
-    
+
     subgraph "Communication Services"
         NOTIF_S[NotificationService]
         EMAIL_S[EmailService]
         SMS_S[SMSService]
         SCHED_S[SchedulerService]
     end
-    
+
     subgraph "Integration Services"
         GCAL_S[GoogleCalendarService]
         WEBHOOK_S[WebhookService]
         FILE_S[FileService]
     end
-    
+
     subgraph "Repositories"
         USER_R[UserRepository]
         APPT_R[AppointmentRepository]
         ASSIGN_R[AssignmentRepository]
         NOTIF_R[NotificationRepository]
     end
-    
+
     AUTH_S --> USER_R
     USER_S --> USER_R
     APPT_S --> APPT_R
@@ -217,13 +217,13 @@ graph TB
     AVAIL_S --> APPT_R
     ASSIGN_S --> ASSIGN_R
     NOTIF_S --> NOTIF_R
-    
+
     BOOK_S --> NOTIF_S
     ASSIGN_S --> NOTIF_S
     NOTIF_S --> EMAIL_S
     NOTIF_S --> SMS_S
     SCHED_S --> NOTIF_S
-    
+
     APPT_S --> GCAL_S
     AVAIL_S --> GCAL_S
 ```
@@ -239,7 +239,7 @@ graph TB
         NAV[Navbar]
         SIDE[Sidebar]
     end
-    
+
     subgraph "Page Components"
         LOGIN[LoginPage]
         REGISTER[RegisterPage]
@@ -249,7 +249,7 @@ graph TB
         APPOINTMENTS[AppointmentsPage]
         ASSIGNMENTS[AssignmentsPage]
     end
-    
+
     subgraph "Feature Components"
         CAL_VIEW[CalendarView]
         APPT_FORM[AppointmentForm]
@@ -258,7 +258,7 @@ graph TB
         RATING[RatingWidget]
         PROGRESS[ProgressTracker]
     end
-    
+
     subgraph "UI Components"
         BUTTON[Button]
         INPUT[Input]
@@ -266,12 +266,12 @@ graph TB
         CALENDAR_UI[Calendar]
         TABLE[DataTable]
     end
-    
+
     ROOT --> AUTH_LAY
     ROOT --> DASH_LAY
     DASH_LAY --> NAV
     DASH_LAY --> SIDE
-    
+
     AUTH_LAY --> LOGIN
     AUTH_LAY --> REGISTER
     DASH_LAY --> STUDENT_DASH
@@ -279,14 +279,14 @@ graph TB
     DASH_LAY --> CALENDAR
     DASH_LAY --> APPOINTMENTS
     DASH_LAY --> ASSIGNMENTS
-    
+
     CALENDAR --> CAL_VIEW
     APPOINTMENTS --> APPT_FORM
     ASSIGNMENTS --> ASSIGN_FORM
     CAL_VIEW --> BOOK_MODAL
     APPOINTMENTS --> RATING
     STUDENT_DASH --> PROGRESS
-    
+
     APPT_FORM --> BUTTON
     APPT_FORM --> INPUT
     BOOK_MODAL --> DIALOG
@@ -303,38 +303,38 @@ graph LR
         USE_SESSION[useSession]
         USE_PERM[usePermissions]
     end
-    
+
     subgraph "API Hooks"
         USE_APPTS[useAppointments]
         USE_ASSIGNS[useAssignments]
         USE_STUDENTS[useStudents]
         USE_NOTIFS[useNotifications]
     end
-    
+
     subgraph "Calendar Hooks"
         USE_CAL[useCalendar]
         USE_AVAIL[useAvailability]
         USE_SLOTS[useTimeSlots]
     end
-    
+
     subgraph "Utility Hooks"
         USE_LOCAL[useLocalStorage]
         USE_DEBOUNCE[useDebounce]
         USE_TZ[useTimezone]
     end
-    
+
     USE_SESSION --> USE_AUTH
     USE_PERM --> USE_AUTH
     USE_APPTS --> USE_AUTH
     USE_ASSIGNS --> USE_AUTH
     USE_STUDENTS --> USE_AUTH
     USE_NOTIFS --> USE_AUTH
-    
+
     USE_CAL --> USE_APPTS
     USE_CAL --> USE_AVAIL
     USE_AVAIL --> USE_SLOTS
     USE_SLOTS --> USE_TZ
-    
+
     USE_APPTS --> USE_LOCAL
     USE_ASSIGNS --> USE_LOCAL
     USE_CAL --> USE_DEBOUNCE
@@ -351,7 +351,7 @@ sequenceDiagram
     participant Repo as AppointmentRepository
     participant DB as Database
     participant NotifService as NotificationService
-    
+
     Student->>Hook: selectTimeSlot(slotId)
     Hook->>API: POST /api/appointments/book
     API->>Service: bookingService.createAppointment()
@@ -359,7 +359,7 @@ sequenceDiagram
     Repo->>DB: SELECT conflicting appointments
     DB-->>Repo: conflicts result
     Repo-->>Service: conflict check result
-    
+
     alt No Conflicts
         Service->>Repo: appointmentRepo.create()
         Repo->>DB: INSERT appointment
@@ -388,14 +388,14 @@ graph TB
         TWILIO[Twilio API]
         GOOGLE_API[Google Calendar API]
     end
-    
+
     subgraph "Repository Layer"
         USER_REPO[UserRepository]
         APPT_REPO[AppointmentRepository]
         ASSIGN_REPO[AssignmentRepository]
         NOTIF_REPO[NotificationRepository]
     end
-    
+
     subgraph "Service Layer"
         AUTH_SERVICE[AuthService]
         BOOKING_SERVICE[BookingService]
@@ -404,25 +404,25 @@ graph TB
         SMS_SERVICE[SMSService]
         GCAL_SERVICE[GoogleCalendarService]
     end
-    
+
     PRISMA_CLIENT --> USER_REPO
     PRISMA_CLIENT --> APPT_REPO
     PRISMA_CLIENT --> ASSIGN_REPO
     PRISMA_CLIENT --> NOTIF_REPO
-    
+
     REDIS --> AUTH_SERVICE
     USER_REPO --> AUTH_SERVICE
     APPT_REPO --> BOOKING_SERVICE
     NOTIF_REPO --> NOTIF_SERVICE
-    
+
     BOOKING_SERVICE --> NOTIF_SERVICE
     NOTIF_SERVICE --> EMAIL_SERVICE
     NOTIF_SERVICE --> SMS_SERVICE
-    
+
     SENDGRID --> EMAIL_SERVICE
     TWILIO --> SMS_SERVICE
     GOOGLE_API --> GCAL_SERVICE
-    
+
     APPT_REPO --> GCAL_SERVICE
 ```
 
@@ -443,7 +443,7 @@ flowchart TD
     J --> L[Assignment created & notifications sent]
     K --> L
     L --> M[Update UI with new assignment]
-    
+
     style A fill:#e1f5fe
     style L fill:#c8e6c9
     style M fill:#c8e6c9
@@ -458,44 +458,44 @@ graph LR
         API_ROUTES[API Routes]
         LAYOUTS[Layout Components]
     end
-    
+
     subgraph "src/components/"
         UI_COMP[UI Components]
         FEATURE_COMP[Feature Components]
         FORMS[Form Components]
     end
-    
+
     subgraph "src/hooks/"
         CUSTOM_HOOKS[Custom Hooks]
     end
-    
+
     subgraph "src/services/"
         SERVICES[Service Classes]
     end
-    
+
     subgraph "src/lib/"
         UTILS[Utilities]
         CONFIG[Configuration]
         TYPES[Type Definitions]
         DB_LIB[Database Layer]
     end
-    
+
     PAGES --> UI_COMP
     PAGES --> FEATURE_COMP
     PAGES --> CUSTOM_HOOKS
-    
+
     FEATURE_COMP --> UI_COMP
     FEATURE_COMP --> FORMS
     FEATURE_COMP --> CUSTOM_HOOKS
-    
+
     CUSTOM_HOOKS --> API_ROUTES
     API_ROUTES --> SERVICES
     SERVICES --> DB_LIB
-    
+
     SERVICES --> UTILS
     SERVICES --> CONFIG
     SERVICES --> TYPES
-    
+
     DB_LIB --> TYPES
     CUSTOM_HOOKS --> TYPES
 ```
@@ -503,6 +503,7 @@ graph LR
 ## Diagram Legend
 
 ### Symbols Used:
+
 - **Rectangles**: Classes, Services, Components
 - **Cylinders**: Databases
 - **Diamonds**: Decision Points
@@ -510,6 +511,7 @@ graph LR
 - **Arrows**: Dependencies/Relationships
 
 ### Color Coding:
+
 - **Blue**: Frontend Components
 - **Green**: Backend Services
 - **Orange**: External Services

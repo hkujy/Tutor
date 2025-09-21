@@ -6,14 +6,19 @@ export default function Home() {
           Tutoring Calendar
         </h1>
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-semibold mb-4">Welcome to Your Tutoring Platform</h2>
+          <h2 className="text-2xl font-semibold mb-4">
+            Welcome to Your Tutoring Platform
+          </h2>
           <p className="text-gray-600 mb-4">
-            Manage appointments, assignments, and student progress all in one place.
+            Manage appointments, assignments, and student progress all in one
+            place.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 border rounded-lg">
               <h3 className="font-semibold">Calendar</h3>
-              <p className="text-sm text-gray-600">View and book appointments</p>
+              <p className="text-sm text-gray-600">
+                View and book appointments
+              </p>
             </div>
             <div className="p-4 border rounded-lg">
               <h3 className="font-semibold">Assignments</h3>
@@ -21,7 +26,9 @@ export default function Home() {
             </div>
             <div className="p-4 border rounded-lg">
               <h3 className="font-semibold">Notifications</h3>
-              <p className="text-sm text-gray-600">Stay updated with reminders</p>
+              <p className="text-sm text-gray-600">
+                Stay updated with reminders
+              </p>
             </div>
           </div>
         </div>

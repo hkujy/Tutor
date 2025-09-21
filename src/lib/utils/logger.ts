@@ -29,23 +29,28 @@ export const logger = pino(
 export function createRequestLogger() {
   return (req: any, res: any, next: any) => {
     const start = Date.now()
-    const correlationId = req.headers['x-correlation-id'] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-    
+    const correlationId =
+      req.headers['x-correlation-id'] ||
+      `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
     req.log = logger.child({ correlationId })
     req.correlationId = correlationId
-    
+
     res.setHeader('X-Correlation-ID', correlationId)
-    
+
     res.on('finish', () => {
       const duration = Date.now() - start
-      req.log.info({
-        method: req.method,
-        url: req.url,
-        statusCode: res.statusCode,
-        duration: `${duration}ms`,
-      }, 'Request completed')
+      req.log.info(
+        {
+          method: req.method,
+          url: req.url,
+          statusCode: res.statusCode,
+          duration: `${duration}ms`,
+        },
+        'Request completed'
+      )
     })
-    
+
     next()
   }
 }

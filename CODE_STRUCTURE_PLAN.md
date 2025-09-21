@@ -5,6 +5,7 @@
 This document outlines the modular code structure for the tutoring calendar application, ensuring maintainable, scalable, and well-organized code across multiple files.
 
 Design principles
+
 - Small, focused files with clear boundaries (services, repos, UI, hooks)
 - Strong typing at API boundaries with runtime validation (Zod)
 - Ports and adapters: repositories as ports, Prisma as adapter
@@ -12,6 +13,7 @@ Design principles
 - Test-first for domain logic; integration tests for boundaries
 
 ## Technology Stack
+
 - **Frontend**: Next.js 14 with TypeScript
 - **Backend**: Next.js API routes + Prisma ORM
 - **Database**: PostgreSQL
@@ -66,6 +68,7 @@ tutoring-calendar/
 ## Backend Structure (src/app/api/)
 
 ### Authentication Routes
+
 ```
 src/app/api/auth/
 ├── [...nextauth]/
@@ -81,6 +84,7 @@ src/app/api/auth/
 ```
 
 ### User Management Routes
+
 ```
 src/app/api/users/
 ├── route.ts                    # GET /api/users (admin)
@@ -93,6 +97,7 @@ src/app/api/users/
 ```
 
 ### Student Management Routes
+
 ```
 src/app/api/students/
 ├── route.ts                    # GET /api/students
@@ -107,6 +112,7 @@ src/app/api/students/
 ```
 
 ### Tutor Management Routes
+
 ```
 src/app/api/tutors/
 ├── route.ts                    # GET /api/tutors
@@ -127,6 +133,7 @@ src/app/api/tutors/
 ```
 
 ### Appointment Routes
+
 ```
 src/app/api/appointments/
 ├── route.ts                    # GET, POST /api/appointments
@@ -143,11 +150,13 @@ src/app/api/appointments/
 ```
 
 Route handler notes
+
 - Apply Zod schemas in each route for input/output
 - Enforce Idempotency-Key on booking endpoints (Redis-backed)
 - Map domain errors to HTTP problem details consistently
 
 ### Assignment Routes
+
 ```
 src/app/api/assignments/
 ├── route.ts                    # GET, POST /api/assignments
@@ -162,6 +171,7 @@ src/app/api/assignments/
 ```
 
 ### Comment Routes
+
 ```
 src/app/api/comments/
 ├── [id]/
@@ -171,6 +181,7 @@ src/app/api/comments/
 ```
 
 ### Notification Routes
+
 ```
 src/app/api/notifications/
 ├── route.ts                    # GET /api/notifications
@@ -186,6 +197,7 @@ src/app/api/notifications/
 ```
 
 ### File Management Routes
+
 ```
 src/app/api/files/
 ├── upload/
@@ -197,6 +209,7 @@ src/app/api/files/
 ```
 
 ### Integration Routes
+
 ```
 src/app/api/integrations/
 ├── google/
@@ -212,6 +225,7 @@ src/app/api/integrations/
 ```
 
 ### Analytics & Reports Routes
+
 ```
 src/app/api/analytics/
 ├── dashboard/
@@ -228,6 +242,7 @@ src/app/api/analytics/
 ```
 
 ### Advertisement Routes
+
 ```
 src/app/api/advertisements/
 ├── route.ts                    # GET, POST /api/advertisements
@@ -240,6 +255,7 @@ src/app/api/advertisements/
 ## Services Layer (src/services/)
 
 ### Core Services
+
 ```
 src/services/
 ├── auth/
@@ -284,6 +300,7 @@ src/services/
 ```
 
 Service design
+
 - Keep services pure where possible; inject repositories, cache, clock, logger
 - Use small function groups; split when >5 core operations
 - Return Result<E, T> or throw typed errors from /lib/errors
@@ -291,6 +308,7 @@ Service design
 ## Database Layer (src/lib/db/)
 
 ### Database Utilities
+
 ```
 src/lib/db/
 ├── client.ts                   # Prisma client instance
@@ -312,6 +330,7 @@ src/lib/db/
 ```
 
 Repository pattern
+
 - Define repository interfaces in src/types or alongside repos
 - Keep all Prisma calls in repositories; never in services or routes
 - Expose query methods with narrow DTOs (no Prisma types leaking)
@@ -319,6 +338,7 @@ Repository pattern
 ## Utilities and Configuration (src/lib/)
 
 ### Core Utilities
+
 ```
 src/lib/
 ├── auth/
@@ -369,6 +389,7 @@ Observability (src/lib/observability)
 ## Frontend Structure (src/app/ and src/components/)
 
 ### Page Components (App Router)
+
 ```
 src/app/
 ├── (auth)/
@@ -418,10 +439,12 @@ src/app/
 ```
 
 Feature-sliced UI (optional)
+
 - src/features/booking, /assignments, /notifications: colocate domain UI, hooks, and API calls per feature
 - Keep shared primitives in src/components and cross-feature hooks in src/hooks
 
 ### Reusable Components
+
 ```
 src/components/
 ├── ui/                        # shadcn/ui components
@@ -481,6 +504,7 @@ src/components/
 ```
 
 ### Custom Hooks
+
 ```
 src/hooks/
 ├── auth/
@@ -508,11 +532,13 @@ src/hooks/
 ```
 
 Data fetching strategy
+
 - Use TanStack Query for caching, retries, and background refresh
-- Keep API calls in hooks (src/hooks/api/*) using lib/http/client
+- Keep API calls in hooks (src/hooks/api/\*) using lib/http/client
 - Normalize time handling with utils/date + timezone; store and transmit ISO UTC; render in user TZ
 
 ## Testing Structure
+
 ```
 tests/
 ├── unit/
@@ -539,6 +565,7 @@ tests/
 ```
 
 Testing guidance
+
 - Unit: services and utils with deterministic clock
 - Integration: API routes with Next.js test runtime + Testcontainers for Postgres/Redis
 - E2E: Playwright against dev server, seed DB before suite
@@ -547,6 +574,7 @@ Testing guidance
 ## File Size Guidelines
 
 ### Maximum File Sizes (Lines of Code)
+
 - **API Routes**: 150 lines max
 - **Service Files**: 200 lines max
 - **Component Files**: 250 lines max
@@ -555,12 +583,14 @@ Testing guidance
 - **Type Definition Files**: 200 lines max
 
 ### When to Split Files
+
 - **API Routes**: Split when handling more than 3 HTTP methods
 - **Services**: Split when handling more than 5 core operations
 - **Components**: Split when component has more than 3 distinct responsibilities
 - **Hooks**: Split when managing more than 2 different state concerns
 
 How to keep files small
+
 - Extract pure helpers to utils; keep side-effects at boundaries
 - Break large components into presentational + container parts
 - Use composition over props drilling; colocate small subcomponents
@@ -568,6 +598,7 @@ How to keep files small
 ## Development Workflow
 
 ### File Naming Conventions
+
 - **API Routes**: `route.ts` (Next.js 14 convention)
 - **Services**: `[entity].service.ts`
 - **Components**: `kebab-case.tsx`
@@ -577,6 +608,7 @@ How to keep files small
 - **Tests**: `[filename].test.ts`
 
 ### Import Organization
+
 ```typescript
 // 1. External libraries
 import React from 'react'
@@ -597,6 +629,7 @@ import { Button } from '@/components/ui/button'
 ```
 
 ### Code Organization Principles
+
 1. **Single Responsibility**: Each file handles one primary concern
 2. **Dependency Injection**: Services receive dependencies rather than importing directly
 3. **Error Boundaries**: Wrap components with error handling
@@ -604,17 +637,20 @@ import { Button } from '@/components/ui/button'
 5. **Testability**: Design for easy unit and integration testing
 
 Security & resilience
+
 - Rate limit public APIs; authz checks in services, not routes
 - Validate all inputs and serialize outputs (no prisma types to client)
 - Standardize errors to problem+json; log with correlation IDs
 - Add security headers (CSP, CORP, Referrer-Policy) in next.config or middleware
 
 Runtime concerns
+
 - Idempotency for booking: require Idempotency-Key; lock window by (tutorId,startAt)
 - Background jobs: reminders, digest emails, cleanup; define in src/jobs with simple cron or a queue
 - Caching: cache read-heavy lists in Redis with short TTL; bust on write
 
 DX & CI
+
 - Husky + lint-staged for pre-commit (lint, typecheck on changed files)
 - CI workflow (ci.yml): pnpm install, prisma generate, lint, typecheck, unit, integration, build
 - Scripts: dev, build, start, test:unit, test:int, test:e2e, typecheck, lint, format, prisma:migrate, seed

@@ -168,7 +168,6 @@ model Tutor {
   availability     Availability[]
   availabilityExceptions AvailabilityException[]
   appointments     Appointment[]
-  assignments      Assignment[]
 
   @@map("tutors")
 }

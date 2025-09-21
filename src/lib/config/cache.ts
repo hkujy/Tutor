@@ -4,10 +4,17 @@ import { env } from './env'
 class RedisClient {
   private client: RedisClientType | null = null
   private isConnected = false
+  private isOptional = env.NODE_ENV === 'development'
 
   async connect() {
     if (this.isConnected && this.client) {
       return this.client
+    }
+
+    // In development, make Redis optional
+    if (this.isOptional && !env.REDIS_URL) {
+      console.log('Redis is optional in development - skipping connection')
+      return null
     }
 
     try {
@@ -15,11 +22,14 @@ class RedisClient {
         url: env.REDIS_URL,
         socket: {
           connectTimeout: 5000,
-          lazyConnect: true,
         },
       })
 
-      this.client.on('error', (err) => {
+      this.client.on('error', err => {
+        if (this.isOptional) {
+          console.warn('Redis connection error (optional in dev):', err.message)
+          return
+        }
         console.error('Redis client error:', err)
       })
 
@@ -36,6 +46,11 @@ class RedisClient {
       await this.client.connect()
       return this.client
     } catch (error) {
+      if (this.isOptional) {
+        console.warn('Failed to connect to Redis (optional in dev):', 
+          error instanceof Error ? error.message : String(error))
+        return null
+      }
       console.error('Failed to connect to Redis:', error)
       throw error
     }

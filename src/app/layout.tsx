@@ -6,7 +6,8 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Tutoring Calendar',
-  description: 'A comprehensive tutoring calendar and appointment management system',
+  description:
+    'A comprehensive tutoring calendar and appointment management system',
 }
 
 export default function RootLayout({

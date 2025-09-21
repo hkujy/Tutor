@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { logger } from './lib/utils/logger'
+import { logger } from './src/lib/utils/logger'
 
 // Rate limiting store (in production, use Redis)
 const rateLimit = new Map<string, { count: number; resetTime: number }>()
@@ -30,7 +30,8 @@ function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
-  const correlationId = request.headers.get('x-correlation-id') || 
+  const correlationId =
+    request.headers.get('x-correlation-id') ||
     `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
   // Add correlation ID to all responses
@@ -40,11 +41,11 @@ export function middleware(request: NextRequest) {
   // Apply rate limiting to API routes
   if (pathname.startsWith('/api/')) {
     const key = getRateLimitKey(request)
-    
+
     // Different limits for different endpoints
     let limit = 100 // requests per minute (default)
     let windowMs = 60 * 1000 // 1 minute
-    
+
     if (pathname.includes('/auth/')) {
       limit = 5
     } else if (pathname.includes('/appointments/book')) {
@@ -55,25 +56,31 @@ export function middleware(request: NextRequest) {
     }
 
     if (!checkRateLimit(key, limit, windowMs)) {
-      logger.warn({ 
-        ip: key, 
-        pathname, 
-        correlationId 
-      }, 'Rate limit exceeded')
-      
-      return new Response(JSON.stringify({
-        error: {
-          code: 'RATE_LIMITED',
-          message: 'Too many requests'
+      logger.warn(
+        {
+          ip: key,
+          pathname,
+          correlationId,
+        },
+        'Rate limit exceeded'
+      )
+
+      return new Response(
+        JSON.stringify({
+          error: {
+            code: 'RATE_LIMITED',
+            message: 'Too many requests',
+          },
+        }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Correlation-ID': correlationId,
+            'Retry-After': '60',
+          },
         }
-      }), {
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Correlation-ID': correlationId,
-          'Retry-After': '60'
-        }
-      })
+      )
     }
   }
 
@@ -82,12 +89,10 @@ export function middleware(request: NextRequest) {
   response.headers.set('X-Frame-Options', 'DENY')
   response.headers.set('X-XSS-Protection', '1; mode=block')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-  
+
   return response
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)'],
 }

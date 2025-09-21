@@ -12,7 +12,9 @@
 ## Authentication Endpoints
 
 ### POST /api/auth/register
+
 Create new user account
+
 ```json
 {
   "email": "student@example.com",
@@ -28,7 +30,9 @@ Create new user account
 ```
 
 ### POST /api/auth/login
+
 Authenticate user
+
 ```json
 {
   "email": "student@example.com",
@@ -39,11 +43,14 @@ Authenticate user
 ## Calendar & Appointments
 
 ### GET /api/appointments
+
 Get appointments for authenticated user
 Query params: `startDate`, `endDate`, `status`
 
 ### POST /api/appointments
+
 Create new appointment (tutor only)
+
 ```json
 {
   "studentId": "uuid",
@@ -55,7 +62,9 @@ Create new appointment (tutor only)
 ```
 
 ### POST /api/appointments/book
+
 Book appointment (student only)
+
 ```json
 {
   "tutorId": "uuid",
@@ -66,26 +75,33 @@ Book appointment (student only)
 ```
 
 Headers:
+
 - `Idempotency-Key`: A unique key per booking attempt to prevent double-booking on retries.
 
 Errors:
+
 - `409 CONFLICT` with `code = "SLOT_TAKEN"` if the slot is no longer available.
 - `422 UNPROCESSABLE_ENTITY` for validation errors.
 
 ### PATCH /api/appointments/:id
+
 Update appointment status or details
 
 ### DELETE /api/appointments/:id
+
 Cancel appointment
 
 ## Availability Management
 
 ### GET /api/tutors/:id/availability
+
 Get tutor's available time slots
 Query params: `startDate`, `endDate`
 
 ### POST /api/tutors/availability
+
 Create availability slots (tutor only)
+
 ```json
 {
   "recurringPattern": {
@@ -104,13 +120,17 @@ Create availability slots (tutor only)
 ```
 
 ### PATCH /api/tutors/availability/:id
+
 Update specific availability slot
 
 ### DELETE /api/tutors/availability/:id
+
 Delete availability slot
 
 ### POST /api/tutors/availability/exceptions
+
 Add availability exception for specific date
+
 ```json
 {
   "date": "2025-09-25",
@@ -122,22 +142,28 @@ Add availability exception for specific date
 ## Calendar Sync Integrations
 
 ### POST /api/integrations/google/connect
+
 Initiate OAuth to connect Google Calendar (tutor only). Returns OAuth URL or completes token exchange.
 
 ### DELETE /api/integrations/google/disconnect
+
 Disconnect Google Calendar (tutor only).
 
 ### POST /api/webhooks/google-calendar
+
 Receive Google Calendar push notifications (internal webhook). Verifies signature and enqueues sync.
 
 ## Assignments & Tasks
 
 ### GET /api/assignments
+
 Get assignments for student or created by tutor
 Query params: `studentId`, `status`, `dueDate`
 
 ### POST /api/assignments
+
 Create assignment (tutor only)
+
 ```json
 {
   "appointmentId": "uuid",
@@ -150,13 +176,17 @@ Create assignment (tutor only)
 ```
 
 ### PATCH /api/assignments/:id
+
 Update assignment status or content
 
 ### GET /api/assignments/:id/submissions
+
 Get all submissions for an assignment (tutor only)
 
 ### POST /api/assignments/:id/submissions
+
 Submit assignment work (student only)
+
 ```json
 {
   "submissionText": "Here are my solutions to problems 1-20...",
@@ -165,7 +195,9 @@ Submit assignment work (student only)
 ```
 
 ### PATCH /api/assignments/submissions/:id
+
 Grade assignment submission (tutor only)
+
 ```json
 {
   "grade": 85.5,
@@ -176,7 +208,9 @@ Grade assignment submission (tutor only)
 ## Rating & Reviews
 
 ### POST /api/appointments/:id/rating
+
 Rate and review completed appointment (student only)
+
 ```json
 {
   "rating": 5,
@@ -185,19 +219,24 @@ Rate and review completed appointment (student only)
 ```
 
 ### GET /api/tutors/:id/reviews
+
 Get tutor's reviews and ratings
 Query params: `limit`, `offset`
 
 ## Student Management
 
 ### GET /api/students
+
 Get all students (tutor only)
 
 ### GET /api/students/:id/progress
+
 Get student's learning progress and statistics
 
 ### POST /api/students/:id/progress
+
 Update student progress (tutor only)
+
 ```json
 {
   "subject": "Mathematics",
@@ -208,7 +247,9 @@ Update student progress (tutor only)
 ```
 
 ### POST /api/students/:id/comments
+
 Add session comments (tutor only)
+
 ```json
 {
   "appointmentId": "uuid",
@@ -219,22 +260,28 @@ Add session comments (tutor only)
 ```
 
 ### GET /api/appointments/:id/comments
+
 Get session comments for an appointment
 Query params: `includePrivate` (tutor only)
 
 ### PATCH /api/comments/:id
+
 Update session comment (tutor only)
 
-### DELETE /api/comments/:id  
+### DELETE /api/comments/:id
+
 Delete session comment (tutor only)
 
 ## Notifications
 
 ### GET /api/notifications
+
 Get user's notifications
 
 ### POST /api/notifications/send
+
 Send notification (system use)
+
 ```json
 {
   "userId": "uuid",
@@ -249,13 +296,17 @@ Send notification (system use)
 ```
 
 ### PATCH /api/notifications/:id/read
+
 Mark notification as read
 
 ### GET /api/notifications/preferences
+
 Get user's notification preferences
 
 ### PATCH /api/notifications/preferences
+
 Update notification preferences
+
 ```json
 {
   "emailNotifications": true,
@@ -267,16 +318,20 @@ Update notification preferences
 ```
 
 Notes:
+
 - Preferences are stored per-user and respected by the scheduler.
 
 ## Advertisements
 
 ### GET /api/advertisements
+
 Get active advertisements
 Query params: `position`, `targetAudience`
 
 ### POST /api/advertisements
+
 Create advertisement (admin only)
+
 ```json
 {
   "title": "Learn Python Programming",
@@ -293,16 +348,20 @@ Create advertisement (admin only)
 ## File Uploads
 
 ### POST /api/files/upload
+
 Upload assignment files or profile pictures
 Multipart form data with file validation
 
 ### DELETE /api/files/:id
+
 Delete uploaded file
 
 ## Analytics & Reports
 
 ### GET /api/analytics/dashboard
+
 Get tutor dashboard statistics
+
 ```json
 {
   "totalStudents": 25,
@@ -317,11 +376,13 @@ Get tutor dashboard statistics
 ```
 
 ### GET /api/reports/student-progress/:id
+
 Get detailed student progress report
 
 ## Error Responses
 
 All endpoints return consistent error format:
+
 ```json
 {
   "error": {
@@ -335,6 +396,7 @@ All endpoints return consistent error format:
 ```
 
 Common error codes:
+
 - `AUTH_REQUIRED`, `FORBIDDEN`, `NOT_FOUND`
 - `VALIDATION_ERROR`, `RATE_LIMITED`, `IDEMPOTENCY_CONFLICT`
 - `SLOT_TAKEN`, `OVERLAPPING_AVAILABILITY`, `EXTERNAL_SYNC_ERROR`
@@ -342,21 +404,25 @@ Common error codes:
 ## WebSocket Events
 
 ### Real-time Updates
+
 - `appointment_booked`: New appointment created
 - `appointment_cancelled`: Appointment cancelled
 - `assignment_submitted`: Student submitted assignment
 - `notification_received`: New notification for user
 
 ## Rate Limiting
+
 - Authentication: 5 requests/minute
 - Appointment booking: 10 requests/minute
 - File uploads: 20 requests/hour
 - General API: 100 requests/minute
 
 Abuse protection:
+
 - SMS sends capped per-user per-day (default 10) to avoid cost abuse.
 
 ## Security Headers
+
 - CORS configured for frontend domain
 - JWT tokens with 24-hour expiry
 - Request validation and sanitization

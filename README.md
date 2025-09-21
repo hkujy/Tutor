@@ -6,7 +6,7 @@ A comprehensive tutoring calendar and appointment management system built with N
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - PostgreSQL 14+
 - Redis 6+
 - pnpm 8+ (recommended) or npm
@@ -14,6 +14,7 @@ A comprehensive tutoring calendar and appointment management system built with N
 ### Installation
 
 1. **Clone and install dependencies:**
+
    ```bash
    git clone <repository-url>
    cd tutoring-calendar
@@ -21,24 +22,27 @@ A comprehensive tutoring calendar and appointment management system built with N
    ```
 
 2. **Set up environment variables:**
+
    ```bash
    cp .env.example .env.local
    # Edit .env.local with your actual values
    ```
 
 3. **Set up the database:**
+
    ```bash
    # Generate Prisma client
    pnpm prisma:generate
-   
+
    # Run database migrations
    pnpm prisma:migrate
-   
+
    # Seed the database with sample data
    pnpm prisma:seed
    ```
 
 4. **Start the development server:**
+
    ```bash
    pnpm dev
    ```
@@ -119,6 +123,7 @@ The application uses PostgreSQL with Prisma ORM. Key entities:
 ## 🔐 Authentication
 
 Built with NextAuth.js supporting:
+
 - Email/password authentication
 - Role-based access control (Student, Tutor, Admin)
 - Session management
@@ -127,18 +132,21 @@ Built with NextAuth.js supporting:
 ## 📊 Features
 
 ### For Students
+
 - Browse and book tutor appointments
 - View assignments and submit work
 - Track learning progress
 - Receive notifications and reminders
 
-### For Tutors  
+### For Tutors
+
 - Manage availability and schedule
 - Create appointments for students
 - Assign tasks and grade submissions
 - View student progress analytics
 
 ### For Admins
+
 - User and content management
 - System analytics and reporting
 - Advertisement management
@@ -160,7 +168,7 @@ Key API routes include:
 
 1. **Environment Variables**: Set all required production env vars
 2. **Database**: Run migrations in production
-3. **Redis**: Configure production Redis instance  
+3. **Redis**: Configure production Redis instance
 4. **File Storage**: Set up S3 or similar for file uploads
 5. **Monitoring**: Configure error tracking (Sentry)
 6. **Domain**: Configure NEXTAUTH_URL and CORS_ORIGIN
@@ -207,5 +215,5 @@ This project is licensed under the MIT License.
 After running `pnpm prisma:seed`:
 
 - **Admin**: admin@tutoringcalendar.com / admin123
-- **Tutor**: tutor@example.com / tutor123  
+- **Tutor**: tutor@example.com / tutor123
 - **Student**: student@example.com / student123

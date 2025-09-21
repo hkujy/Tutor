@@ -51,7 +51,7 @@ async function main() {
       education: 'MS in Mathematics, MIT',
       certifications: ['Certified Math Teacher'],
       bio: 'Experienced mathematics tutor with 5+ years of teaching experience.',
-      hourlyRate: 50.00,
+      hourlyRate: 50.0,
       currency: 'USD',
       rating: 4.8,
       totalSessions: 150,
@@ -87,7 +87,8 @@ async function main() {
       userId: studentUser.id,
       gradeLevel: '12',
       subjects: ['Mathematics', 'Physics'],
-      learningGoals: 'Improve calculus understanding and prepare for college entrance exams',
+      learningGoals:
+        'Improve calculus understanding and prepare for college entrance exams',
       parentContact: 'parent@example.com',
     },
   })
@@ -194,7 +195,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('❌ Seeding failed:', e)
     process.exit(1)
   })

@@ -1,6 +1,7 @@
 # Database Schema Design
 
 ## Overview
+
 This document outlines the database schema for the tutoring calendar application using PostgreSQL with Prisma ORM.
 
 ## Schema Diagram
@@ -188,7 +189,7 @@ model AssignmentFile {
 
 enum FileType {
   INSTRUCTION @map("instruction")
-  SUBMISSION  @map("submission") 
+  SUBMISSION  @map("submission")
   FEEDBACK    @map("feedback")
 }
 
@@ -344,7 +345,9 @@ System ←→ (M) Advertisements
 ## Tables
 
 ### users
+
 Base user table for authentication and common user data
+
 ```sql
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -365,7 +368,9 @@ CREATE TABLE users (
 ```
 
 ### students
+
 Student-specific information
+
 ```sql
 CREATE TABLE students (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -385,7 +390,9 @@ CREATE TABLE students (
 ```
 
 ### tutors
+
 Tutor-specific information
+
 ```sql
 CREATE TABLE tutors (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -408,7 +415,9 @@ CREATE TABLE tutors (
 ```
 
 ### availability
+
 Tutor availability patterns
+
 ```sql
 CREATE TABLE availability (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -426,7 +435,9 @@ CREATE TABLE availability (
 ```
 
 ### availability_exceptions
+
 Specific date overrides for availability
+
 ```sql
 CREATE TABLE availability_exceptions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -442,7 +453,9 @@ CREATE TABLE availability_exceptions (
 ```
 
 ### appointments
+
 Scheduled tutoring sessions
+
 ```sql
 CREATE TABLE appointments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -451,7 +464,7 @@ CREATE TABLE appointments (
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NOT NULL,
     subject VARCHAR(100) NOT NULL,
-    status VARCHAR(20) DEFAULT 'scheduled' CHECK (status IN 
+    status VARCHAR(20) DEFAULT 'scheduled' CHECK (status IN
         ('scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show')),
     meeting_link VARCHAR(500),
     student_notes TEXT, -- Notes from student when booking
@@ -469,14 +482,16 @@ CREATE TABLE appointments (
 ```
 
 ### session_comments
+
 Comments added by tutors after sessions
+
 ```sql
 CREATE TABLE session_comments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     appointment_id UUID REFERENCES appointments(id) ON DELETE CASCADE,
     tutor_id UUID REFERENCES tutors(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
-    comment_type VARCHAR(20) DEFAULT 'general' CHECK (comment_type IN 
+    comment_type VARCHAR(20) DEFAULT 'general' CHECK (comment_type IN
         ('general', 'progress', 'concern', 'achievement', 'homework')),
     private BOOLEAN DEFAULT false, -- If true, only visible to tutor
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -485,7 +500,9 @@ CREATE TABLE session_comments (
 ```
 
 ### assignments
+
 Tasks and homework assigned by tutors
+
 ```sql
 CREATE TABLE assignments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -498,7 +515,7 @@ CREATE TABLE assignments (
     difficulty_level VARCHAR(20) CHECK (difficulty_level IN ('beginner', 'intermediate', 'advanced')),
     estimated_hours DECIMAL(4,2),
     due_date TIMESTAMP,
-    status VARCHAR(20) DEFAULT 'assigned' CHECK (status IN 
+    status VARCHAR(20) DEFAULT 'assigned' CHECK (status IN
         ('assigned', 'in_progress', 'submitted', 'reviewed', 'completed')),
     points_possible INTEGER,
     points_earned INTEGER,
@@ -508,7 +525,9 @@ CREATE TABLE assignments (
 ```
 
 ### assignment_files
+
 Files attached to assignments
+
 ```sql
 CREATE TABLE assignment_files (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -525,7 +544,9 @@ CREATE TABLE assignment_files (
 ```
 
 ### assignment_submissions
+
 Student submissions for assignments
+
 ```sql
 CREATE TABLE assignment_submissions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -541,14 +562,16 @@ CREATE TABLE assignment_submissions (
 ```
 
 ### student_progress
+
 Track student learning progress
+
 ```sql
 CREATE TABLE student_progress (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID REFERENCES students(id) ON DELETE CASCADE,
     subject VARCHAR(100) NOT NULL,
     skill VARCHAR(200) NOT NULL,
-    proficiency_level VARCHAR(20) CHECK (proficiency_level IN 
+    proficiency_level VARCHAR(20) CHECK (proficiency_level IN
         ('beginner', 'developing', 'proficient', 'advanced')),
     last_assessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     assessment_notes TEXT,
@@ -559,15 +582,17 @@ CREATE TABLE student_progress (
 ```
 
 ### notifications
+
 System notifications for users
+
 ```sql
 CREATE TABLE notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     title VARCHAR(200) NOT NULL,
     message TEXT NOT NULL,
-    type VARCHAR(50) NOT NULL CHECK (type IN 
-        ('appointment_reminder', 'appointment_booked', 'appointment_cancelled', 
+    type VARCHAR(50) NOT NULL CHECK (type IN
+        ('appointment_reminder', 'appointment_booked', 'appointment_cancelled',
          'assignment_due', 'assignment_graded', 'payment_reminder', 'system')),
     channels TEXT[] DEFAULT '{"in_app"}', -- in_app, email, sms
     read BOOLEAN DEFAULT false,
@@ -580,7 +605,9 @@ CREATE TABLE notifications (
 ```
 
 ### notification_preferences
+
 Per-user notification settings
+
 ```sql
 CREATE TABLE notification_preferences (
     user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
@@ -595,7 +622,9 @@ CREATE TABLE notification_preferences (
 ```
 
 ### advertisements
+
 Advertisement content and placement
+
 ```sql
 CREATE TABLE advertisements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -618,7 +647,9 @@ CREATE TABLE advertisements (
 ```
 
 ### user_sessions
+
 Track user sessions for analytics
+
 ```sql
 CREATE TABLE user_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -632,7 +663,9 @@ CREATE TABLE user_sessions (
 ```
 
 ### audit_logs
+
 Track important system events
+
 ```sql
 CREATE TABLE audit_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -757,24 +790,29 @@ model NotificationPreference {
 ## Migration Strategy
 
 ### Phase 1: Core Tables
+
 1. Users, Students, Tutors
 2. Basic authentication and profiles
 
 ### Phase 2: Scheduling
+
 1. Availability, Appointments
 2. Basic booking functionality
 
 ### Phase 3: Learning Management
+
 1. Assignments, Comments, Progress
 2. Enhanced tutor-student interaction
 
 ### Phase 4: System Features
+
 1. Notifications, Advertisements
 2. Analytics and reporting
 
 ## Data Seeding
 
 Sample data will include:
+
 - Test users (students and tutors)
 - Sample availability patterns
 - Demo appointments and assignments

@@ -7,7 +7,9 @@ This document outlines a step-by-step implementation plan for the tutoring calen
 ## Phase 1: Project Foundation & Setup (Week 1-2)
 
 ### 1.1 Project Initialization
+
 **Tasks:**
+
 - [ ] Initialize Next.js 14 project with TypeScript
 - [ ] Set up project structure according to CODE_STRUCTURE_PLAN.md
 - [ ] Configure package.json with all required dependencies
@@ -18,6 +20,7 @@ This document outlines a step-by-step implementation plan for the tutoring calen
 - [ ] Choose and configure client state (Zustand) for UI-only state
 
 **Dependencies to Install:**
+
 ```json
 {
   "dependencies": {
@@ -57,18 +60,22 @@ This document outlines a step-by-step implementation plan for the tutoring calen
 ```
 
 **Testing:**
+
 - [ ] Verify Next.js dev server starts successfully
 - [ ] Confirm TypeScript compilation works
 - [ ] Test ESLint and Prettier configuration
 - [ ] Validate project structure matches plan
 
 **Acceptance Criteria:**
+
 - Project builds without errors
 - Linting passes with zero issues
 - All configuration files are properly set up
 
 ### 1.2 Database Setup
+
 **Tasks:**
+
 - [ ] Initialize Prisma with PostgreSQL
 - [ ] Create database schema based on DATABASE_SCHEMA.md
 - [ ] Set up database migrations
@@ -76,6 +83,7 @@ This document outlines a step-by-step implementation plan for the tutoring calen
 - [ ] Configure database connection and client
 
 **Database Schema Implementation:**
+
 - [ ] Create all tables: users, students, tutors, appointments, assignments, notifications, etc.
 - [ ] Define all relationships and foreign key constraints
 - [ ] Add indexes for performance (user queries, appointment lookups, availability searches)
@@ -83,18 +91,22 @@ This document outlines a step-by-step implementation plan for the tutoring calen
 - [ ] Set up proper @map directives for snake_case database fields
 
 **Testing:**
+
 - [ ] Test database connection
 - [ ] Run migrations successfully
 - [ ] Verify seed data insertion
 - [ ] Test basic CRUD operations
 
 **Acceptance Criteria:**
+
 - Database schema matches design specification
 - All migrations run without errors
 - Seed data populates correctly
 
 ### 1.3 Environment Configuration
+
 **Tasks:**
+
 - [ ] Create env.ts with Zod validation
 - [ ] Set up environment variables for all services
 - [ ] Configure Redis connection
@@ -102,6 +114,7 @@ This document outlines a step-by-step implementation plan for the tutoring calen
 - [ ] Create development and test environments
 
 **Environment Variables:**
+
 ```env
 # Database
 DATABASE_URL="postgresql://..."
@@ -130,12 +143,14 @@ GOOGLE_CLIENT_SECRET="..."
 ```
 
 **Testing:**
+
 - [ ] Validate environment variable parsing
 - [ ] Test Redis connection
 - [ ] Verify logging configuration
 - [ ] Test environment switching (dev/test)
 
 **Acceptance Criteria:**
+
 - All environment variables validate correctly
 - External service connections work
 - Logging outputs structured data
@@ -143,7 +158,9 @@ GOOGLE_CLIENT_SECRET="..."
 ## Phase 2: Core Infrastructure (Week 2-3)
 
 ### 2.1 Authentication & Authorization
+
 **Tasks:**
+
 - [ ] Set up NextAuth.js with providers
 - [ ] Implement user registration and login
 - [ ] Create role-based permission system
@@ -151,18 +168,21 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Add email verification
 
 **Authentication Components:**
+
 - [ ] Login form with validation
 - [ ] Registration form with email verification
 - [ ] Password reset functionality
 - [ ] Role selection (student/tutor)
 
 **Testing:**
+
 - [ ] Unit tests for auth services
 - [ ] Integration tests for auth API routes
 - [ ] E2E tests for login/registration flow
 - [ ] Security testing (rate limiting, validation)
 
 **Test Scenarios:**
+
 - User can register with valid email
 - Email verification works correctly
 - Login with valid credentials succeeds
@@ -171,12 +191,15 @@ GOOGLE_CLIENT_SECRET="..."
 - Role-based access control functions
 
 **Acceptance Criteria:**
+
 - Complete authentication flow works
 - Security measures are in place
 - All auth tests pass
 
 ### 2.2 Repository Layer
+
 **Tasks:**
+
 - [ ] Create repository interfaces
 - [ ] Implement Prisma repositories
 - [ ] Add transaction support
@@ -184,6 +207,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Set up connection pooling
 
 **Repository Implementation:**
+
 - [ ] UserRepository with CRUD operations
 - [ ] AppointmentRepository with conflict detection
 - [ ] AssignmentRepository with file handling
@@ -191,18 +215,22 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] AnalyticsRepository with aggregations
 
 **Testing:**
+
 - [ ] Unit tests for each repository
 - [ ] Integration tests with test database
 - [ ] Transaction rollback tests
 - [ ] Performance tests for complex queries
 
 **Acceptance Criteria:**
+
 - All repositories implement their interfaces
 - Database operations are properly abstracted
 - Transaction handling works correctly
 
 ### 2.3 Service Layer Foundation
+
 **Tasks:**
+
 - [ ] Create base service classes
 - [ ] Implement error handling system
 - [ ] Set up result/either pattern
@@ -210,36 +238,43 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Add audit logging
 
 **Core Services:**
+
 - [ ] IdempotencyService for booking conflicts
 - [ ] RateLimitService for API protection
 - [ ] AuditService for activity tracking
 - [ ] EmailTemplateService for notifications
 
 **Testing:**
+
 - [ ] Unit tests for all services
 - [ ] Mock repository dependencies
 - [ ] Test error handling scenarios
 - [ ] Validate audit log creation
 
 **Acceptance Criteria:**
+
 - Services are properly isolated
 - Error handling is consistent
 - Dependency injection works
 - Audit trail is captured
 
 ### 2.4 Edge Middleware & Security Headers
+
 **Tasks:**
+
 - [ ] Implement edge middleware for rate limiting on public endpoints
 - [ ] Add security headers (CSP, CORP, Referrer-Policy, X-Frame-Options)
 - [ ] Correlation ID propagation and request logging
 - [ ] Healthcheck endpoint for uptime monitoring
 
 **Testing:**
+
 - [ ] Rate limit unit/integration tests (burst and sustained traffic)
 - [ ] Header presence and CSP report-only validation
 - [ ] Healthcheck monitored in CI pipeline
 
 **Acceptance Criteria:**
+
 - Public APIs are rate limited with clear 429 responses
 - Security headers applied consistently
 - Healthcheck returns 200 with version/build info
@@ -247,7 +282,9 @@ GOOGLE_CLIENT_SECRET="..."
 ## Phase 3: Core Features Implementation (Week 4-7)
 
 ### 3.1 User Management
+
 **Tasks:**
+
 - [ ] User profile creation and editing
 - [ ] Student profile with preferences
 - [ ] Tutor profile with subjects/rates
@@ -255,6 +292,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Timezone handling
 
 **API Endpoints:**
+
 - [ ] GET/PATCH /api/users/me
 - [ ] GET/PATCH /api/users/[id]/profile
 - [ ] POST /api/files/upload (avatar)
@@ -263,12 +301,14 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] GET /api/tutors/dashboard (tutor-specific data)
 
 **Testing:**
+
 - [ ] Profile CRUD operations
 - [ ] File upload validation
 - [ ] Authorization checks
 - [ ] Timezone conversion accuracy
 
 **Test Scenarios:**
+
 - User can view and edit their profile
 - File uploads work with proper validation
 - Timezone changes are handled correctly
@@ -276,12 +316,15 @@ GOOGLE_CLIENT_SECRET="..."
 - Non-admin cannot access other profiles
 
 **Acceptance Criteria:**
+
 - Complete profile management works
 - File uploads are secure and validated
 - Timezone handling is accurate
 
 ### 3.2 Availability Management
+
 **Tasks:**
+
 - [ ] Tutor availability CRUD
 - [ ] Recurring availability patterns
 - [ ] Availability exceptions
@@ -289,18 +332,21 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Conflict detection
 
 **Components:**
+
 - [ ] Availability grid component
 - [ ] Time slot picker
 - [ ] Recurring schedule editor
 - [ ] Exception date picker
 
 **API Endpoints:**
+
 - [ ] GET/POST /api/tutors/availability
 - [ ] PATCH/DELETE /api/tutors/availability/[id]
 - [ ] POST /api/tutors/availability/exceptions
 - [ ] GET /api/tutors/[id]/availability
 
 **Testing:**
+
 - [ ] Availability CRUD operations
 - [ ] Recurring pattern calculations
 - [ ] Exception handling
@@ -308,13 +354,16 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Conflict detection accuracy
 
 **Acceptance Criteria:**
+
 - Tutors can set complex availability schedules
 - Recurring patterns work correctly
 - Exceptions override recurring patterns
 - All times are timezone-aware
 
 ### 3.3 Appointment Booking System
+
 **Tasks:**
+
 - [ ] Booking form with validation
 - [ ] Idempotent booking with Redis locks
 - [ ] Conflict detection and prevention
@@ -322,6 +371,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Cancellation and rescheduling
 
 **Core Logic:**
+
 - [ ] Available slot calculation
 - [ ] Double-booking prevention
 - [ ] Idempotency key handling
@@ -329,6 +379,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Automatic confirmations
 
 **API Endpoints:**
+
 - [ ] POST /api/appointments/book (with Idempotency-Key)
 - [ ] GET /api/appointments
 - [ ] PATCH /api/appointments/[id]
@@ -337,6 +388,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] GET /api/appointments/[id]/comments (session comments)
 
 **Testing:**
+
 - [ ] Booking flow end-to-end tests
 - [ ] Concurrent booking prevention
 - [ ] Idempotency key validation
@@ -344,6 +396,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Edge cases (DST, holidays)
 
 **Test Scenarios:**
+
 - Student can book available time slot
 - Double booking is prevented
 - Idempotent requests work correctly
@@ -352,13 +405,16 @@ GOOGLE_CLIENT_SECRET="..."
 - Concurrent bookings fail appropriately
 
 **Acceptance Criteria:**
+
 - Booking system prevents conflicts
 - Idempotency ensures consistency
 - All booking states are handled
 - Edge cases are properly managed
 
 ### 3.4 Assignment System
+
 **Tasks:**
+
 - [ ] Assignment creation by tutors
 - [ ] File attachment handling
 - [ ] Student submission system
@@ -367,6 +423,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Storage abstraction (local adapter for dev, S3 adapter for prod)
 
 **Components:**
+
 - [ ] Assignment creation form
 - [ ] File upload with drag-and-drop
 - [ ] Submission interface
@@ -374,6 +431,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Progress visualization
 
 **API Endpoints:**
+
 - [ ] GET/POST /api/assignments
 - [ ] GET/PATCH /api/assignments/[id]
 - [ ] GET/POST /api/assignments/[id]/submissions
@@ -384,6 +442,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] DELETE /api/files/[id]
 
 **Testing:**
+
 - [ ] Assignment CRUD operations
 - [ ] File upload and validation
 - [ ] Submission workflow
@@ -391,6 +450,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Progress calculations
 
 **Acceptance Criteria:**
+
 - Complete assignment lifecycle works
 - File handling is secure
 - Progress tracking is accurate
@@ -399,15 +459,18 @@ GOOGLE_CLIENT_SECRET="..."
 ## Phase 4: Advanced Features (Week 8-10)
 
 ### 4.1 Notification System
+
 **Tasks:**
+
 - [ ] Email notification service with SendGrid
 - [ ] SMS notification service (Twilio integration - future)
- - [ ] In-app notification system with real-time updates (SSE or WebSocket)
+- [ ] In-app notification system with real-time updates (SSE or WebSocket)
 - [ ] Notification preferences management
 - [ ] Scheduled notifications with background jobs
 - [ ] Notification templates and localization
 
 **Notification Types:**
+
 - [ ] Appointment confirmations
 - [ ] Assignment due dates
 - [ ] Cancellation notices
@@ -415,6 +478,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] System announcements
 
 **Testing:**
+
 - [ ] Email delivery testing
 - [ ] Template rendering tests
 - [ ] Preference handling
@@ -422,35 +486,43 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Rate limiting for notifications
 
 **Acceptance Criteria:**
+
 - All notification types work correctly
 - User preferences are respected
 - Scheduled notifications fire properly
 - Email templates render correctly
 
 ### 4.3 Advertisements Management
+
 **Tasks:**
+
 - [ ] Advertisement CRUD (admin)
 - [ ] Placement components and client rendering
 - [ ] Targeting rules and feature flags (basic)
 - [ ] Analytics tracking for impressions/clicks
 
 **API Endpoints:**
+
 - [ ] GET/POST /api/advertisements
 - [ ] GET/PATCH/DELETE /api/advertisements/[id]
 - [ ] GET /api/advertisements/analytics
 
 **Testing:**
+
 - [ ] Admin-only access controls
 - [ ] Placement rendering tests
 - [ ] Analytics event correctness
 
 **Acceptance Criteria:**
+
 - Admin can manage ads
 - Ads display in configured positions
 - Analytics provide basic performance insights
 
 ### 4.2 Calendar Integration
+
 **Tasks:**
+
 - [ ] Google Calendar OAuth setup and flow
 - [ ] Calendar sync functionality (bidirectional)
 - [ ] Webhook handling for external calendar updates
@@ -458,6 +530,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Calendar disconnect and cleanup functionality
 
 **Integration Features:**
+
 - [ ] Connect/disconnect Google Calendar
 - [ ] Sync appointments to external calendar
 - [ ] Handle external calendar changes via webhooks
@@ -465,25 +538,30 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Support multiple calendar providers (future: Outlook)
 
 **API Endpoints:**
+
 - [ ] POST /api/integrations/google/connect
-- [ ] DELETE /api/integrations/google/disconnect  
+- [ ] DELETE /api/integrations/google/disconnect
 - [ ] POST /api/webhooks/google-calendar (webhook handler)
 - [ ] GET /api/users/me/integrations (connection status)
 
 **Testing:**
+
 - [ ] OAuth flow testing
 - [ ] Sync accuracy validation
 - [ ] Webhook handling tests
 - [ ] Conflict resolution scenarios
 
 **Acceptance Criteria:**
+
 - Calendar integration works reliably
 - Sync is bidirectional and accurate
 - Conflicts are resolved properly
 - OAuth flow is secure
 
 ### 4.3 Analytics and Reporting
+
 **Tasks:**
+
 - [ ] Student progress analytics
 - [ ] Tutor performance metrics
 - [ ] Booking statistics
@@ -491,6 +569,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Data export functionality
 
 **Dashboard Features:**
+
 - [ ] Student dashboard with progress and upcoming sessions
 - [ ] Tutor dashboard with metrics and student overview
 - [ ] Admin analytics overview with system health
@@ -498,6 +577,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Advertisement performance tracking
 
 **API Endpoints:**
+
 - [ ] GET /api/analytics/dashboard (role-specific)
 - [ ] GET /api/analytics/reports/student-progress/[id]
 - [ ] GET /api/analytics/reports/tutor-performance/[id]
@@ -505,12 +585,14 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] POST /api/analytics/export (CSV, PDF formats)
 
 **Testing:**
+
 - [ ] Analytics calculation accuracy
 - [ ] Dashboard loading performance
 - [ ] Report generation tests
 - [ ] Data export validation
 
 **Acceptance Criteria:**
+
 - Analytics provide meaningful insights
 - Dashboards load quickly
 - Reports generate correctly
@@ -519,7 +601,9 @@ GOOGLE_CLIENT_SECRET="..."
 ## Phase 5: Testing and Quality Assurance (Week 11-12)
 
 ### 5.1 Comprehensive Testing
+
 **Tasks:**
+
 - [ ] Complete unit test coverage
 - [ ] Integration test suite
 - [ ] End-to-end test scenarios
@@ -527,13 +611,15 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Security testing
 
 **Testing Goals:**
-- [ ] >90% code coverage for services
+
+- [ ] > 90% code coverage for services
 - [ ] All API endpoints tested
 - [ ] Critical user flows covered
 - [ ] Performance benchmarks met
 - [ ] Security vulnerabilities addressed
 
 **Test Types:**
+
 - [ ] Unit tests (services, utilities)
 - [ ] Integration tests (API routes, database)
 - [ ] E2E tests (user workflows)
@@ -541,46 +627,57 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Security tests (auth, validation)
 
 **Acceptance Criteria:**
+
 - All tests pass consistently
 - Coverage targets are met
 - Performance is acceptable
 - Security issues are resolved
 
 ### 5.3 PWA & Offline Support
+
 **Tasks:**
+
 - [ ] Add web app manifest and icons
 - [ ] Configure service worker (Next PWA or custom) for offline cache of assignments
 - [ ] Offline queue for assignment submissions (retry on reconnect)
 - [ ] Installability checks and testing
 
 **Testing:**
+
 - [ ] Lighthouse PWA audits >90
 - [ ] Offline reads for assignment pages
 - [ ] Retry queue works after reconnect
 
 **Acceptance Criteria:**
+
 - App is installable
 - Assignments accessible offline (read-only)
 - Submission queue retries on network restore
 
 ### 5.4 Privacy & Compliance
+
 **Tasks:**
+
 - [ ] GDPR data export endpoint
 - [ ] GDPR account deletion with cascading data cleanup
 - [ ] Data retention policies and cleanup jobs
 - [ ] Audit of PII storage and encryption at rest/in transit
 
 **Testing:**
+
 - [ ] Export includes all user data and is downloadable securely
 - [ ] Deletion removes PII and anonymizes analytics
 - [ ] Retention jobs verified on schedule
 
 **Acceptance Criteria:**
+
 - Compliance endpoints function securely
 - Documentation updated for users/admins
 
 ### 5.2 Bug Fixes and Polish
+
 **Tasks:**
+
 - [ ] Address test failures
 - [ ] Fix identified bugs
 - [ ] UI/UX improvements
@@ -588,6 +685,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Accessibility compliance
 
 **Quality Checks:**
+
 - [ ] Cross-browser compatibility
 - [ ] Mobile responsiveness
 - [ ] Accessibility audit
@@ -595,6 +693,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Security review
 
 **Acceptance Criteria:**
+
 - All critical bugs resolved
 - UI is polished and responsive
 - Accessibility standards met
@@ -603,7 +702,9 @@ GOOGLE_CLIENT_SECRET="..."
 ## Phase 6: Deployment and Monitoring (Week 13-14)
 
 ### 6.1 Production Setup
+
 **Tasks:**
+
 - [ ] Set up production database
 - [ ] Configure production Redis
 - [ ] Set up monitoring and logging
@@ -611,6 +712,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Set up backup systems
 
 **Infrastructure:**
+
 - [ ] Production database with backups
 - [ ] Redis cluster for caching
 - [ ] CDN for static assets
@@ -618,19 +720,23 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Error tracking service
 
 **Testing:**
+
 - [ ] Production deployment test
 - [ ] Load testing in staging
 - [ ] Monitoring validation
 - [ ] Backup/restore testing
 
 **Acceptance Criteria:**
+
 - Production environment is stable
 - Monitoring captures all metrics
 - Backup systems work correctly
 - Error tracking is functional
 
 ### 6.2 CI/CD Pipeline
+
 **Tasks:**
+
 - [ ] Set up GitHub Actions workflow
 - [ ] Automated testing pipeline
 - [ ] Database migration automation
@@ -638,6 +744,7 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Rollback procedures
 
 **Pipeline Stages:**
+
 - [ ] Code quality checks (lint, format)
 - [ ] Automated testing (unit, integration)
 - [ ] Build and security scan
@@ -645,12 +752,14 @@ GOOGLE_CLIENT_SECRET="..."
 - [ ] Production deployment
 
 **Testing:**
+
 - [ ] Pipeline execution tests
 - [ ] Deployment verification
 - [ ] Rollback testing
 - [ ] Migration testing
 
 **Acceptance Criteria:**
+
 - CI/CD pipeline runs reliably
 - All quality gates function
 - Deployments are automated
@@ -659,18 +768,21 @@ GOOGLE_CLIENT_SECRET="..."
 ## Testing Strategy Summary
 
 ### Unit Testing (Throughout Development)
+
 - **Tools:** Vitest, Testing Library
 - **Coverage:** Services, utilities, hooks
 - **Goal:** >90% coverage for business logic
 - **Frequency:** Every feature implementation
 
 ### Integration Testing (Per Phase)
+
 - **Tools:** Testcontainers, Next.js test runner
 - **Coverage:** API routes, database operations
 - **Goal:** All endpoints tested with real dependencies
 - **Frequency:** End of each implementation phase
 
 ### End-to-End Testing (Major Milestones)
+
 - **Tools:** Playwright
 - **Coverage:** Critical user journeys
 - **Scenarios:**
@@ -681,6 +793,7 @@ GOOGLE_CLIENT_SECRET="..."
   - Notification delivery
 
 ### Performance Testing (Pre-Production)
+
 - **Tools:** Artillery, Lighthouse
 - **Metrics:** Response times, throughput, memory usage
 - **Scenarios:** Peak booking loads, concurrent users
@@ -689,12 +802,14 @@ GOOGLE_CLIENT_SECRET="..."
 ## Risk Mitigation
 
 ### Technical Risks
+
 - **Database performance:** Index optimization, query profiling
 - **Concurrent bookings:** Redis-based locking, idempotency
 - **Calendar sync reliability:** Robust error handling, retry logic
 - **File upload security:** Validation, scanning, size limits
 
 ### Timeline Risks
+
 - **Complex integrations:** Calendar sync and OAuth flows - Start early, have fallback plans
 - **Testing delays:** Write tests alongside features, not after
 - **Performance issues:** Monitor early with realistic data, optimize continuously
@@ -704,12 +819,14 @@ GOOGLE_CLIENT_SECRET="..."
 ## Success Metrics
 
 ### Development Metrics
+
 - [ ] Code coverage >90%
 - [ ] All E2E tests passing
 - [ ] Zero security vulnerabilities
 - [ ] Performance targets met
 
 ### Business Metrics
+
 - [ ] User registration flow <2 minutes
 - [ ] Booking success rate >95%
 - [ ] System uptime >99.5%
