@@ -7,7 +7,7 @@ const rateLimit = new Map<string, { count: number; resetTime: number }>()
 function getRateLimitKey(req: NextRequest): string {
   // In production, use proper client IP detection
   const forwarded = req.headers.get('x-forwarded-for')
-  const ip = forwarded ? forwarded.split(',')[0] : req.ip || 'unknown'
+  const ip = forwarded ? forwarded.split(',')[0] : req.nextUrl.hostname || 'unknown'
   return ip
 }
 

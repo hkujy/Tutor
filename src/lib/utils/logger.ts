@@ -1,29 +1,12 @@
-import pino from 'pino'
-import { env } from '../config/env'
-
-const transport = pino.transport({
-  target: 'pino-pretty',
-  options: {
-    colorize: env.NODE_ENV === 'development',
-    translateTime: 'yyyy-mm-dd HH:MM:ss',
-    ignore: 'pid,hostname',
-  },
-})
-
-export const logger = pino(
-  {
-    level: env.LOG_LEVEL,
-    base: {
-      env: env.NODE_ENV,
-    },
-    serializers: {
-      req: pino.stdSerializers.req,
-      res: pino.stdSerializers.res,
-      err: pino.stdSerializers.err,
-    },
-  },
-  env.NODE_ENV === 'development' ? transport : undefined
-)
+// Simple console logger to avoid worker thread issues in development
+export const logger = {
+  trace: (obj: any, msg?: string) => console.log('[TRACE]', msg || obj, typeof obj === 'object' ? obj : ''),
+  debug: (obj: any, msg?: string) => console.log('[DEBUG]', msg || obj, typeof obj === 'object' ? obj : ''),
+  info: (obj: any, msg?: string) => console.log('[INFO]', msg || obj, typeof obj === 'object' ? obj : ''),
+  warn: (obj: any, msg?: string) => console.warn('[WARN]', msg || obj, typeof obj === 'object' ? obj : ''),
+  error: (obj: any, msg?: string) => console.error('[ERROR]', msg || obj, typeof obj === 'object' ? obj : ''),
+  child: (obj: any) => logger, // Return same logger for child calls
+}
 
 // Request logger middleware
 export function createRequestLogger() {
@@ -33,7 +16,7 @@ export function createRequestLogger() {
       req.headers['x-correlation-id'] ||
       `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
-    req.log = logger.child({ correlationId })
+    req.log = logger
     req.correlationId = correlationId
 
     res.setHeader('X-Correlation-ID', correlationId)

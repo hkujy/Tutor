@@ -1,0 +1,5 @@
+NEXTAUTH_SECRET="your-very-long-super-secret-key-32-chars-min"
+DATABASE_URL="postgresql://username:password@localhost:5432/tutoring_calendar_dev"
+REDIS_URL="redis://localhost:6379"
+SENDGRID_API_KEY="your-sendgrid-api-key"
+FROM_EMAIL="noreply@tutoringcalendar.com"

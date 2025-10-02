@@ -1,10 +1,10 @@
 'use client'
 
 import { signIn, getSession } from 'next-auth/react'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function SignIn() {
+function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/'
@@ -29,7 +29,7 @@ export default function SignIn() {
       if (result?.error) {
         setError('Invalid credentials')
       } else {
-        router.push(callbackUrl)
+  router.push(callbackUrl as any)
       }
     } catch (error) {
       setError('An error occurred during sign in')
@@ -103,5 +103,13 @@ export default function SignIn() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function SignIn() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignInForm />
+    </Suspense>
   )
 }
