@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import { SkeletonTable, Skeleton } from '../ui/Skeleton'
+import LoadingButton from '../ui/LoadingButton'
 import { format } from 'date-fns'
 
 interface Availability {
@@ -154,15 +156,12 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-200 rounded"></div>
-            ))}
-          </div>
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex justify-between items-center mb-6">
+          <Skeleton width={200} height={24} className="bg-gray-300" />
+          <Skeleton width={120} height={36} />
         </div>
+        <SkeletonTable rows={7} columns={4} />
       </div>
     )
   }
@@ -171,12 +170,13 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold text-gray-900">Weekly Availability</h3>
-        <button
+        <LoadingButton
           onClick={() => setShowForm(!showForm)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
+          variant="primary"
+          size="sm"
         >
           {showForm ? 'Cancel' : 'Add Time Slot'}
-        </button>
+        </LoadingButton>
       </div>
 
       {message && (
@@ -237,20 +237,21 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
             </div>
           </div>
           <div className="mt-4 flex gap-2">
-            <button
+            <LoadingButton
               type="submit"
-              disabled={submitting}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              loading={submitting}
+              loadingText="Adding..."
+              variant="primary"
             >
-              {submitting ? 'Adding...' : 'Add Slot'}
-            </button>
-            <button
+              Add Slot
+            </LoadingButton>
+            <LoadingButton
               type="button"
               onClick={() => setShowForm(false)}
-              className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+              variant="secondary"
             >
               Cancel
-            </button>
+            </LoadingButton>
           </div>
         </form>
       )}

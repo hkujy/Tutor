@@ -198,3 +198,5 @@ export default function CalendarView() {
     </div>
   )
 }
+
+export default CalendarView

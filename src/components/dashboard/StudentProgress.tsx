@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { format } from 'date-fns'
+import { SkeletonCard, Skeleton } from '../ui/Skeleton'
 
 interface Subject {
   name: string
@@ -73,13 +74,11 @@ export default function StudentProgress({ studentId }: StudentProgressProps) {
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-200 rounded"></div>
-            ))}
-          </div>
+        <Skeleton width={180} height={24} className="bg-gray-300 mb-6" />
+        <div className="space-y-6">
+          {[...Array(3)].map((_, i) => (
+            <SkeletonCard key={i} lines={4} className="border" />
+          ))}
         </div>
       </div>
     )
