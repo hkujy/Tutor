@@ -9,11 +9,13 @@ import AppointmentList from '../../components/calendar/AppointmentList'
 import AppointmentManager from '../../components/calendar/AppointmentManager'
 import StudentProgress from '../../components/dashboard/StudentProgress'
 import AssignmentManager from '../../components/dashboard/AssignmentManager'
+import LectureHoursTracker from '../../components/lecture-hours/LectureHoursTracker'
+import PaymentManager from '../../components/lecture-hours/PaymentManager'
 
 function StudentDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'assignments' | 'progress'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'assignments' | 'progress' | 'hours' | 'payments'>('overview')
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [dashboardStats, setDashboardStats] = useState<any>(null)
@@ -76,7 +78,9 @@ function StudentDashboard() {
     { id: 'overview', name: 'Overview', icon: '🏠' },
     { id: 'manage', name: 'Manage', icon: '⚙️' },
     { id: 'assignments', name: 'Assignments', icon: '📝' },
-    { id: 'progress', name: 'Progress', icon: '📊' }
+    { id: 'progress', name: 'Progress', icon: '📊' },
+    { id: 'hours', name: 'Lecture Hours', icon: '⏰' },
+    { id: 'payments', name: 'Payments', icon: '💳' }
   ]
 
   return (
@@ -222,6 +226,18 @@ function StudentDashboard() {
         {activeTab === 'progress' && (
           <div>
             <StudentProgress studentId={user?.id || ''} />
+          </div>
+        )}
+
+        {activeTab === 'hours' && (
+          <div>
+            <LectureHoursTracker userRole="student" userId={user?.id || ''} />
+          </div>
+        )}
+
+        {activeTab === 'payments' && (
+          <div>
+            <PaymentManager userRole="student" userId={user?.id || ''} />
           </div>
         )}
       </div>

@@ -82,8 +82,19 @@ enum NotificationType {
   CANCELLATION
   CONFIRMATION
   SYSTEM_ANNOUNCEMENT
+  PAYMENT_REMINDER
+  PAYMENT_RECEIVED
 
   @@map("notification_type")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+
+  @@map("payment_status")
 }
 
 model User {
@@ -142,6 +153,7 @@ model Student {
   appointments     Appointment[]
   assignmentSubmissions AssignmentSubmission[]
   studentProgress  StudentProgress[]
+  lectureHours     LectureHours[]
 
   @@map("students")
 }
@@ -168,6 +180,7 @@ model Tutor {
   availability     Availability[]
   availabilityExceptions AvailabilityException[]
   appointments     Appointment[]
+  lectureHours     LectureHours[]
 
   @@map("tutors")
 }
@@ -223,6 +236,7 @@ model Appointment {
   student      Student          @relation(fields: [studentId], references: [id])
   assignments  Assignment[]
   sessionComments SessionComment[]
+  lectureSession LectureSession?
 
   @@map("appointments")
 }
@@ -374,4 +388,66 @@ model AuditLog {
   user User? @relation(fields: [userId], references: [id])
 
   @@map("audit_logs")
+}
+
+model LectureHours {
+  id              String   @id @default(cuid())
+  studentId       String   @map("student_id")
+  tutorId         String   @map("tutor_id")
+  subject         String
+  totalHours      Decimal  @default(0.00) @map("total_hours") @db.Decimal(10,2)
+  unpaidHours     Decimal  @default(0.00) @map("unpaid_hours") @db.Decimal(10,2)
+  lastSessionDate DateTime? @map("last_session_date")
+  paymentInterval Int      @default(10) @map("payment_interval") // hours before payment due
+  reminderSent    Boolean  @default(false) @map("reminder_sent")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  tutor   Tutor   @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  payments Payment[]
+  sessions LectureSession[]
+
+  @@unique([studentId, tutorId, subject])
+  @@map("lecture_hours")
+}
+
+model LectureSession {
+  id              String       @id @default(cuid())
+  lectureHoursId  String       @map("lecture_hours_id")
+  appointmentId   String       @map("appointment_id")
+  duration        Decimal      @db.Decimal(5,2) // Duration in hours
+  actualStartTime DateTime     @map("actual_start_time")
+  actualEndTime   DateTime     @map("actual_end_time")
+  notes           String?
+  paid            Boolean      @default(false)
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  lectureHours LectureHours @relation(fields: [lectureHoursId], references: [id], onDelete: Cascade)
+  appointment  Appointment  @relation(fields: [appointmentId], references: [id])
+
+  @@unique([appointmentId])
+  @@map("lecture_sessions")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  lectureHoursId  String        @map("lecture_hours_id")
+  amount          Decimal       @db.Decimal(10,2)
+  currency        String        @default("USD")
+  hoursIncluded   Decimal       @map("hours_included") @db.Decimal(10,2)
+  status          PaymentStatus @default(PENDING)
+  dueDate         DateTime      @map("due_date")
+  paidDate        DateTime?     @map("paid_date")
+  paymentMethod   String?       @map("payment_method")
+  transactionId   String?       @map("transaction_id")
+  notes           String?
+  remindersSent   Int           @default(0) @map("reminders_sent")
+  lastReminderAt  DateTime?     @map("last_reminder_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  lectureHours LectureHours @relation(fields: [lectureHoursId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
 }

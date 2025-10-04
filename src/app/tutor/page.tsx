@@ -8,11 +8,13 @@ import AppointmentList from '../../components/calendar/AppointmentList'
 import AppointmentManager from '../../components/calendar/AppointmentManager'
 import TutorAnalytics from '../../components/dashboard/TutorAnalytics'
 import AssignmentManager from '../../components/dashboard/AssignmentManager'
+import LectureHoursTracker from '../../components/lecture-hours/LectureHoursTracker'
+import PaymentManager from '../../components/lecture-hours/PaymentManager'
 
 function TutorDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'overview' | 'availability' | 'appointments' | 'manage' | 'analytics' | 'assignments'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'availability' | 'appointments' | 'manage' | 'analytics' | 'assignments' | 'hours' | 'payments'>('overview')
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -59,7 +61,9 @@ function TutorDashboard() {
     { id: 'appointments', name: 'Appointments', icon: '📅' },
     { id: 'manage', name: 'Manage', icon: '⚙️' },
     { id: 'analytics', name: 'Analytics', icon: '📈' },
-    { id: 'assignments', name: 'Assignments', icon: '📝' }
+    { id: 'assignments', name: 'Assignments', icon: '📝' },
+    { id: 'hours', name: 'Lecture Hours', icon: '⏰' },
+    { id: 'payments', name: 'Payments', icon: '💳' }
   ]
 
   const stats = dashboardStats?.stats ? [
@@ -270,6 +274,18 @@ function TutorDashboard() {
         {activeTab === 'assignments' && (
           <div>
             <AssignmentManager userRole="tutor" userId={user?.id || ''} />
+          </div>
+        )}
+
+        {activeTab === 'hours' && (
+          <div>
+            <LectureHoursTracker userRole="tutor" userId={user?.id || ''} />
+          </div>
+        )}
+
+        {activeTab === 'payments' && (
+          <div>
+            <PaymentManager userRole="tutor" userId={user?.id || ''} />
           </div>
         )}
       </div>
