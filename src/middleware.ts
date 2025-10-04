@@ -3,7 +3,7 @@ import { getToken } from 'next-auth/jwt'
 
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request })
-  const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
+  const isAuthPage = request.nextUrl.pathname.startsWith('/auth') || request.nextUrl.pathname === '/login'
   const isApiAuthRoute = request.nextUrl.pathname.startsWith('/api/auth')
   const isHealthRoute = request.nextUrl.pathname === '/api/health'
 
@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
 
   // Redirect unauthenticated users to login for protected pages
   if (!token && !isAuthPage) {
-    const loginUrl = new URL('/auth/signin', request.url)
+    const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('callbackUrl', request.nextUrl.href)
     return NextResponse.redirect(loginUrl)
   }
