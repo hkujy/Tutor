@@ -16,6 +16,8 @@ function StudentDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'assignments' | 'progress'>('overview')
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [dashboardStats, setDashboardStats] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   // Handle authentication
   useEffect(() => {
@@ -25,6 +27,24 @@ function StudentDashboard() {
       router.push('/tutor') // Redirect non-students to tutor page
     }
   }, [user, isLoading, router])
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchDashboardStats(user.id)
+    }
+  }, [user])
+
+  const fetchDashboardStats = async (userId: string) => {
+    try {
+      const res = await fetch(`/api/dashboard?tutorId=${userId}&role=student`)
+      const data = await res.json()
+      setDashboardStats(data)
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Show loading while checking authentication
   if (isLoading) {
@@ -40,11 +60,16 @@ function StudentDashboard() {
     setRefreshTrigger(prev => prev + 1)
   }
 
-  const stats = [
-    { label: 'Total Sessions', value: '18', icon: '📚', color: 'bg-blue-500' },
-    { label: 'This Month', value: '6', icon: '📅', color: 'bg-green-500' },
-    { label: 'Completed', value: '12', icon: '✅', color: 'bg-purple-500' },
-    { label: 'Average Rating', value: '4.9', icon: '⭐', color: 'bg-yellow-500' }
+  const stats = dashboardStats?.stats ? [
+    { label: 'Total Sessions', value: dashboardStats.stats.totalAppointments.toString(), icon: '📚', color: 'bg-blue-500' },
+    { label: 'This Month', value: dashboardStats.stats.upcomingAppointments.toString(), icon: '📅', color: 'bg-green-500' },
+    { label: 'Completed', value: dashboardStats.stats.completedAppointments.toString(), icon: '✅', color: 'bg-purple-500' },
+    { label: 'Average Rating', value: dashboardStats.stats.avgRating.toString(), icon: '⭐', color: 'bg-yellow-500' }
+  ] : [
+    { label: 'Total Sessions', value: '0', icon: '📚', color: 'bg-blue-500' },
+    { label: 'This Month', value: '0', icon: '📅', color: 'bg-green-500' },
+    { label: 'Completed', value: '0', icon: '✅', color: 'bg-purple-500' },
+    { label: 'Average Rating', value: '0', icon: '⭐', color: 'bg-yellow-500' }
   ]
 
   const tabs = [
@@ -92,23 +117,35 @@ function StudentDashboard() {
         {activeTab === 'overview' && (
           <div>
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {stats.map((stat, index) => (
-                <div key={index} className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center">
-                    <div className={`flex-shrink-0 p-3 rounded-md ${stat.color}`}>
-                      <span className="text-white text-2xl">{stat.icon}</span>
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {loading ? (
+                [...Array(4)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-lg shadow p-6 animate-pulse">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-gray-200 rounded-lg mr-4"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+                        <div className="h-6 bg-gray-200 rounded w-16"></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                ))
+              ) : (
+                stats.map((stat, index) => (
+                  <div key={index} className="bg-white rounded-lg shadow p-6">
+                    <div className="flex items-center">
+                      <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center text-white text-xl mr-4`}>
+                        {stat.icon}
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">{stat.label}</p>
+                        <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Calendar View - Takes up 2 columns on large screens */}
               <div className="lg:col-span-2">
                 <CalendarView />

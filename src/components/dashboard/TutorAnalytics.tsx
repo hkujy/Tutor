@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns'
+import { Skeleton } from '../ui/Skeleton'
 
 interface TutorAnalyticsProps {
   tutorId: string
@@ -33,61 +34,33 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
   const [isHydrated, setIsHydrated] = useState(false)
   const [loading, setLoading] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState('7d')
+  const [analyticsData, setAnalyticsData] = useState<any>(null)
 
   useEffect(() => {
-    // Generate mock data after hydration to avoid SSR mismatch
-    const today = new Date()
-    const weekStart = startOfWeek(today)
-    const weekEnd = endOfWeek(today)
-    const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd })
-
-    // Use deterministic values based on day index instead of random
-    const mockWeeklyData: WeeklyData[] = weekDays.map((day, index) => ({
-      day: format(day, 'EEE'),
-      sessions: (index % 4) + 1, // Deterministic: 1, 2, 3, 4, 1, 2, 3
-      hours: ((index * 2) % 7) + 2 // Deterministic: 2, 4, 6, 8, 3, 5, 7
-    }))
-
-    setWeeklyData(mockWeeklyData)
     setIsHydrated(true)
-
-    const mockMetrics: PerformanceMetric[] = [
-      {
-        label: 'Student Satisfaction',
-        value: '4.9/5.0',
-        change: '+0.1',
-        trend: 'up',
-        icon: '⭐'
-      },
-      {
-        label: 'Response Time',
-        value: '< 2 hours',
-        change: '-30 min',
-        trend: 'up',
-        icon: '⚡'
-      },
-      {
-        label: 'Session Completion',
-        value: '98%',
-        change: '+2%',
-        trend: 'up',
-        icon: '✅'
-      },
-      {
-        label: 'Repeat Bookings',
-        value: '87%',
-        change: '+5%',
-        trend: 'up',
-        icon: '🔄'
-      }
-    ]
-
-    setTimeout(() => {
-      setWeeklyData(mockWeeklyData)
-      setMetrics(mockMetrics)
-      setLoading(false)
-    }, 1000)
+    fetchAnalytics()
   }, [tutorId, selectedPeriod])
+
+  const fetchAnalytics = async () => {
+    if (!tutorId) return
+    
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/analytics?tutorId=${tutorId}&period=${selectedPeriod}`)
+      if (res.ok) {
+        const data = await res.json()
+        setAnalyticsData(data)
+        setMetrics(data.metrics || [])
+        setWeeklyData(data.weeklyActivity || [])
+      } else {
+        console.error('Failed to fetch analytics')
+      }
+    } catch (error) {
+      console.error('Analytics fetch error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
@@ -111,14 +84,27 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+        <div className="flex items-center justify-between mb-6">
+          <Skeleton width={200} height={24} className="bg-gray-300" />
+          <Skeleton width={120} height={36} />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <Skeleton width={24} height={24} variant="circular" />
+                <Skeleton width={60} height={16} />
+              </div>
+              <Skeleton width={60} height={28} className="mb-1" />
+              <Skeleton width={100} height={16} />
+            </div>
+          ))}
+        </div>
+        <Skeleton width="100%" height={200} className="mb-6" />
+        <div className="space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} width="100%" height={60} />
+          ))}
         </div>
       </div>
     )
@@ -195,23 +181,24 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       <div className="mb-8">
         <h4 className="text-lg font-medium text-gray-900 mb-4">Subject Performance</h4>
         <div className="space-y-3">
-          {[
-            { subject: 'Mathematics', sessions: 15, rating: 4.9, students: 8 },
-            { subject: 'Physics', sessions: 12, rating: 4.8, students: 6 },
-            { subject: 'Chemistry', sessions: 8, rating: 4.7, students: 4 },
-            { subject: 'Biology', sessions: 5, rating: 5.0, students: 3 }
-          ].map((item, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex-1">
-                <div className="font-medium text-gray-900">{item.subject}</div>
-                <div className="text-sm text-gray-600">{item.students} students • {item.sessions} sessions</div>
+          {analyticsData?.subjectPerformance?.length > 0 ? (
+            analyticsData.subjectPerformance.map((item: any, index: number) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900">{item.subject}</div>
+                  <div className="text-sm text-gray-600">{item.students} students • {item.sessions} sessions</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium text-gray-900">{item.rating} ⭐</div>
+                  <div className="text-sm text-gray-600">Rating</div>
+                </div>
               </div>
-              <div className="text-right">
-                <div className="font-medium text-gray-900">{item.rating} ⭐</div>
-                <div className="text-sm text-gray-600">Rating</div>
-              </div>
+            ))
+          ) : (
+            <div className="text-center text-gray-500 py-4">
+              No subject data available yet
             </div>
-          ))}
+          )}
         </div>
       </div>
 
@@ -220,15 +207,21 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
         <h4 className="font-medium text-green-900 mb-3">Earnings Summary (This Month)</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">$2,450</div>
+            <div className="text-2xl font-bold text-green-600">
+              ${analyticsData?.earnings?.total || 0}
+            </div>
             <div className="text-green-700">Total Earnings</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">$65</div>
+            <div className="text-2xl font-bold text-green-600">
+              ${analyticsData?.earnings?.averagePerSession || 0}
+            </div>
             <div className="text-green-700">Average per Session</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">38</div>
+            <div className="text-2xl font-bold text-green-600">
+              {analyticsData?.earnings?.totalSessions || 0}
+            </div>
             <div className="text-green-700">Total Sessions</div>
           </div>
         </div>
