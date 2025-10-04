@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 
 export default function LoginPage() {
-  const [selectedRole, setSelectedRole] = useState<'TUTOR' | 'STUDENT' | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -26,16 +25,6 @@ export default function LoginPage() {
       firstName: 'Alex',
       lastName: 'Smith'
     }
-  }
-
-  const handleRoleSelection = (role: 'TUTOR' | 'STUDENT') => {
-    console.log('Role selected:', role)
-    setSelectedRole(role)
-    // Auto-fill demo credentials
-    const demoUser = demoUsers[role]
-    setEmail(demoUser.email)
-    setPassword(demoUser.password)
-    setError('')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,14 +48,18 @@ export default function LoginPage() {
       if (result?.error) {
         setError('Invalid email or password')
       } else if (result?.ok) {
-        // Redirect based on the user role
-        if (selectedRole === 'TUTOR') {
+        // Get the user session to determine their actual role
+        const session = await fetch('/api/auth/session').then(res => res.json())
+        const userRole = session?.user?.role
+        
+        // Redirect based on the actual user role from the database
+        if (userRole === 'TUTOR') {
           router.push('/tutor')
-        } else if (selectedRole === 'STUDENT') {
+        } else if (userRole === 'STUDENT') {
           router.push('/student')
         } else {
-          // If no role selected, redirect to a general dashboard
-          router.push('/student') // Default to student
+          // Default redirect
+          router.push('/')
         }
       }
     } catch (error) {
@@ -203,27 +196,6 @@ export default function LoginPage() {
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
             </form>
-
-            {/* Role Selection for Manual Login */}
-            {email && !selectedRole && (
-              <div className="space-y-3">
-                <p className="text-sm text-gray-600 text-center">Select your role:</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => handleRoleSelection('TUTOR')}
-                    className="p-3 border border-gray-300 rounded-md hover:border-blue-400 hover:bg-blue-50 transition-colors"
-                  >
-                    <span className="font-medium">Tutor</span>
-                  </button>
-                  <button
-                    onClick={() => handleRoleSelection('STUDENT')}
-                    className="p-3 border border-gray-300 rounded-md hover:border-green-400 hover:bg-green-50 transition-colors"
-                  >
-                    <span className="font-medium">Student</span>
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
