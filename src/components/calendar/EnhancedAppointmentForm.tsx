@@ -565,13 +565,14 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
         >
           ← Back
         </button>
-        <button
+        <LoadingButton
           onClick={handleSubmit}
-          disabled={loading}
-          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          loading={loading}
+          loadingText="Booking..."
+          variant="primary"
         >
-          {loading ? 'Booking...' : 'Book Appointment'}
-        </button>
+          Book Appointment
+        </LoadingButton>
         <button
           onClick={resetForm}
           className="px-4 py-2 text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
