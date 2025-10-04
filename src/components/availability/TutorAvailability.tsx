@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
 
 interface Availability {
@@ -30,11 +30,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
 
-  useEffect(() => {
-    fetchAvailability()
-  }, [tutorId])
-
-  const fetchAvailability = async () => {
+  const fetchAvailability = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch(`/api/availability?tutorId=${tutorId}`)
@@ -45,7 +41,11 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [tutorId])
+
+  useEffect(() => {
+    fetchAvailability()
+  }, [fetchAvailability])
 
   const generateTimeSlots = () => {
     const slots = []

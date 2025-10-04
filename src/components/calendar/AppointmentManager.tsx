@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { format, parseISO, addDays, isAfter } from 'date-fns'
 
 interface Appointment {
@@ -45,11 +45,7 @@ export default function AppointmentManager({ userRole, userId }: AppointmentMana
   const [rescheduleSubject, setRescheduleSubject] = useState('')
   const [rescheduleNotes, setRescheduleNotes] = useState('')
 
-  useEffect(() => {
-    fetchAppointments()
-  }, [])
-
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     try {
       const res = await fetch('/api/appointments')
       const data = await res.json()
@@ -69,7 +65,11 @@ export default function AppointmentManager({ userRole, userId }: AppointmentMana
     } finally {
       setLoading(false)
     }
-  }
+  }, [userRole])
+
+  useEffect(() => {
+    fetchAppointments()
+  }, [fetchAppointments])
 
   const handleReschedule = async () => {
     if (!selectedAppointment) return

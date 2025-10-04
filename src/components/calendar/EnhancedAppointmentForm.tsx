@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { 
   format, 
   addDays, 
@@ -124,10 +124,52 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
   }
 
   useEffect(() => {
+    const generateTimeSlots = () => {
+      if (!selectedDate || !selectedTutor) return
+
+      const slots: TimeSlot[] = []
+      const dayOfWeek = selectedDate.getDay()
+      
+      // Generate time slots from 8 AM to 6 PM
+      for (let hour = 8; hour < 18; hour++) {
+        for (let minute = 0; minute < 60; minute += 30) {
+          const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+          const slotDateTime = new Date(selectedDate)
+          slotDateTime.setHours(hour, minute, 0, 0)
+          
+          // Check if slot is in the past
+          if (slotDateTime < new Date()) {
+            continue
+          }
+
+          // Check for conflicts with existing appointments
+          const hasConflict = existingAppointments.some(apt => {
+            const aptStart = new Date(apt.startTime)
+            const aptEnd = new Date(apt.endTime)
+            const slotEnd = new Date(slotDateTime.getTime() + duration * 60 * 1000)
+            
+            return apt.tutorId === selectedTutor.id &&
+                   apt.status !== 'CANCELLED' &&
+                   ((slotDateTime >= aptStart && slotDateTime < aptEnd) ||
+                    (slotEnd > aptStart && slotEnd <= aptEnd) ||
+                    (slotDateTime <= aptStart && slotEnd >= aptEnd))
+          })
+
+          slots.push({
+            time: timeString,
+            available: !hasConflict,
+            conflictReason: hasConflict ? 'Already booked' : undefined
+          })
+        }
+      }
+
+      setAvailableSlots(slots)
+    }
+
     if (selectedTutor && selectedDate && selectedSubject) {
       generateTimeSlots()
     }
-  }, [selectedTutor, selectedDate, selectedSubject])
+  }, [selectedTutor, selectedDate, selectedSubject, existingAppointments, duration])
 
   const fetchExistingAppointments = async () => {
     try {
@@ -137,54 +179,6 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
     } catch (error) {
       console.error('Failed to fetch appointments:', error)
     }
-  }
-
-  const generateTimeSlots = () => {
-    if (!selectedDate || !selectedTutor) return
-
-    const slots: TimeSlot[] = []
-    const dayOfWeek = selectedDate.getDay()
-    
-    // Generate time slots from 8 AM to 6 PM
-    for (let hour = 8; hour < 18; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
-        const slotDateTime = new Date(selectedDate)
-        slotDateTime.setHours(hour, minute, 0, 0)
-        
-        // Check if slot is in the past
-        const now = new Date()
-        if (isBefore(slotDateTime, now)) {
-          slots.push({
-            time: timeString,
-            available: false,
-            conflictReason: 'Past time'
-          })
-          continue
-        }
-
-        // Check for conflicts with existing appointments
-        const hasConflict = existingAppointments.some(apt => {
-          const aptStart = parseISO(apt.startTime)
-          const aptEnd = parseISO(apt.endTime)
-          const slotEnd = new Date(slotDateTime.getTime() + duration * 60 * 1000)
-          
-          return apt.tutorId === selectedTutor.id &&
-                 apt.status !== 'CANCELLED' &&
-                 ((slotDateTime >= aptStart && slotDateTime < aptEnd) ||
-                  (slotEnd > aptStart && slotEnd <= aptEnd) ||
-                  (slotDateTime <= aptStart && slotEnd >= aptEnd))
-        })
-
-        slots.push({
-          time: timeString,
-          available: !hasConflict,
-          conflictReason: hasConflict ? 'Already booked' : undefined
-        })
-      }
-    }
-
-    setAvailableSlots(slots)
   }
 
   const handleTutorSelect = (tutor: Tutor) => {
