@@ -11,11 +11,13 @@ import AssignmentManager from '../../components/dashboard/AssignmentManager'
 import LectureHoursTracker from '../../components/lecture-hours/LectureHoursTracker'
 import PaymentManager from '../../components/lecture-hours/PaymentManager'
 import StudentSummaryList from '../../components/dashboard/StudentSummaryList'
+import NotificationManager from '../../components/notifications/NotificationManager'
+import NotificationPreferencesManager from '../../components/notifications/NotificationPreferencesManager'
 
 function TutorDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'availability' | 'appointments' | 'manage' | 'analytics' | 'assignments' | 'hours' | 'payments'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'availability' | 'appointments' | 'manage' | 'analytics' | 'assignments' | 'hours' | 'payments' | 'notifications' | 'settings'>('overview')
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -65,7 +67,9 @@ function TutorDashboard() {
     { id: 'analytics', name: 'Analytics', icon: '📈' },
     { id: 'assignments', name: 'Assignments', icon: '📝' },
     { id: 'hours', name: 'Lecture Hours', icon: '⏰' },
-    { id: 'payments', name: 'Payments', icon: '💳' }
+    { id: 'payments', name: 'Payments', icon: '💳' },
+    { id: 'notifications', name: 'Notifications', icon: '🔔' },
+    { id: 'settings', name: 'Settings', icon: '⚙️' }
   ]
 
   const stats = dashboardStats?.stats ? [
@@ -294,6 +298,18 @@ function TutorDashboard() {
         {activeTab === 'payments' && (
           <div>
             <PaymentManager userRole="tutor" userId={user?.id || ''} />
+          </div>
+        )}
+
+        {activeTab === 'notifications' && (
+          <div>
+            <NotificationManager userId={user?.id || ''} userRole="tutor" />
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div>
+            <NotificationPreferencesManager userId={user?.id || ''} />
           </div>
         )}
       </div>

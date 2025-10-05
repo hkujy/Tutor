@@ -11,11 +11,13 @@ import StudentProgress from '../../components/dashboard/StudentProgress'
 import AssignmentManager from '../../components/dashboard/AssignmentManager'
 import LectureHoursTracker from '../../components/lecture-hours/LectureHoursTracker'
 import PaymentManager from '../../components/lecture-hours/PaymentManager'
+import NotificationManager from '../../components/notifications/NotificationManager'
+import NotificationPreferencesManager from '../../components/notifications/NotificationPreferencesManager'
 
 function StudentDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'assignments' | 'progress' | 'hours' | 'payments'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'assignments' | 'progress' | 'hours' | 'payments' | 'notifications' | 'settings'>('overview')
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [dashboardStats, setDashboardStats] = useState<any>(null)
@@ -80,7 +82,9 @@ function StudentDashboard() {
     { id: 'assignments', name: 'Assignments', icon: '📝' },
     { id: 'progress', name: 'Progress', icon: '📊' },
     { id: 'hours', name: 'Lecture Hours', icon: '⏰' },
-    { id: 'payments', name: 'Payments', icon: '💳' }
+    { id: 'payments', name: 'Payments', icon: '💳' },
+    { id: 'notifications', name: 'Notifications', icon: '🔔' },
+    { id: 'settings', name: 'Settings', icon: '⚙️' }
   ]
 
   return (
@@ -238,6 +242,18 @@ function StudentDashboard() {
         {activeTab === 'payments' && (
           <div>
             <PaymentManager userRole="student" userId={user?.id || ''} />
+          </div>
+        )}
+
+        {activeTab === 'notifications' && (
+          <div>
+            <NotificationManager userId={user?.id || ''} userRole="student" />
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div>
+            <NotificationPreferencesManager userId={user?.id || ''} />
           </div>
         )}
       </div>
