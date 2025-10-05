@@ -138,6 +138,11 @@ export async function PUT(request: NextRequest) {
       }
     })
 
+    // If appointment is marked as COMPLETED, automatically create/update lecture hours
+    if (data.status === 'COMPLETED') {
+      await handleCompletedAppointment(appointment)
+    }
+
     return NextResponse.json({ appointment })
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -192,5 +197,139 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('Appointment cancellation error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// Handle completed appointment - automatically create lecture hours and session
+async function handleCompletedAppointment(appointment: any) {
+  try {
+    // Calculate session duration in hours
+    const startTime = new Date(appointment.startTime)
+    const endTime = new Date(appointment.endTime)
+    const durationMs = endTime.getTime() - startTime.getTime()
+    const durationHours = durationMs / (1000 * 60 * 60) // Convert to hours
+
+    if (durationHours <= 0) {
+      console.warn('Invalid appointment duration:', durationHours)
+      return
+    }
+
+    // Find or create lecture hours record
+    let lectureHours = await db.lectureHours.findUnique({
+      where: {
+        studentId_tutorId_subject: {
+          studentId: appointment.studentId,
+          tutorId: appointment.tutorId,
+          subject: appointment.subject
+        }
+      }
+    })
+
+    if (!lectureHours) {
+      // Create new lecture hours record
+      lectureHours = await db.lectureHours.create({
+        data: {
+          studentId: appointment.studentId,
+          tutorId: appointment.tutorId,
+          subject: appointment.subject,
+          totalHours: durationHours,
+          unpaidHours: durationHours,
+          lastSessionDate: endTime,
+          paymentInterval: 10 // Default to 10 hours payment interval
+        }
+      })
+    } else {
+      // Update existing record
+      const newTotalHours = parseFloat(lectureHours.totalHours.toString()) + durationHours
+      const newUnpaidHours = parseFloat(lectureHours.unpaidHours.toString()) + durationHours
+
+      lectureHours = await db.lectureHours.update({
+        where: { id: lectureHours.id },
+        data: {
+          totalHours: newTotalHours,
+          unpaidHours: newUnpaidHours,
+          lastSessionDate: endTime,
+          reminderSent: false // Reset reminder flag when new hours are added
+        }
+      })
+    }
+
+    // Create the session record
+    const session = await db.lectureSession.create({
+      data: {
+        lectureHoursId: lectureHours.id,
+        appointmentId: appointment.id,
+        duration: durationHours,
+        actualStartTime: startTime,
+        actualEndTime: endTime,
+        notes: appointment.notes || null
+      }
+    })
+
+    // Check if payment reminder should be triggered
+    const unpaidHours = parseFloat(lectureHours.unpaidHours.toString())
+    const paymentInterval = lectureHours.paymentInterval || 10
+
+    if (unpaidHours >= paymentInterval && !lectureHours.reminderSent) {
+      // Get appointment with user details for notifications
+      const appointmentWithUsers = await db.appointment.findUnique({
+        where: { id: appointment.id },
+        include: {
+          student: { include: { user: true } },
+          tutor: { include: { user: true } }
+        }
+      })
+
+      if (appointmentWithUsers) {
+        // Create payment reminder notifications
+        await Promise.all([
+          // Notification for student
+          db.notification.create({
+            data: {
+              userId: appointmentWithUsers.student.userId,
+              type: 'PAYMENT_REMINDER',
+              title: 'Payment Reminder',
+              message: `You have ${unpaidHours.toFixed(1)} unpaid hours for ${appointmentWithUsers.subject} sessions. Please arrange payment with your tutor.`,
+              channels: ['email'],
+              data: {
+                lectureHoursId: lectureHours.id,
+                unpaidHours,
+                paymentInterval,
+                subject: appointmentWithUsers.subject
+              }
+            }
+          }),
+          // Notification for tutor
+          db.notification.create({
+            data: {
+              userId: appointmentWithUsers.tutor.userId,
+              type: 'PAYMENT_REMINDER',
+              title: 'Payment Reminder - Student',
+              message: `${appointmentWithUsers.student.user.firstName} ${appointmentWithUsers.student.user.lastName} has ${unpaidHours.toFixed(1)} unpaid hours for ${appointmentWithUsers.subject} sessions.`,
+              channels: ['email'],
+              data: {
+                lectureHoursId: lectureHours.id,
+                unpaidHours,
+                paymentInterval,
+                subject: appointmentWithUsers.subject
+              }
+            }
+          })
+        ])
+
+        // Mark reminder as sent
+        await db.lectureHours.update({
+          where: { id: lectureHours.id },
+          data: { reminderSent: true }
+        })
+      }
+    }
+
+    console.log(`Lecture hours automatically created for appointment ${appointment.id}: ${durationHours} hours`)
+    return { lectureHours, session }
+    
+  } catch (error) {
+    console.error('Error handling completed appointment:', error)
+    // Don't throw error to avoid breaking appointment update
   }
 }

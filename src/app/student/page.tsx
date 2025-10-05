@@ -30,12 +30,6 @@ function StudentDashboard() {
     }
   }, [user, isLoading, router])
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchDashboardStats(user.id)
-    }
-  }, [user])
-
   const fetchDashboardStats = async (userId: string) => {
     try {
       const res = await fetch(`/api/dashboard?tutorId=${userId}&role=student`)
@@ -47,6 +41,12 @@ function StudentDashboard() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchDashboardStats(user.id)
+    }
+  }, [user])
 
   // Show loading while checking authentication
   if (isLoading) {

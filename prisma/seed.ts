@@ -46,7 +46,7 @@ async function main() {
     update: {},
     create: {
       userId: tutorUser.id,
-      specializations: ['Mathematics', 'Physics', 'Chemistry'],
+      specializations: ['Music'],
       experienceYears: 5,
       education: 'MS in Mathematics, MIT',
       certifications: ['Certified Math Teacher'],
@@ -86,7 +86,7 @@ async function main() {
     create: {
       userId: studentUser.id,
       gradeLevel: '12',
-      subjects: ['Mathematics', 'Physics'],
+      subjects: ['Music'],
       learningGoals:
         'Improve calculus understanding and prepare for college entrance exams',
       parentContact: 'parent@example.com',

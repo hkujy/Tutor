@@ -91,19 +91,19 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
     {
       id: 'cmg7z5uy90003lvjgzvfa50hg',
       user: { firstName: 'John', lastName: 'Smith', email: 'tutor@example.com' },
-      subjects: ['Mathematics', 'Physics', 'Chemistry'],
+      subjects: ['Music'],
       hourlyRate: 50
     },
     {
       id: 'mock-tutor-2',
       user: { firstName: 'Sarah', lastName: 'Johnson', email: 'sarah@example.com' },
-      subjects: ['English', 'Literature', 'Writing'],
+      subjects: ['Music'],
       hourlyRate: 45
     },
     {
       id: 'mock-tutor-3',
       user: { firstName: 'Mike', lastName: 'Chen', email: 'mike@example.com' },
-      subjects: ['Computer Science', 'Programming', 'Mathematics'],
+      subjects: ['Music'],
       hourlyRate: 60
     }
   ]

@@ -9,6 +9,17 @@ const createSessionSchema = z.object({
   notes: z.string().optional(),
 })
 
+const manualSessionSchema = z.object({
+  lectureHoursId: z.string(),
+  duration: z.number().positive(),
+  notes: z.string().optional(),
+})
+
+const updatePaymentIntervalSchema = z.object({
+  lectureHoursId: z.string(),
+  paymentInterval: z.number().positive(),
+})
+
 const updatePaymentSchema = z.object({
   paymentId: z.string(),
   status: z.enum(['PENDING', 'PAID', 'OVERDUE', 'CANCELLED']),
@@ -85,7 +96,19 @@ export async function GET(request: NextRequest) {
         }
       })
 
-      return NextResponse.json({ lectureHours })
+      // Convert Decimal fields to numbers for frontend consumption
+      const convertedLectureHours = lectureHours.map(lh => ({
+        ...lh,
+        totalHours: parseFloat(lh.totalHours.toString()),
+        unpaidHours: parseFloat(lh.unpaidHours.toString()),
+        payments: lh.payments.map(payment => ({
+          ...payment,
+          amount: parseFloat(payment.amount.toString()),
+          hoursIncluded: parseFloat(payment.hoursIncluded.toString())
+        }))
+      }))
+
+      return NextResponse.json({ lectureHours: convertedLectureHours })
     }
 
     // Legacy parameter handling
@@ -154,8 +177,20 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Convert Decimal fields to numbers for frontend consumption
+    const convertedLectureHours = lectureHours.map(lh => ({
+      ...lh,
+      totalHours: parseFloat(lh.totalHours.toString()),
+      unpaidHours: parseFloat(lh.unpaidHours.toString()),
+      payments: lh.payments.map(payment => ({
+        ...payment,
+        amount: parseFloat(payment.amount.toString()),
+        hoursIncluded: parseFloat(payment.hoursIncluded.toString())
+      }))
+    }))
+
     return NextResponse.json({ 
-      lectureHours,
+      lectureHours: convertedLectureHours,
       remindersNeeded 
     })
   } catch (error) {
@@ -164,10 +199,27 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Record a completed session
+// POST - Record a completed session or add payment
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    
+    // Check if this is an add payment request
+    if (body.action === 'addPayment') {
+      return await handleAddPayment(body)
+    }
+    
+    // Check if this is a payment interval update
+    if (body.action === 'updatePaymentInterval') {
+      return await handleUpdatePaymentInterval(body)
+    }
+    
+    // Check if this is a manual session recording
+    if (body.lectureHoursId && body.duration && !body.appointmentId) {
+      return await handleManualSessionRecording(body)
+    }
+    
+    // Default to appointment-based session recording
     const data = createSessionSchema.parse(body)
 
     // Get appointment details
@@ -332,10 +384,112 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Handle add payment action
+async function handleAddPayment(body: any) {
+  try {
+    const { lectureHoursId, amount, hoursIncluded, paymentMethod, transactionId, notes, paidDate, userId } = body
+    
+    // Validate required fields
+    if (!lectureHoursId || !amount || !hoursIncluded || !paymentMethod || !paidDate) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Verify the lecture hours record exists and user has permission
+    const lectureHours = await db.lectureHours.findFirst({
+      where: { 
+        id: lectureHoursId,
+        tutor: {
+          userId: userId // Ensure tutor owns this record
+        }
+      },
+      include: {
+        student: {
+          include: {
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
+        tutor: {
+          include: {
+            user: {
+              select: { firstName: true, lastName: true }
+            }
+          }
+        }
+      }
+    })
+
+    if (!lectureHours) {
+      return NextResponse.json({ error: 'Lecture hours record not found or unauthorized' }, { status: 404 })
+    }
+
+    // Create the payment record
+    const payment = await db.payment.create({
+      data: {
+        lectureHoursId,
+        amount: parseFloat(amount),
+        hoursIncluded: parseFloat(hoursIncluded),
+        status: 'PAID',
+        dueDate: new Date(paidDate), // Set due date same as paid date for manually added payments
+        paidDate: new Date(paidDate),
+        paymentMethod,
+        transactionId: transactionId || null,
+        notes: notes || null
+      }
+    })
+
+    // Update the lecture hours to reduce unpaid hours
+    const currentUnpaidHours = parseFloat(lectureHours.unpaidHours.toString())
+    const newUnpaidHours = Math.max(0, currentUnpaidHours - parseFloat(hoursIncluded))
+
+    await db.lectureHours.update({
+      where: { id: lectureHoursId },
+      data: {
+        unpaidHours: newUnpaidHours
+      }
+    })
+
+    // Create notification for student about payment received
+    await db.notification.create({
+      data: {
+        userId: lectureHours.student.userId,
+        type: 'PAYMENT_RECEIVED',
+        title: 'Payment Received',
+        message: `Your payment of $${amount} for ${hoursIncluded} hours of ${lectureHours.subject} has been recorded.`,
+        channels: ['email'],
+        data: {
+          paymentId: payment.id,
+          amount,
+          hoursIncluded,
+          paymentMethod,
+          subject: lectureHours.subject
+        }
+      }
+    })
+
+    return NextResponse.json({ 
+      payment,
+      message: 'Payment added successfully'
+    }, { status: 201 })
+    
+  } catch (error) {
+    console.error('Add payment error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 // PUT - Update payment status
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
+    
+    // Handle different action formats
+    if (body.action === 'markPaymentPaid') {
+      return await handleMarkPaymentPaid(body)
+    }
+    
+    // Default to schema validation for other updates
     const data = updatePaymentSchema.parse(body)
 
     const payment = await db.payment.findUnique({
@@ -418,6 +572,193 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
     }
     console.error('Update payment error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// Handle mark payment as paid action
+async function handleMarkPaymentPaid(body: any) {
+  try {
+    const { paymentId, userId } = body
+    
+    if (!paymentId) {
+      return NextResponse.json({ error: 'Payment ID is required' }, { status: 400 })
+    }
+
+    const payment = await db.payment.findUnique({
+      where: { id: paymentId },
+      include: {
+        lectureHours: {
+          include: {
+            student: { include: { user: true } },
+            tutor: { include: { user: true } }
+          }
+        }
+      }
+    })
+
+    if (!payment) {
+      return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
+    }
+
+    // Verify user has permission (must be the tutor)
+    if (payment.lectureHours.tutor.userId !== userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    // Update payment to paid status
+    const updatedPayment = await db.payment.update({
+      where: { id: paymentId },
+      data: {
+        status: 'PAID',
+        paidDate: new Date(),
+        paymentMethod: payment.paymentMethod || 'Not specified'
+      }
+    })
+
+    // Update lecture hours to reduce unpaid hours
+    const hoursIncluded = parseFloat(payment.hoursIncluded.toString())
+    const currentUnpaidHours = parseFloat(payment.lectureHours.unpaidHours.toString())
+    const newUnpaidHours = Math.max(0, currentUnpaidHours - hoursIncluded)
+
+    await db.lectureHours.update({
+      where: { id: payment.lectureHoursId },
+      data: {
+        unpaidHours: newUnpaidHours
+      }
+    })
+
+    // Send notification to student
+    await db.notification.create({
+      data: {
+        userId: payment.lectureHours.student.userId,
+        type: 'PAYMENT_RECEIVED',
+        title: 'Payment Marked as Received',
+        message: `Your payment of $${payment.amount} for ${hoursIncluded} hours of ${payment.lectureHours.subject} has been marked as received.`,
+        channels: ['email'],
+        data: {
+          paymentId: payment.id,
+          amount: payment.amount.toString(),
+          hoursIncluded: hoursIncluded.toString(),
+          subject: payment.lectureHours.subject
+        }
+      }
+    })
+
+    return NextResponse.json({ 
+      payment: updatedPayment,
+      message: 'Payment marked as paid successfully'
+    })
+    
+  } catch (error) {
+    console.error('Mark payment paid error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// Handle manual session recording
+async function handleManualSessionRecording(body: any) {
+  try {
+    const data = manualSessionSchema.parse(body)
+    
+    // Get the lecture hours record
+    const lectureHours = await db.lectureHours.findUnique({
+      where: { id: data.lectureHoursId },
+      include: {
+        student: {
+          include: { user: true }
+        },
+        tutor: {
+          include: { user: true }
+        }
+      }
+    })
+    
+    if (!lectureHours) {
+      return NextResponse.json({ error: 'Lecture hours record not found' }, { status: 404 })
+    }
+    
+    // Update lecture hours totals directly (no session record for manual entries)
+    const currentTotalHours = parseFloat(lectureHours.totalHours.toString())
+    const currentUnpaidHours = parseFloat(lectureHours.unpaidHours.toString())
+    
+    const updatedLectureHours = await db.lectureHours.update({
+      where: { id: data.lectureHoursId },
+      data: {
+        totalHours: currentTotalHours + data.duration,
+        unpaidHours: currentUnpaidHours + data.duration,
+        lastSessionDate: new Date()
+      }
+    })
+    
+    // Send notification to student
+    await db.notification.create({
+      data: {
+        userId: lectureHours.student.userId,
+        type: 'SYSTEM_ANNOUNCEMENT',
+        title: 'New Session Recorded',
+        message: `A new ${data.duration} hour music session has been recorded by ${lectureHours.tutor.user.firstName} ${lectureHours.tutor.user.lastName}`,
+        data: {
+          lectureHoursId: data.lectureHoursId,
+          duration: data.duration.toString(),
+          subject: lectureHours.subject
+        }
+      }
+    })
+    
+    return NextResponse.json({ 
+      lectureHours: updatedLectureHours,
+      message: 'Session recorded successfully'
+    })
+    
+  } catch (error) {
+    console.error('Manual session recording error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// Handle payment interval updates
+async function handleUpdatePaymentInterval(body: any) {
+  try {
+    const data = updatePaymentIntervalSchema.parse(body)
+    
+    const lectureHours = await db.lectureHours.update({
+      where: { id: data.lectureHoursId },
+      data: {
+        paymentInterval: data.paymentInterval
+      },
+      include: {
+        student: {
+          include: { user: true }
+        },
+        tutor: {
+          include: { user: true }
+        }
+      }
+    })
+    
+    // Send notification to student about the change
+    await db.notification.create({
+      data: {
+        userId: lectureHours.student.userId,
+        type: 'SYSTEM_ANNOUNCEMENT',
+        title: 'Payment Schedule Updated',
+        message: `Payment frequency has been updated to every ${data.paymentInterval} hours for ${lectureHours.subject} sessions`,
+        data: {
+          lectureHoursId: data.lectureHoursId,
+          paymentInterval: data.paymentInterval.toString(),
+          subject: lectureHours.subject
+        }
+      }
+    })
+    
+    return NextResponse.json({ 
+      lectureHours,
+      message: 'Payment interval updated successfully'
+    })
+    
+  } catch (error) {
+    console.error('Update payment interval error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

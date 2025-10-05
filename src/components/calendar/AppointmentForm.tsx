@@ -75,16 +75,7 @@ export default function AppointmentForm({ onAppointmentCreated, selectedDate }: 
   }
 
   const subjects = [
-    'Mathematics',
-    'Physics',
-    'Chemistry',
-    'Biology',
-    'English',
-    'History',
-    'Computer Science',
-    'Economics',
-    'Literature',
-    'Other'
+    'Music'
   ]
 
   return (

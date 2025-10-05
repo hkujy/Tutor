@@ -12,7 +12,6 @@ let prisma: PrismaClient
 if (env.NODE_ENV === 'production') {
   prisma = new PrismaClient({
     log: [
-      { emit: 'event', level: 'query' },
       { emit: 'event', level: 'error' },
       { emit: 'event', level: 'warn' },
     ],
@@ -22,7 +21,6 @@ if (env.NODE_ENV === 'production') {
   if (!globalThis.__prisma) {
     globalThis.__prisma = new PrismaClient({
       log: [
-        { emit: 'event', level: 'query' },
         { emit: 'event', level: 'error' },
         { emit: 'event', level: 'warn' },
       ],
@@ -32,18 +30,19 @@ if (env.NODE_ENV === 'production') {
 }
 
 // Log database events (cast to any for $on to avoid TS narrowing to never)
-;(prisma as any).$on('query', (e: any) => {
-  if (env.NODE_ENV === 'development') {
-    logger.debug(
-      {
-        query: e.query,
-        params: e.params,
-        duration: e.duration,
-      },
-      'Database query'
-    )
-  }
-})
+// Commenting out query logging to improve performance
+// ;(prisma as any).$on('query', (e: any) => {
+//   if (env.NODE_ENV === 'development') {
+//     logger.debug(
+//       {
+//         query: e.query,
+//         params: e.params,
+//         duration: e.duration,
+//       },
+//       'Database query'
+//     )
+//   }
+// })
 
 ;(prisma as any).$on('error', (e: any) => {
   logger.error({ error: e }, 'Database error')

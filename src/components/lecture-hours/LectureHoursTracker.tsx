@@ -5,6 +5,18 @@ import { format } from 'date-fns'
 import { SkeletonList } from '../ui/Skeleton'
 import LoadingButton from '../ui/LoadingButton'
 
+// Helper function for safe date formatting
+const formatDateSafe = (dateValue: string | null | undefined, fallback: string = 'No date'): string => {
+  if (!dateValue) return fallback
+  try {
+    const date = new Date(dateValue)
+    if (isNaN(date.getTime())) return fallback
+    return format(date, 'MMM d, yyyy')
+  } catch (error) {
+    return fallback
+  }
+}
+
 interface LectureHours {
   id: string
   studentId: string
@@ -12,7 +24,7 @@ interface LectureHours {
   subject: string
   totalHours: number
   unpaidHours: number
-  paymentFrequency: number
+  paymentInterval: number
   student: {
     user: {
       firstName: string
@@ -31,7 +43,7 @@ interface LectureHours {
 
 interface LectureSession {
   id: string
-  date: string
+  date: string | null
   duration: number
   notes?: string
 }
@@ -41,8 +53,8 @@ interface Payment {
   amount: number
   hoursIncluded: number
   status: 'PENDING' | 'PAID' | 'OVERDUE'
-  dueDate: string
-  paidDate?: string
+  dueDate: string | null
+  paidDate?: string | null
 }
 
 interface LectureHoursTrackerProps {
@@ -60,6 +72,8 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
     duration: '',
     notes: ''
   })
+  const [editingPaymentInterval, setEditingPaymentInterval] = useState<string | null>(null)
+  const [newPaymentInterval, setNewPaymentInterval] = useState<number>(10)
 
   useEffect(() => {
     fetchLectureHours()
@@ -126,6 +140,27 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
     }
   }
 
+  const updatePaymentInterval = async (lectureHoursId: string, paymentInterval: number) => {
+    try {
+      const res = await fetch('/api/lecture-hours', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updatePaymentInterval',
+          lectureHoursId,
+          paymentInterval
+        })
+      })
+
+      if (res.ok) {
+        setEditingPaymentInterval(null)
+        fetchLectureHours() // Refresh data
+      }
+    } catch (error) {
+      console.error('Failed to update payment interval:', error)
+    }
+  }
+
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
       case 'PAID':
@@ -148,21 +183,22 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
     )
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              {userRole === 'student' ? 'My Lecture Hours' : 'Student Lecture Hours'}
-            </h2>
-            <p className="text-gray-600 mt-1">
-              {userRole === 'student' 
-                ? 'Track your lesson hours and payment status'
-                : 'Record sessions and track student progress'
-              }
-            </p>
+  try {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {userRole === 'student' ? 'My Lecture Hours' : 'Student Lecture Hours'}
+              </h2>
+              <p className="text-gray-600 mt-1">
+                {userRole === 'student' 
+                  ? 'Track your lesson hours and payment status'
+                  : 'Record sessions and track student progress'
+                }
+              </p>
           </div>
           {userRole === 'tutor' && (
             <button
@@ -284,9 +320,49 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
                 </span>
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Payment Frequency:</span>
-                <span className="font-medium">Every {lh.paymentFrequency}h</span>
+                {userRole === 'tutor' && editingPaymentInterval === lh.id ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="1"
+                      max="50"
+                      value={newPaymentInterval}
+                      onChange={(e) => setNewPaymentInterval(parseInt(e.target.value))}
+                      className="w-16 px-2 py-1 text-sm border rounded"
+                    />
+                    <span className="text-sm">hours</span>
+                    <button
+                      onClick={() => updatePaymentInterval(lh.id, newPaymentInterval)}
+                      className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={() => setEditingPaymentInterval(null)}
+                      className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Every {lh.paymentInterval}h</span>
+                    {userRole === 'tutor' && (
+                      <button
+                        onClick={() => {
+                          setEditingPaymentInterval(lh.id)
+                          setNewPaymentInterval(lh.paymentInterval)
+                        }}
+                        className="text-blue-500 hover:text-blue-700 text-sm"
+                        title="Edit payment frequency"
+                      >
+                        ✏️
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Payment Status */}
@@ -305,12 +381,12 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
               <div className="pt-2">
                 <div className="flex justify-between text-xs text-gray-600 mb-1">
                   <span>Progress to next payment</span>
-                  <span>{(lh.unpaidHours % lh.paymentFrequency).toFixed(1)}/{lh.paymentFrequency}h</span>
+                  <span>{(lh.unpaidHours % lh.paymentInterval).toFixed(1)}/{lh.paymentInterval}h</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(100, (lh.unpaidHours % lh.paymentFrequency) / lh.paymentFrequency * 100)}%` }}
+                    style={{ width: `${Math.min(100, (lh.unpaidHours % lh.paymentInterval) / lh.paymentInterval * 100)}%` }}
                   />
                 </div>
               </div>
@@ -360,7 +436,9 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
                   <div key={session.id} className="border rounded-lg p-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-medium">{format(new Date(session.date), 'MMM d, yyyy')}</p>
+                        <p className="font-medium">
+                          {formatDateSafe(session.date)}
+                        </p>
                         <p className="text-sm text-gray-600">{session.duration}h session</p>
                         {session.notes && (
                           <p className="text-sm text-gray-500 mt-1 italic">{session.notes}</p>
@@ -383,11 +461,11 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
                         <p className="font-medium">${payment.amount.toFixed(2)}</p>
                         <p className="text-sm text-gray-600">{payment.hoursIncluded}h payment</p>
                         <p className="text-sm text-gray-500">
-                          Due: {format(new Date(payment.dueDate), 'MMM d, yyyy')}
+                          Due: {formatDateSafe(payment.dueDate, 'No due date')}
                         </p>
                         {payment.paidDate && (
                           <p className="text-sm text-green-600">
-                            Paid: {format(new Date(payment.paidDate), 'MMM d, yyyy')}
+                            Paid: {formatDateSafe(payment.paidDate)}
                           </p>
                         )}
                       </div>
@@ -414,4 +492,15 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
       )}
     </div>
   )
+  } catch (error) {
+    console.error('Error rendering LectureHoursTracker:', error)
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 className="text-xl font-semibold mb-4 text-red-600">Error Loading Data</h3>
+        <p className="text-gray-600">
+          Sorry, there was an error loading the lecture hours data. Please refresh the page or try again later.
+        </p>
+      </div>
+    )
+  }
 }

@@ -10,11 +10,12 @@ import TutorAnalytics from '../../components/dashboard/TutorAnalytics'
 import AssignmentManager from '../../components/dashboard/AssignmentManager'
 import LectureHoursTracker from '../../components/lecture-hours/LectureHoursTracker'
 import PaymentManager from '../../components/lecture-hours/PaymentManager'
+import StudentSummaryList from '../../components/dashboard/StudentSummaryList'
 
 function TutorDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'overview' | 'availability' | 'appointments' | 'manage' | 'analytics' | 'assignments' | 'hours' | 'payments'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'availability' | 'appointments' | 'manage' | 'analytics' | 'assignments' | 'hours' | 'payments'>('overview')
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -26,6 +27,18 @@ function TutorDashboard() {
       router.push('/student') // Redirect non-tutors to student page
     }
   }, [user, isLoading, router])
+
+  const fetchDashboardStats = async (tutorId: string) => {
+    try {
+      const res = await fetch(`/api/dashboard?tutorId=${tutorId}&role=tutor`)
+      const data = await res.json()
+      setDashboardStats(data)
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (user?.id) {
@@ -43,20 +56,9 @@ function TutorDashboard() {
     return null
   }
 
-  const fetchDashboardStats = async (tutorId: string) => {
-    try {
-      const res = await fetch(`/api/dashboard?tutorId=${tutorId}&role=tutor`)
-      const data = await res.json()
-      setDashboardStats(data)
-    } catch (error) {
-      console.error('Failed to fetch dashboard stats:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const tabs = [
     { id: 'overview', name: 'Overview', icon: '📊' },
+    { id: 'students', name: 'Students', icon: '👥' },
     { id: 'availability', name: 'Availability', icon: '🗓️' },
     { id: 'appointments', name: 'Appointments', icon: '📅' },
     { id: 'manage', name: 'Manage', icon: '⚙️' },
@@ -244,6 +246,12 @@ function TutorDashboard() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'students' && (
+          <div>
+            <StudentSummaryList tutorId={user?.id || ''} />
           </div>
         )}
 

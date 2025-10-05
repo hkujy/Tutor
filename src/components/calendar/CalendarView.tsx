@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, subMonths, addMonths } from 'date-fns'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, subMonths, addMonths, startOfWeek, endOfWeek } from 'date-fns'
 
 interface Appointment {
   id: string
@@ -26,7 +26,12 @@ export default function CalendarView() {
 
   const monthStart = currentDate ? startOfMonth(currentDate) : null
   const monthEnd = currentDate ? endOfMonth(currentDate) : null
-  const calendarDays = monthStart && monthEnd ? eachDayOfInterval({ start: monthStart, end: monthEnd }) : []
+  
+  // Get the start and end of the calendar view (including partial weeks)
+  const calendarStart = monthStart ? startOfWeek(monthStart, { weekStartsOn: 0 }) : null // Sunday = 0
+  const calendarEnd = monthEnd ? endOfWeek(monthEnd, { weekStartsOn: 0 }) : null
+  
+  const calendarDays = calendarStart && calendarEnd ? eachDayOfInterval({ start: calendarStart, end: calendarEnd }) : []
 
   useEffect(() => {
     fetchAppointments()
@@ -117,7 +122,7 @@ export default function CalendarView() {
 
       {loading ? (
         <div className="grid grid-cols-7 gap-1">
-          {Array.from({ length: 35 }).map((_, i) => (
+          {Array.from({ length: 42 }).map((_, i) => (
             <div key={i} className="h-24 bg-gray-100 rounded animate-pulse" />
           ))}
         </div>
@@ -127,6 +132,7 @@ export default function CalendarView() {
             const dayAppointments = getAppointmentsForDate(date)
             const isSelected = selectedDate && isSameDay(date, selectedDate)
             const isToday = isSameDay(date, new Date())
+            const isCurrentMonth = currentDate && date.getMonth() === currentDate.getMonth()
 
             return (
               <div
@@ -136,9 +142,14 @@ export default function CalendarView() {
                   h-24 p-2 border cursor-pointer rounded-md transition-colors
                   ${isSelected ? 'bg-indigo-100 border-indigo-500' : 'border-gray-200 hover:bg-gray-50'}
                   ${isToday ? 'bg-blue-50 border-blue-300' : ''}
+                  ${!isCurrentMonth ? 'bg-gray-50' : ''}
                 `}
               >
-                <div className={`text-sm font-medium ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
+                <div className={`text-sm font-medium ${
+                  isToday ? 'text-blue-600' : 
+                  !isCurrentMonth ? 'text-gray-400' : 
+                  'text-gray-900'
+                }`}>
                   {format(date, 'd')}
                 </div>
                 {dayAppointments.length > 0 && (
