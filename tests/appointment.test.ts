@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+// import { describe, it, expect } from 'vitest'  // Removed: using Jest instead
 
 // Example test for appointment API
 

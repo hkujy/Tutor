@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Create role-specific profile
-    if (validatedData.role === 'STUDENT') {
+    if (user && validatedData.role === 'STUDENT') {
       await studentRepository.create({
         userId: user.id,
         gradeLevel: validatedData.gradeLevel,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         learningGoals: validatedData.learningGoals,
         parentContact: validatedData.parentContact,
       })
-    } else if (validatedData.role === 'TUTOR') {
+    } else if (user && validatedData.role === 'TUTOR') {
       await tutorRepository.create({
         userId: user.id,
         specializations: validatedData.specializations || [],
@@ -79,6 +79,10 @@ export async function POST(request: NextRequest) {
         hourlyRate: validatedData.hourlyRate,
         languages: validatedData.languages || ['English'],
       })
+    }
+
+    if (!user) {
+      throw new Error('Failed to create user')
     }
 
     // Return user data (without password)

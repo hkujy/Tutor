@@ -42,10 +42,12 @@ export default function AppointmentList({ refreshTrigger }: AppointmentListProps
   }
 
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
+  const [isHydrated, setIsHydrated] = useState(false)
   
-  // Initialize current time after hydration
+  // Initialize current time after hydration to avoid SSR mismatch
   useEffect(() => {
     setCurrentTime(new Date())
+    setIsHydrated(true)
   }, [])
 
   const getFilteredAppointments = () => {
@@ -194,7 +196,7 @@ export default function AppointmentList({ refreshTrigger }: AppointmentListProps
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      {getStatusIcon(apt.status)}
+                      {isHydrated && getStatusIcon(apt.status)}
                       <h4 className="font-semibold text-lg text-gray-900">{apt.subject}</h4>
                       <span className={`px-2 py-1 text-xs rounded-full font-medium ${
                         apt.status === 'SCHEDULED' ? 'bg-blue-100 text-blue-800' :

@@ -12,10 +12,23 @@ export async function GET(request: NextRequest) {
     }
 
     const url = new URL(request.url)
-    const limit = parseInt(url.searchParams.get('limit') || '20')
-    const page = parseInt(url.searchParams.get('page') || '1')
+    const rawLimit = url.searchParams.get('limit')
+    const rawPage = url.searchParams.get('page')
+    
+    // Validate and sanitize pagination parameters
+    const limit = Math.min(Math.max(parseInt(rawLimit || '20'), 1), 100) // Max 100 items per page
+    const page = Math.max(parseInt(rawPage || '1'), 1) // Minimum page 1
+    
     const unreadOnly = url.searchParams.get('unread') === 'true'
     const type = url.searchParams.get('type')
+    
+    // Validate notification type if provided
+    if (type) {
+      const validTypes = ['APPOINTMENT_REMINDER', 'ASSIGNMENT_DUE', 'PAYMENT_REMINDER', 'SYSTEM_ANNOUNCEMENT', 'PAYMENT_RECEIVED']
+      if (!validTypes.includes(type)) {
+        return NextResponse.json({ error: `Invalid notification type: ${type}` }, { status: 400 })
+      }
+    }
 
     const skip = (page - 1) * limit
 
@@ -99,15 +112,35 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Create notification
+    // Validate userId exists in database
+    const userExists = await db.user.findUnique({
+      where: { id: userId },
+      select: { id: true }
+    })
+    
+    if (!userExists) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+    
+    // Validate scheduledFor date if provided
+    let scheduledDate = null
+    if (scheduledFor) {
+      const date = new Date(scheduledFor)
+      if (isNaN(date.getTime())) {
+        return NextResponse.json({ error: 'Invalid scheduledFor date format' }, { status: 400 })
+      }
+      scheduledDate = date
+    }
+    
+    // Create notification with transaction
     const notification = await db.notification.create({
       data: {
         userId,
         type,
-        title,
-        message,
+        title: title.trim(),
+        message: message.trim(),
         channels,
-        scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
+        scheduledFor: scheduledDate,
         data: data || null
       }
     })
@@ -137,6 +170,22 @@ export async function POST(request: NextRequest) {
 // Helper function to process notification delivery
 async function processNotification(notification: any) {
   try {
+    // Check rate limiting - max 50 notifications per user per hour
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+    const recentNotifications = await db.notification.count({
+      where: {
+        userId: notification.userId,
+        createdAt: {
+          gte: oneHourAgo
+        }
+      }
+    })
+    
+    if (recentNotifications >= 50) {
+      console.warn(`Rate limit exceeded for user ${notification.userId}`)
+      return
+    }
+    
     // Get user preferences
     const preferences = await db.notificationPreference.findUnique({
       where: { userId: notification.userId }

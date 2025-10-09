@@ -1,8 +1,60 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, subMonths, startOfMonth, endOfMonth } from 'date-fns'
 import { Skeleton } from '../ui/Skeleton'
+import ErrorBoundary from '../ErrorBoundary'
+
+// Type guards for data validation
+const isValidNumber = (value: any): value is number => {
+  return typeof value === 'number' && !isNaN(value) && isFinite(value)
+}
+
+const isValidString = (value: any): value is string => {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+const sanitizeApiData = (data: any) => {
+  if (!data || typeof data !== 'object') return null
+  
+  // Sanitize metrics array
+  if (Array.isArray(data.metrics)) {
+    data.metrics = data.metrics.filter((metric: any) => 
+      metric && 
+      isValidString(metric.label) && 
+      isValidString(metric.value) &&
+      ['up', 'down', 'stable'].includes(metric.trend)
+    )
+  } else {
+    data.metrics = []
+  }
+  
+  // Sanitize weekly data
+  if (Array.isArray(data.weeklyActivity)) {
+    data.weeklyActivity = data.weeklyActivity.filter((day: any) => 
+      day &&
+      isValidString(day.day) &&
+      isValidNumber(day.sessions) &&
+      isValidNumber(day.hours) &&
+      isValidNumber(day.earnings) &&
+      day.sessions >= 0 &&
+      day.hours >= 0 &&
+      day.earnings >= 0
+    )
+  } else {
+    data.weeklyActivity = []
+  }
+  
+  // Sanitize other arrays with similar validation
+  const arrayFields = ['monthlyEarnings', 'studentProgress', 'timeDistribution', 'subjectPerformance']
+  arrayFields.forEach(field => {
+    if (!Array.isArray(data[field])) {
+      data[field] = []
+    }
+  })
+  
+  return data
+}
 
 interface TutorAnalyticsProps {
   tutorId: string
@@ -55,7 +107,7 @@ interface SubjectPerformance {
   studentCount: number
 }
 
-export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
+function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([])
   const [metrics, setMetrics] = useState<PerformanceMetric[]>([])
   const [monthlyEarnings, setMonthlyEarnings] = useState<MonthlyEarning[]>([])
@@ -64,39 +116,118 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
   const [subjectPerformance, setSubjectPerformance] = useState<SubjectPerformance[]>([])
   const [isHydrated, setIsHydrated] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
   const [selectedPeriod, setSelectedPeriod] = useState('7d')
   const [analyticsData, setAnalyticsData] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'subjects' | 'schedule'>('overview')
+  
+  // Performance optimization: abort controller for cleanup
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const maxRetries = 3
+  const retryDelay = 1000
 
   useEffect(() => {
     setIsHydrated(true)
     fetchAnalytics()
   }, [tutorId, selectedPeriod])
 
-  const fetchAnalytics = async () => {
-    if (!tutorId) return
+  // Memoized fetchAnalytics with comprehensive error handling
+  const fetchAnalytics = useCallback(async (isRetry = false) => {
+    if (!tutorId || !isValidString(tutorId)) {
+      setError('Invalid tutor ID provided')
+      setLoading(false)
+      return
+    }
     
-    setLoading(true)
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    
+    // Create new abort controller
+    abortControllerRef.current = new AbortController()
+    const { signal } = abortControllerRef.current
+    
+    if (!isRetry) {
+      setLoading(true)
+      setError(null)
+    }
+    
     try {
-      const res = await fetch(`/api/analytics?tutorId=${tutorId}&period=${selectedPeriod}`)
-      if (res.ok) {
-        const data = await res.json()
-        setAnalyticsData(data)
-        setMetrics(data.metrics || [])
-        setWeeklyData(data.weeklyActivity || [])
-        setMonthlyEarnings(data.monthlyEarnings || [])
-        setStudentProgress(data.studentProgress || [])
-        setTimeDistribution(data.timeDistribution || [])
-        setSubjectPerformance(data.subjectPerformance || [])
-      } else {
-        console.error('Failed to fetch analytics')
+      // Input validation
+      const validPeriods = ['7d', '30d', '90d', '365d']
+      const safePeriod = validPeriods.includes(selectedPeriod) ? selectedPeriod : '7d'
+      
+      const url = `/api/analytics?tutorId=${encodeURIComponent(tutorId)}&period=${safePeriod}`
+      
+      const response = await fetch(url, {
+        signal,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Analytics data not found. Please check if you have any appointments recorded.')
+        } else if (response.status === 403) {
+          throw new Error('Access denied. Please check your permissions.')
+        } else if (response.status >= 500) {
+          throw new Error('Server error occurred. Please try again later.')
+        } else {
+          throw new Error(`Request failed with status ${response.status}`)
+        }
       }
-    } catch (error) {
-      console.error('Analytics fetch error:', error)
+      
+      const rawData = await response.json()
+      const data = sanitizeApiData(rawData)
+      
+      if (!data) {
+        throw new Error('Invalid data received from server')
+      }
+      
+      // Update state with validated data
+      setAnalyticsData(data)
+      setMetrics(data.metrics || [])
+      setWeeklyData(data.weeklyActivity || [])
+      setMonthlyEarnings(data.monthlyEarnings || [])
+      setStudentProgress(data.studentProgress || [])
+      setTimeDistribution(data.timeDistribution || [])
+      setSubjectPerformance(data.subjectPerformance || [])
+      setError(null)
+      setRetryCount(0)
+      
+    } catch (err) {
+      // Don't update state if request was aborted
+      if (signal.aborted) return
+      
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch analytics data'
+      console.error('Analytics fetch error:', err)
+      
+      // Retry logic with exponential backoff
+      if (retryCount < maxRetries && !isRetry) {
+        setRetryCount(prev => prev + 1)
+        setTimeout(() => {
+          fetchAnalytics(true)
+        }, retryDelay * Math.pow(2, retryCount))
+        return
+      }
+      
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
-  }
+  }, [tutorId, selectedPeriod, retryCount])
+  
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [])
 
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
@@ -130,18 +261,51 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
     }
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', { 
-      style: 'currency', 
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount)
-  }
-
-  const maxSessions = Math.max(...weeklyData.map(d => d.sessions), 1)
-  const maxHours = Math.max(...weeklyData.map(d => d.hours), 1)
-  const maxEarnings = Math.max(...weeklyData.map(d => d.earnings), 1)
+  // Memoized calculations with NaN protection
+  const chartData = useMemo(() => {
+    const validWeeklyData = weeklyData.filter(d => 
+      isValidNumber(d.sessions) && 
+      isValidNumber(d.hours) && 
+      isValidNumber(d.earnings)
+    )
+    
+    if (validWeeklyData.length === 0) {
+      return { maxSessions: 1, maxHours: 1, maxEarnings: 1 }
+    }
+    
+    const sessions = validWeeklyData.map(d => d.sessions)
+    const hours = validWeeklyData.map(d => d.hours)
+    const earnings = validWeeklyData.map(d => d.earnings)
+    
+    return {
+      maxSessions: Math.max(...sessions, 1),
+      maxHours: Math.max(...hours, 1),
+      maxEarnings: Math.max(...earnings, 1)
+    }
+  }, [weeklyData])
+  
+  // Safe currency formatter with error handling
+  const formatCurrency = useCallback((amount: any): string => {
+    if (!isValidNumber(amount)) return '$0'
+    
+    try {
+      return new Intl.NumberFormat('en-US', { 
+        style: 'currency', 
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(Math.max(0, amount))
+    } catch (error) {
+      console.warn('Currency formatting error:', error)
+      return `$${Math.round(Math.max(0, amount))}`
+    }
+  }, [])
+  
+  // Safe percentage calculator
+  const calculatePercentage = useCallback((value: number, max: number): number => {
+    if (!isValidNumber(value) || !isValidNumber(max) || max === 0) return 0
+    return Math.min(100, Math.max(0, (value / max) * 100))
+  }, [])
 
   if (loading) {
     return (
@@ -167,6 +331,54 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
           {[...Array(3)].map((_, i) => (
             <Skeleton key={i} width="100%" height={60} />
           ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Error state with retry option
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="text-center py-8">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to Load Analytics</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          {retryCount < maxRetries && (
+            <button
+              onClick={() => fetchAnalytics()}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              disabled={loading}
+            >
+              {loading ? 'Retrying...' : 'Try Again'}
+            </button>
+          )}
+          {retryCount >= maxRetries && (
+            <div className="text-sm text-gray-500">
+              Please refresh the page or contact support if the problem persists.
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // No data state
+  if (!analyticsData || (metrics.length === 0 && weeklyData.length === 0)) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="text-center py-8">
+          <div className="text-gray-400 text-6xl mb-4">📊</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Analytics Data</h3>
+          <p className="text-gray-600 mb-4">
+            You don&apos;t have any analytics data yet. Complete some tutoring sessions to see your analytics.
+          </p>
+          <button
+            onClick={() => fetchAnalytics()}
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+          >
+            Refresh Data
+          </button>
         </div>
       </div>
     )
@@ -250,10 +462,10 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                       <div className="h-20 bg-gray-100 rounded relative">
                         <div 
                           className="absolute bottom-0 w-full bg-blue-500 rounded"
-                          style={{ height: `${(day.sessions / maxSessions) * 100}%` }}
+                          style={{ height: `${calculatePercentage(day.sessions, chartData.maxSessions)}%` }}
                         />
                         <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-gray-700">
-                          {day.sessions}
+                          {isValidNumber(day.sessions) ? day.sessions : 0}
                         </div>
                       </div>
                     </div>
@@ -264,10 +476,10 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                       <div className="h-16 bg-gray-100 rounded relative">
                         <div 
                           className="absolute bottom-0 w-full bg-green-500 rounded"
-                          style={{ height: `${(day.hours / maxHours) * 100}%` }}
+                          style={{ height: `${calculatePercentage(day.hours, chartData.maxHours)}%` }}
                         />
                         <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-gray-700">
-                          {day.hours.toFixed(1)}
+                          {isValidNumber(day.hours) ? day.hours.toFixed(1) : '0.0'}
                         </div>
                       </div>
                     </div>
@@ -278,10 +490,10 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                       <div className="h-16 bg-gray-100 rounded relative">
                         <div 
                           className="absolute bottom-0 w-full bg-purple-500 rounded"
-                          style={{ height: `${(day.earnings / maxEarnings) * 100}%` }}
+                          style={{ height: `${calculatePercentage(day.earnings, chartData.maxEarnings)}%` }}
                         />
                         <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-gray-700">
-                          ${day.earnings}
+                          {formatCurrency(day.earnings)}
                         </div>
                       </div>
                     </div>
@@ -423,7 +635,10 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="text-sm font-medium text-blue-900">Peak Hours</div>
                     <div className="text-sm text-blue-700">
-                      {timeDistribution.length > 0 && timeDistribution[0]?.timeSlot} is your busiest time slot
+                      {timeDistribution.length > 0 && isValidString(timeDistribution[0]?.timeSlot) 
+                        ? `${timeDistribution[0].timeSlot} is your busiest time slot`
+                        : 'No time distribution data available'
+                      }
                     </div>
                   </div>
                   <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -435,7 +650,12 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                   <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <div className="text-sm font-medium text-yellow-900">Work-Life Balance</div>
                     <div className="text-sm text-yellow-700">
-                      {weeklyData.reduce((sum, day) => sum + day.hours, 0).toFixed(1)} hours this week
+                      {(() => {
+                        const totalHours = weeklyData
+                          .filter(day => isValidNumber(day.hours))
+                          .reduce((sum, day) => sum + day.hours, 0)
+                        return `${totalHours.toFixed(1)} hours this week`
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -447,3 +667,14 @@ export default function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
     </div>
   )
 }
+
+// Wrap with ErrorBoundary for additional safety
+function TutorAnalyticsWithErrorBoundary(props: TutorAnalyticsProps) {
+  return (
+    <ErrorBoundary>
+      <TutorAnalytics {...props} />
+    </ErrorBoundary>
+  )
+}
+
+export default TutorAnalyticsWithErrorBoundary

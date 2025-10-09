@@ -111,7 +111,7 @@ interface SkeletonListProps {
 
 export function SkeletonList({ items = 5, showAvatar = true, className = '' }: SkeletonListProps) {
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={`space-y-4 ${className}`} data-testid="skeleton-list">
       {Array.from({ length: items }).map((_, index) => (
         <SkeletonCard key={index} showAvatar={showAvatar} lines={2} />
       ))}

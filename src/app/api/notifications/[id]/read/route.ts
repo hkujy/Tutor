@@ -4,9 +4,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../../../../lib/auth/config'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 // PATCH /api/notifications/[id]/read - Mark notification as read
@@ -17,7 +17,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     // Verify notification belongs to user
     const notification = await db.notification.findFirst({

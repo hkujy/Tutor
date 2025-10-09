@@ -1,0 +1,283 @@
+import request from 'supertest'
+import { createMocks } from 'node-mocks-http'
+import { POST } from '../../src/app/api/notifications/route'
+import { db } from '../../src/lib/db/client'
+
+// Mock the auth system
+jest.mock('next-auth/react')
+jest.mock('../../src/lib/auth/config', () => ({
+  getServerSession: jest.fn(() => Promise.resolve({
+    user: {
+      id: 'test-user-1',
+      email: 'test@example.com',
+      firstName: 'Test',
+      lastName: 'User',
+      role: 'STUDENT',
+    }
+  }))
+}))
+
+// Mock Prisma
+jest.mock('../../src/lib/db/client', () => ({
+  default: {
+    notification: {
+      count: jest.fn(),
+      create: jest.fn(),
+      findMany: jest.fn(),
+    },
+    user: {
+      findUnique: jest.fn(() => Promise.resolve({
+        id: 'test-user-1',
+        email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User',
+        role: 'STUDENT',
+      }))
+    }
+  }
+}))
+
+const mockPrisma = jest.mocked(db)
+
+describe('Notification API Rate Limiting', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    // Reset notification count for each test
+    mockPrisma.notification.count.mockResolvedValue(0)
+    mockPrisma.notification.create.mockResolvedValue({
+      id: 'notif-1',
+      type: 'APPOINTMENT_REMINDER',
+      message: 'Test notification',
+      userId: 'test-user-1',
+      createdAt: new Date(),
+    })
+  })
+
+  test('allows notifications under rate limit (50/hour)', async () => {
+    // Mock count to be under limit
+    mockPrisma.notification.count.mockResolvedValue(49)
+
+    const { req, res } = createMocks({
+      method: 'POST',
+      body: {
+        type: 'APPOINTMENT_REMINDER',
+        message: 'Test notification under limit'
+      }
+    })
+
+    const response = await POST(req as any)
+    const data = await response.json()
+
+    expect(response.status).toBe(201)
+    expect(data.message).toBe('Test notification under limit')
+    expect(mockPrisma.notification.create).toHaveBeenCalled()
+  })
+
+  test('blocks notifications over rate limit (50/hour)', async () => {
+    // Mock count to be at limit
+    mockPrisma.notification.count.mockResolvedValue(50)
+
+    const { req } = createMocks({
+      method: 'POST',
+      body: {
+        type: 'APPOINTMENT_REMINDER',
+        message: 'Test notification over limit'
+      }
+    })
+
+    const response = await POST(req as any)
+    const data = await response.json()
+
+    expect(response.status).toBe(429)
+    expect(data.error).toContain('Rate limit exceeded')
+    expect(mockPrisma.notification.create).not.toHaveBeenCalled()
+  })
+
+  test('validates input to prevent XSS attacks', async () => {
+    mockPrisma.notification.count.mockResolvedValue(10)
+
+    const maliciousPayload = {
+      type: 'APPOINTMENT_REMINDER',
+      message: '<script>alert("XSS")</script>Test notification'
+    }
+
+    const { req } = createMocks({
+      method: 'POST',
+      body: maliciousPayload
+    })
+
+    const response = await POST(req as any)
+    const data = await response.json()
+
+    // Should sanitize the input
+    expect(response.status).toBe(201)
+    expect(data.message).not.toContain('<script>')
+    expect(data.message).toBe('Test notification') // Script tags removed
+  })
+
+  test('rejects invalid notification types', async () => {
+    const { req } = createMocks({
+      method: 'POST',
+      body: {
+        type: 'INVALID_TYPE',
+        message: 'Test notification'
+      }
+    })
+
+    const response = await POST(req as any)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.error).toContain('Invalid notification type')
+  })
+
+  test('requires authentication', async () => {
+    // Mock no session
+    jest.doMock('../../src/lib/auth/config', () => ({
+      getServerSession: jest.fn(() => Promise.resolve(null))
+    }))
+
+    const { req } = createMocks({
+      method: 'POST',
+      body: {
+        type: 'APPOINTMENT_REMINDER',
+        message: 'Test notification'
+      }
+    })
+
+    const response = await POST(req as any)
+    const data = await response.json()
+
+    expect(response.status).toBe(401)
+    expect(data.error).toBe('Unauthorized')
+  })
+
+  test('handles database errors gracefully', async () => {
+    mockPrisma.notification.count.mockRejectedValue(new Error('Database connection failed'))
+
+    const { req } = createMocks({
+      method: 'POST',
+      body: {
+        type: 'APPOINTMENT_REMINDER',
+        message: 'Test notification'
+      }
+    })
+
+    const response = await POST(req as any)
+    const data = await response.json()
+
+    expect(response.status).toBe(500)
+    expect(data.error).toBe('Internal server error')
+  })
+
+  test('validates message length', async () => {
+    mockPrisma.notification.count.mockResolvedValue(10)
+
+    const longMessage = 'A'.repeat(1001) // Over 1000 characters
+
+    const { req } = createMocks({
+      method: 'POST',
+      body: {
+        type: 'APPOINTMENT_REMINDER',
+        message: longMessage
+      }
+    })
+
+    const response = await POST(req as any)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.error).toContain('Message too long')
+  })
+
+  test('rate limit counts are calculated correctly within time window', async () => {
+    // Test that rate limit counts notifications from the last hour only
+    const oneHourAgo = new Date()
+    oneHourAgo.setHours(oneHourAgo.getHours() - 1)
+
+    mockPrisma.notification.count.mockImplementation((query) => {
+      // Verify the query includes correct time filter
+      expect(query.where.createdAt.gte).toBeInstanceOf(Date)
+      return Promise.resolve(25) // Return count within limit
+    })
+
+    const { req } = createMocks({
+      method: 'POST',
+      body: {
+        type: 'APPOINTMENT_REMINDER',
+        message: 'Test time window'
+      }
+    })
+
+    const response = await POST(req as any)
+    expect(response.status).toBe(201)
+    
+    // Verify the time window query was called
+    expect(mockPrisma.notification.count).toHaveBeenCalledWith({
+      where: {
+        userId: 'test-user-1',
+        createdAt: {
+          gte: expect.any(Date)
+        }
+      }
+    })
+  })
+})
+
+describe('Notification API Input Validation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockPrisma.notification.count.mockResolvedValue(10)
+  })
+
+  test('sanitizes HTML in messages', async () => {
+    const htmlPayload = {
+      type: 'APPOINTMENT_REMINDER',
+      message: '<b>Bold</b> and <i>italic</i> text with <a href="malicious">link</a>'
+    }
+
+    const { req } = createMocks({
+      method: 'POST',
+      body: htmlPayload
+    })
+
+    const response = await POST(req as any)
+    const data = await response.json()
+
+    expect(response.status).toBe(201)
+    // Should strip HTML tags
+    expect(data.message).toBe('Bold and italic text with link')
+  })
+
+  test('trims whitespace from messages', async () => {
+    const { req } = createMocks({
+      method: 'POST',
+      body: {
+        type: 'APPOINTMENT_REMINDER',
+        message: '   Test notification with whitespace   '
+      }
+    })
+
+    const response = await POST(req as any)
+    const data = await response.json()
+
+    expect(response.status).toBe(201)
+    expect(data.message).toBe('Test notification with whitespace')
+  })
+
+  test('rejects empty messages', async () => {
+    const { req } = createMocks({
+      method: 'POST',
+      body: {
+        type: 'APPOINTMENT_REMINDER',
+        message: ''
+      }
+    })
+
+    const response = await POST(req as any)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.error).toContain('Message is required')
+  })
+})

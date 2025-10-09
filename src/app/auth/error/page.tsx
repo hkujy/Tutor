@@ -37,6 +37,7 @@ function AuthErrorContent() {
               stroke="currentColor"
               viewBox="0 0 48 48"
               aria-hidden="true"
+              suppressHydrationWarning={true}
             >
               <path
                 strokeLinecap="round"

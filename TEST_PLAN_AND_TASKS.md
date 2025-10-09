@@ -173,11 +173,11 @@ tests/components/calendar/appointment-manager.test.ts
 **Objective**: Ensure all Prisma operations are secure and robust
 
 **Test Scenarios**:
-- Test SQL injection prevention
-- Validate transaction safety
-- Test connection error handling
-- Verify data consistency
-- Test concurrent operation handling
+- Test SQL injection prevention with payloads like `' OR 1=1; --`
+- Validate transaction safety and rollback on failure
+- Test connection error handling and retry logic
+- Verify data consistency after concurrent operations
+- Test for unauthorized data access across roles
 
 **Test Files to Create**:
 ```
@@ -195,11 +195,11 @@ tests/database/concurrent-operations.test.ts
 **Objective**: Validate NextAuth configuration and session management
 
 **Test Scenarios**:
-- Test session validation
-- Verify route protection
-- Test JWT token security
-- Validate logout functionality
-- Test session hijacking prevention
+- Test session validation and expiration
+- Verify route protection for all roles (student, tutor, admin)
+- Test JWT token security (signing algorithm, expiration)
+- Validate logout functionality and session termination
+- Test against session hijacking and fixation attacks
 
 **Test Files to Create**:
 ```
@@ -213,17 +213,41 @@ tests/auth/security.test.ts
 - `src/middleware.ts` - Route protection middleware
 - `src/contexts/AuthContext.tsx` - Client-side auth
 
-### Phase 5: Performance and Load Testing
-**Priority: LOW**
+### Phase 5: End-to-End (E2E) Testing
+**Priority: HIGH**
 
-#### Task 5.1: Performance Testing
-**Objective**: Ensure application performs well under load
+**Objective**: Simulate full user journeys to validate the application as a whole.
 
 **Test Scenarios**:
-- Test component rendering performance
-- Validate API response times
-- Test database query performance
-- Verify memory usage patterns
+- **Student Journey**: Registration -> Login -> Book Appointment -> View Assignment -> Submit Assignment -> Logout
+- **Tutor Journey**: Login -> Set Availability -> View Bookings -> Create Assignment -> Grade Submission -> Logout
+- **Admin Journey**: Login -> Manage Users -> View Analytics -> Manage Advertisements -> Logout
+- **Cancellation Flow**: Student cancels an appointment, and tutor sees the updated availability.
+- **Payment Flow (if applicable)**: Student pays for a session, and tutor sees the payment confirmation.
+
+**Test Files to Create**:
+```
+tests/e2e/student-journey.spec.ts
+tests/e2e/tutor-journey.spec.ts
+tests/e2e/admin-journey.spec.ts
+```
+
+### Phase 6: Performance and Load Testing
+**Priority: LOW**
+
+#### Task 6.1: Performance Testing
+**Objective**: Ensure application performs well under normal and peak load.
+
+**Performance Baselines**:
+- **API Response Time**: < 200ms for 95% of requests
+- **Page Load Time (LCP)**: < 2.5 seconds
+- **First Input Delay (FID)**: < 100ms
+
+**Test Scenarios**:
+- Test component rendering performance with large data sets (e.g., 1000+ appointments)
+- Validate API response times under simulated load
+- Test database query performance with complex filtering
+- Verify memory usage patterns over extended sessions
 
 **Test Files to Create**:
 ```
@@ -232,20 +256,59 @@ tests/performance/api-performance.test.ts
 tests/performance/database-performance.test.ts
 ```
 
-#### Task 5.2: Load Testing
-**Objective**: Test system behavior under high concurrent usage
+#### Task 6.2: Load Testing
+**Objective**: Test system behavior under high concurrent usage.
 
 **Test Scenarios**:
-- Test concurrent user sessions
-- Validate rate limiting under load
-- Test database connection pooling
-- Verify error handling under stress
+- **Concurrent Users**: Simulate 1000 concurrent users browsing and booking appointments.
+- **Rate Limiting Stress Test**: Verify that the rate limiting holds up under a sustained high volume of requests.
+- **Database Connection Pooling**: Ensure the database can handle a high number of concurrent connections.
+- **Error Handling Under Stress**: Verify that the system degrades gracefully under extreme load.
 
 **Test Files to Create**:
 ```
 tests/load/concurrent-users.test.ts
 tests/load/rate-limiting-stress.test.ts
 ```
+
+### Phase 7: Accessibility, i18n, and l10n Testing
+**Priority: MEDIUM**
+
+#### Task 7.1: Accessibility (a11y) Testing
+**Objective**: Ensure the application is usable by people with disabilities.
+
+**Test Scenarios**:
+- **Keyboard Navigation**: All interactive elements are focusable and operable via keyboard.
+- **Screen Reader Compatibility**: Test with NVDA/JAWS/VoiceOver to ensure all content is read correctly.
+- **Color Contrast**: Check that all text has sufficient color contrast (WCAG AA).
+- **ARIA Attributes**: Ensure all components have appropriate ARIA roles and attributes.
+
+**Tools**:
+- Axe DevTools
+- Lighthouse
+- Manual testing with screen readers
+
+#### Task 7.2: Internationalization (i18n) and Localization (l10n) Testing
+**Objective**: Ensure the application can be easily translated and supports different locales.
+
+**Test Scenarios**:
+- **Translation**: Verify that all user-facing strings are extracted and can be translated.
+- **Date/Time Formatting**: Test that dates, times, and numbers are formatted correctly for different locales (e.g., `en-US`, `en-GB`, `fr-FR`).
+- **Right-to-Left (RTL) Support**: Test the layout with an RTL language like Arabic or Hebrew.
+
+### Phase 8: Security Penetration Testing
+**Priority: HIGH**
+
+**Objective**: Identify and exploit potential security vulnerabilities.
+
+**Test Scenarios**:
+- **OWASP Top 10**: Test for common vulnerabilities like Insecure Direct Object References (IDOR), Security Misconfiguration, etc.
+- **Business Logic Flaws**: Test for flaws in the application logic that could be exploited (e.g., booking an appointment in the past).
+- **Data Exposure**: Attempt to access sensitive data that should not be exposed.
+
+**Tools**:
+- OWASP ZAP
+- Burp Suite
 
 ## Testing Tools and Setup
 
@@ -259,7 +322,9 @@ tests/load/rate-limiting-stress.test.ts
   "jest-environment-jsdom": "^29.3.0",
   "supertest": "^6.3.0",
   "msw": "^0.49.0",
-  "@playwright/test": "^1.28.0"
+  "@playwright/test": "^1.28.0",
+  "axe-core": "^4.4.1",
+  "jest-axe": "^6.0.0"
 }
 ```
 
@@ -290,12 +355,14 @@ module.exports = {
 2. API security and rate limiting
 3. Authentication and authorization
 4. Database transaction safety
+5. E2E tests for critical user journeys
 
 ### Secondary Tests
 1. Component reliability
 2. Performance optimization
 3. Error handling edge cases
 4. Load testing scenarios
+5. Accessibility, i18n, and l10n testing
 
 ## Success Criteria
 
@@ -307,7 +374,7 @@ module.exports = {
 
 ### API Testing
 - ✅ Rate limiting prevents abuse (50 req/hour limit)
-- ✅ Input validation blocks malicious data
+- ✅ Input validation blocks malicious data (XSS, SQLi)
 - ✅ Error handling provides meaningful responses
 - ✅ Authentication prevents unauthorized access
 
@@ -318,83 +385,14 @@ module.exports = {
 - ✅ Error boundaries catch and handle errors
 
 ### Security Testing
-- ✅ SQL injection attempts blocked
-- ✅ XSS attacks prevented
-- ✅ Session security maintained
-- ✅ Data validation comprehensive
+- ✅ No critical vulnerabilities found during penetration testing
+- ✅ OWASP Top 10 vulnerabilities are mitigated
+- ✅ Session security is robust
+- ✅ Data validation is comprehensive
 
-## Test Data and Scenarios
-
-### Sample Test Users
-```typescript
-const testUsers = {
-  student: {
-    id: 'test-student-1',
-    email: 'student@test.com',
-    firstName: 'Test',
-    lastName: 'Student',
-    role: 'STUDENT'
-  },
-  tutor: {
-    id: 'test-tutor-1',
-    email: 'tutor@test.com',
-    firstName: 'Test',
-    lastName: 'Tutor',
-    role: 'TUTOR'
-  }
-}
-```
-
-### Sample Appointments
-```typescript
-const testAppointments = [
-  {
-    id: 'apt-1',
-    studentId: 'test-student-1',
-    tutorId: 'test-tutor-1',
-    subject: 'Mathematics',
-    startTime: '2025-10-06T10:00:00Z',
-    duration: 60,
-    status: 'SCHEDULED'
-  }
-]
-```
-
-### Browser Extension Test Setup
-```typescript
-const browserExtensions = [
-  'Dark Reader',
-  'Grammarly',
-  'AdBlock Plus',
-  'LastPass',
-  'Honey'
-]
-```
-
-## Notes for AI Test Code Generation
-
-### Key Implementation Details
-1. **Hydration Components**: Focus on testing the `suppressHydrationWarning` attribute and the custom NoSSR/HydrationSafe wrapper components
-2. **Rate Limiting**: Test the 50 notifications per hour limit implementation in the API routes
-3. **Date Handling**: Pay special attention to timezone-sensitive operations and client/server date synchronization
-4. **Error Boundaries**: Test React error boundary components and API error handling
-5. **Memory Management**: Verify useEffect cleanup and prevent memory leaks in long-running components
-
-### Testing Patterns to Use
-- Use React Testing Library for component tests
-- Use Supertest for API endpoint testing
-- Use MSW (Mock Service Worker) for API mocking
-- Use Playwright for E2E browser extension testing
-- Use Jest for unit tests and mocking
-
-### Common Edge Cases to Test
-- Empty data states
-- Network failures
-- Authentication expiration
-- Concurrent user operations
-- Browser extension interference
-- Timezone differences
-- Invalid input data
-- Database connection issues
+### Accessibility Testing
+- ✅ WCAG 2.1 AA compliance
+- ✅ Full keyboard navigation
+- ✅ Screen reader compatibility
 
 This comprehensive test plan should provide sufficient guidance for creating robust test suites that validate all the reliability improvements and hydration fixes implemented in the application.

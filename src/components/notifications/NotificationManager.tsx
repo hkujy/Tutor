@@ -22,33 +22,49 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
   const [bulkActionLoading, setBulkActionLoading] = useState(false)
 
   useEffect(() => {
-    fetchNotifications()
-  }, [activeFilter, currentPage])
+    let isMounted = true
+    
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true)
+        const params: any = {
+          page: currentPage,
+          limit: 20
+        }
 
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true)
-      const params: any = {
-        page: currentPage,
-        limit: 20
+        if (activeFilter === 'unread') {
+          params.unread = true
+        } else if (activeFilter !== 'all') {
+          params.type = activeFilter
+        }
+
+        const response: NotificationsResponse = await notificationService.getNotifications(params)
+        
+        if (isMounted) {
+          setNotifications(response.notifications)
+          setUnreadCount(response.unreadCount)
+          setTotalPages(response.pagination.pages)
+        }
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error)
+        if (isMounted) {
+          setNotifications([])
+          setUnreadCount(0)
+          setTotalPages(1)
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
       }
-
-      if (activeFilter === 'unread') {
-        params.unread = true
-      } else if (activeFilter !== 'all') {
-        params.type = activeFilter
-      }
-
-      const response: NotificationsResponse = await notificationService.getNotifications(params)
-      setNotifications(response.notifications)
-      setUnreadCount(response.unreadCount)
-      setTotalPages(response.pagination.pages)
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error)
-    } finally {
-      setLoading(false)
     }
-  }
+    
+    fetchNotifications()
+    
+    return () => {
+      isMounted = false
+    }
+  }, [activeFilter, currentPage])
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -67,25 +83,46 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
   }
 
   const handleBulkMarkAsRead = async () => {
+    if (selectedNotifications.size === 0) {
+      return // No notifications selected
+    }
+    
     try {
       setBulkActionLoading(true)
       
-      if (selectedNotifications.size > 0) {
-        const notificationIds = Array.from(selectedNotifications)
-        await notificationService.bulkMarkAsRead(notificationIds)
-        
-        setNotifications(prev => 
-          prev.map(n => 
-            selectedNotifications.has(n.id) 
-              ? { ...n, readAt: new Date().toISOString() }
-              : n
-          )
-        )
-        setUnreadCount(prev => Math.max(0, prev - selectedNotifications.size))
-        setSelectedNotifications(new Set())
+      const notificationIds = Array.from(selectedNotifications)
+      
+      // Validate all IDs are valid
+      const validIds = notificationIds.filter(id => 
+        typeof id === 'string' && id.length > 0
+      )
+      
+      if (validIds.length === 0) {
+        throw new Error('No valid notification IDs selected')
       }
+      
+      await notificationService.bulkMarkAsRead(validIds)
+      
+      // Update local state optimistically
+      setNotifications(prev => 
+        prev.map(notification => 
+          validIds.includes(notification.id) 
+            ? { ...notification, readAt: new Date().toISOString() }
+            : notification
+        )
+      )
+      
+      // Update unread count more accurately
+      const markedCount = notifications.filter(n => 
+        validIds.includes(n.id) && !n.readAt
+      ).length
+      
+      setUnreadCount(prev => Math.max(0, prev - markedCount))
+      setSelectedNotifications(new Set())
+      
     } catch (error) {
       console.error('Failed to mark notifications as read:', error)
+      // Show error feedback to user
     } finally {
       setBulkActionLoading(false)
     }
