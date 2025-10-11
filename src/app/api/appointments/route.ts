@@ -9,6 +9,7 @@ const appointmentSchema = z.object({
   time: z.string(), // HH:MM
   subject: z.string(),
   duration: z.number().optional().default(60), // Duration in minutes
+  notes: z.string().optional(), // Optional notes
 })
 
 const updateAppointmentSchema = z.object({
@@ -74,8 +75,46 @@ export async function POST(request: NextRequest) {
         endTime,
         subject: data.subject,
         status: 'SCHEDULED',
+        notes: data.notes || null,
       },
     })
+
+    // Get student and tutor info for notification
+    const [student, tutor] = await Promise.all([
+      db.student.findUnique({
+        where: { id: data.studentId },
+        include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } }
+      }),
+      db.tutor.findUnique({
+        where: { id: data.tutorId },
+        include: { user: { select: { firstName: true, lastName: true } } }
+      })
+    ])
+
+    // Send notification to student about new appointment
+    if (student && tutor) {
+      try {
+        await db.notification.create({
+          data: {
+            userId: student.user.id,
+            type: 'APPOINTMENT_REMINDER',
+            title: 'New Appointment Scheduled',
+            message: `${tutor.user.firstName} ${tutor.user.lastName} has scheduled a ${data.subject} session for ${new Date(startTime).toLocaleDateString()} at ${new Date(startTime).toLocaleTimeString()}.`,
+            channels: ['in_app', 'email'],
+            data: {
+              appointmentId: appointment.id,
+              tutorName: `${tutor.user.firstName} ${tutor.user.lastName}`,
+              subject: data.subject,
+              startTime: startTime.toISOString(),
+              endTime: endTime.toISOString()
+            }
+          }
+        })
+      } catch (notificationError) {
+        console.error('Failed to create notification:', notificationError)
+        // Don't fail the appointment creation if notification fails
+      }
+    }
 
     return NextResponse.json({ appointment }, { status: 201 })
   } catch (error) {

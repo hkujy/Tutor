@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import TutorAvailability from '../../components/availability/TutorAvailability'
-import AppointmentList from '../../components/calendar/AppointmentList'
-import AppointmentManager from '../../components/calendar/AppointmentManager'
+import AppointmentManagement from '../../components/calendar/AppointmentManagement'
+import TutorAppointmentForm from '../../components/calendar/TutorAppointmentForm'
 import TutorAnalytics from '../../components/dashboard/TutorAnalytics'
 import AssignmentManager from '../../components/dashboard/AssignmentManager'
 import LectureHoursTracker from '../../components/lecture-hours/LectureHoursTracker'
@@ -17,7 +17,7 @@ import NotificationPreferencesManager from '../../components/notifications/Notif
 function TutorDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'availability' | 'appointments' | 'manage' | 'analytics' | 'assignments' | 'hours' | 'payments' | 'notifications' | 'settings'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'availability' | 'appointments' | 'create' | 'analytics' | 'assignments' | 'hours' | 'payments' | 'notifications' | 'settings'>('overview')
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -63,7 +63,7 @@ function TutorDashboard() {
     { id: 'students', name: 'Students', icon: '👥' },
     { id: 'availability', name: 'Availability', icon: '🗓️' },
     { id: 'appointments', name: 'Appointments', icon: '📅' },
-    { id: 'manage', name: 'Manage', icon: '⚙️' },
+    { id: 'create', name: 'Create Appointment', icon: '➕' },
     { id: 'analytics', name: 'Analytics', icon: '📈' },
     { id: 'assignments', name: 'Assignments', icon: '📝' },
     { id: 'hours', name: 'Lecture Hours', icon: '⏰' },
@@ -267,13 +267,16 @@ function TutorDashboard() {
 
         {activeTab === 'appointments' && (
           <div>
-            <AppointmentList />
+            <AppointmentManagement userRole="tutor" userId={user?.id || ''} />
           </div>
         )}
 
-        {activeTab === 'manage' && (
+        {activeTab === 'create' && (
           <div>
-            <AppointmentManager userRole="tutor" userId={user?.id || ''} />
+            <TutorAppointmentForm onAppointmentCreated={() => {
+              // Optionally refresh appointments or show success message
+              console.log('Appointment created successfully!')
+            }} />
           </div>
         )}
 
