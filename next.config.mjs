@@ -4,6 +4,42 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: 'my-value',
   },
+  
+  // Experimental features for better performance
+  experimental: {
+    optimizePackageImports: ['date-fns', '@radix-ui/react-slot', 'clsx'],
+  },
+
+  // Turbopack configuration (new format)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
+  },
+
+  // Webpack optimizations
+  webpack: (config, { dev, isServer }) => {
+    // Reduce bundle size
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
+      },
+    }
+
+    return config
+  },
+
   async headers() {
     return [
       {

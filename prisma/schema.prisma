@@ -154,6 +154,7 @@ model Student {
   assignmentSubmissions AssignmentSubmission[]
   studentProgress  StudentProgress[]
   lectureHours     LectureHours[]
+  notes            StudentNote[]
 
   @@map("students")
 }
@@ -181,6 +182,7 @@ model Tutor {
   availabilityExceptions AvailabilityException[]
   appointments     Appointment[]
   lectureHours     LectureHours[]
+  studentNotes     StudentNote[]
 
   @@map("tutors")
 }
@@ -198,6 +200,9 @@ model Availability {
   tutor Tutor @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
   @@unique([tutorId, dayOfWeek, startTime])
+  @@index([tutorId])
+  @@index([tutorId, isActive])
+  @@index([tutorId, dayOfWeek])
   @@map("availability")
 }
 
@@ -214,6 +219,9 @@ model AvailabilityException {
   tutor Tutor @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
   @@unique([tutorId, date, startTime])
+  @@index([tutorId])
+  @@index([tutorId, date])
+  @@index([date])
   @@map("availability_exceptions")
 }
 
@@ -238,6 +246,14 @@ model Appointment {
   sessionComments SessionComment[]
   lectureSession LectureSession?
 
+  // Performance indexes for common queries
+  @@index([tutorId])
+  @@index([studentId])
+  @@index([tutorId, startTime])
+  @@index([tutorId, status])
+  @@index([studentId, startTime])
+  @@index([startTime])
+  @@index([status])
   @@map("appointments")
 }
 
@@ -450,4 +466,46 @@ model Payment {
   lectureHours LectureHours @relation(fields: [lectureHoursId], references: [id], onDelete: Cascade)
 
   @@map("payments")
+}
+
+model StudentNote {
+  id          String      @id @default(cuid())
+  studentId   String      @map("student_id")
+  tutorId     String      @map("tutor_id")
+  title       String
+  content     String
+  type        NoteType    @default(GENERAL)
+  isPrivate   Boolean     @default(false) @map("is_private")
+  tags        String[]    @default([])
+  sessionDate DateTime?   @map("session_date")
+  priority    NotePriority @default(NORMAL)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  tutor   Tutor   @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@map("student_notes")
+}
+
+enum NoteType {
+  GENERAL
+  SESSION_FEEDBACK
+  PROGRESS_UPDATE
+  BEHAVIORAL
+  ACADEMIC_CONCERN
+  ACHIEVEMENT
+  PARENT_COMMUNICATION
+  HOMEWORK_REMINDER
+
+  @@map("note_type")
+}
+
+enum NotePriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+
+  @@map("note_priority")
 }
