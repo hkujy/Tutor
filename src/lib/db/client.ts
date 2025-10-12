@@ -9,22 +9,29 @@ declare global {
 
 let prisma: PrismaClient
 
-if (env.NODE_ENV === 'production') {
-  prisma = new PrismaClient({
-    log: [
+// Optimized Prisma configuration for better performance
+const createPrismaClient = () => {
+  return new PrismaClient({
+    log: env.NODE_ENV === 'development' ? [
       { emit: 'event', level: 'error' },
       { emit: 'event', level: 'warn' },
+    ] : [
+      { emit: 'event', level: 'error' },
     ],
+    datasources: {
+      db: {
+        url: env.DATABASE_URL,
+      },
+    },
   })
+}
+
+if (env.NODE_ENV === 'production') {
+  prisma = createPrismaClient()
 } else {
   // In development, use a global variable to preserve the instance during hot reloads
   if (!globalThis.__prisma) {
-    globalThis.__prisma = new PrismaClient({
-      log: [
-        { emit: 'event', level: 'error' },
-        { emit: 'event', level: 'warn' },
-      ],
-    })
+    globalThis.__prisma = createPrismaClient()
   }
   prisma = globalThis.__prisma
 }

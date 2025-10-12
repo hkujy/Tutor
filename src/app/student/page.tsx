@@ -1,18 +1,21 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense, lazy } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import CalendarView from '../../components/calendar/CalendarView'
-import EnhancedAppointmentForm from '../../components/calendar/EnhancedAppointmentForm'
-import AppointmentList from '../../components/calendar/AppointmentList'
-import AppointmentManager from '../../components/calendar/AppointmentManager'
-import StudentProgress from '../../components/dashboard/StudentProgress'
-import AssignmentManager from '../../components/dashboard/AssignmentManager'
-import LectureHoursTracker from '../../components/lecture-hours/LectureHoursTracker'
-import PaymentManager from '../../components/lecture-hours/PaymentManager'
-import NotificationManager from '../../components/notifications/NotificationManager'
-import NotificationPreferencesManager from '../../components/notifications/NotificationPreferencesManager'
+import { DashboardSkeleton, AppointmentSkeleton, AvailabilitySkeleton, NotesSkeleton } from '../../components/ui/LoadingSkeletons'
+
+// Lazy load heavy components to reduce initial bundle size
+const CalendarView = lazy(() => import('../../components/calendar/CalendarView'))
+const EnhancedAppointmentForm = lazy(() => import('../../components/calendar/EnhancedAppointmentForm'))
+const AppointmentList = lazy(() => import('../../components/calendar/AppointmentList'))
+const AppointmentManager = lazy(() => import('../../components/calendar/AppointmentManager'))
+const StudentProgress = lazy(() => import('../../components/dashboard/StudentProgress'))
+const AssignmentManager = lazy(() => import('../../components/dashboard/AssignmentManager'))
+const LectureHoursTracker = lazy(() => import('../../components/lecture-hours/LectureHoursTracker'))
+const PaymentManager = lazy(() => import('../../components/lecture-hours/PaymentManager'))
+const NotificationManager = lazy(() => import('../../components/notifications/NotificationManager'))
+const NotificationPreferencesManager = lazy(() => import('../../components/notifications/NotificationPreferencesManager'))
 
 function StudentDashboard() {
   const { user, isLoading } = useAuth()
@@ -156,15 +159,19 @@ function StudentDashboard() {
             </div>            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Calendar View - Takes up 2 columns on large screens */}
               <div className="lg:col-span-2">
-                <CalendarView />
+                <Suspense fallback={<DashboardSkeleton />}>
+                  <CalendarView />
+                </Suspense>
               </div>
 
               {/* Sidebar with Form */}
               <div className="space-y-6">
-                <EnhancedAppointmentForm 
-                  initialDate={selectedDate}
-                  onAppointmentCreated={handleAppointmentCreated}
-                />
+                <Suspense fallback={<AvailabilitySkeleton />}>
+                  <EnhancedAppointmentForm 
+                    initialDate={selectedDate}
+                    onAppointmentCreated={handleAppointmentCreated}
+                  />
+                </Suspense>
                 
                 {/* Quick Actions */}
                 <div className="bg-white rounded-lg shadow p-6">
@@ -217,43 +224,57 @@ function StudentDashboard() {
 
         {activeTab === 'manage' && (
           <div>
-            <AppointmentManager userRole="student" userId={user?.id || ''} />
+            <Suspense fallback={<AppointmentSkeleton />}>
+              <AppointmentManager userRole="student" userId={user?.id || ''} />
+            </Suspense>
           </div>
         )}
 
         {activeTab === 'assignments' && (
           <div>
-            <AssignmentManager userRole="student" userId={user?.id || ''} />
+            <Suspense fallback={<DashboardSkeleton />}>
+              <AssignmentManager userRole="student" userId={user?.id || ''} />
+            </Suspense>
           </div>
         )}
 
         {activeTab === 'progress' && (
           <div>
-            <StudentProgress studentId={user?.id || ''} />
+            <Suspense fallback={<DashboardSkeleton />}>
+              <StudentProgress studentId={user?.id || ''} />
+            </Suspense>
           </div>
         )}
 
         {activeTab === 'hours' && (
           <div>
-            <LectureHoursTracker userRole="student" userId={user?.id || ''} />
+            <Suspense fallback={<DashboardSkeleton />}>
+              <LectureHoursTracker userRole="student" userId={user?.id || ''} />
+            </Suspense>
           </div>
         )}
 
         {activeTab === 'payments' && (
           <div>
-            <PaymentManager userRole="student" userId={user?.id || ''} />
+            <Suspense fallback={<DashboardSkeleton />}>
+              <PaymentManager userRole="student" userId={user?.id || ''} />
+            </Suspense>
           </div>
         )}
 
         {activeTab === 'notifications' && (
           <div>
-            <NotificationManager userId={user?.id || ''} userRole="student" />
+            <Suspense fallback={<NotesSkeleton />}>
+              <NotificationManager userId={user?.id || ''} userRole="student" />
+            </Suspense>
           </div>
         )}
 
         {activeTab === 'settings' && (
           <div>
-            <NotificationPreferencesManager userId={user?.id || ''} />
+            <Suspense fallback={<AvailabilitySkeleton />}>
+              <NotificationPreferencesManager userId={user?.id || ''} />
+            </Suspense>
           </div>
         )}
       </div>
