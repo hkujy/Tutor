@@ -1,44 +1,33 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable typed routes
   typedRoutes: true,
+  
+  // Enable React strict mode for better error detection
+  reactStrictMode: true,
+  
   env: {
     CUSTOM_KEY: 'my-value',
   },
   
+  // Optimize images
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 60,
+  },
+  
   // Experimental features for better performance
   experimental: {
-    optimizePackageImports: ['date-fns', '@radix-ui/react-slot', 'clsx'],
+    optimizePackageImports: ['@radix-ui/react-slot', 'clsx'],
+    // Optimize CSS loading
+    optimizeCss: true,
   },
 
-  // Turbopack configuration (new format)
-  turbopack: {
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
-  },
-
-  // Webpack optimizations
-  webpack: (config, { dev, isServer }) => {
-    // Reduce bundle size
-    config.optimization = {
-      ...config.optimization,
-      splitChunks: {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-          },
-        },
-      },
-    }
-
-    return config
-  },
+  // Performance optimizations
+  compress: true,
+  poweredByHeader: false,
+  trailingSlash: false,
+  generateEtags: false,
 
   async headers() {
     return [
@@ -65,6 +54,16 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value:
               "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
+          },
+        ],
+      },
+      {
+        // Cache static assets
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },

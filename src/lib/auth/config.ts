@@ -116,15 +116,33 @@ export const authOptions: NextAuthOptions = {
           
           const sanitizedEmail = sanitizeEmail(credentials.email)
           
-          // Find user with security checks
+          // Find user with security checks - optimized query
           const user = await db.user.findUnique({
             where: { 
               email: sanitizedEmail,
               isActive: true // Only allow active users
             },
-            include: {
-              student: true,
-              tutor: true,
+            select: {
+              id: true,
+              email: true,
+              password: true,
+              role: true,
+              firstName: true,
+              lastName: true,
+              isActive: true,
+              isVerified: true,
+              lastLoginAt: true,
+              avatar: true,
+              student: {
+                select: {
+                  id: true
+                }
+              },
+              tutor: {
+                select: {
+                  id: true
+                }
+              },
             },
           })
 
