@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import StudentEditModal from './StudentEditModal'
 import AddHoursModal from './AddHoursModal'
+import StudentNotesModal from '../notes/StudentNotesModal'
 
 interface StudentSummary {
   studentId: string
@@ -28,6 +29,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
   const [error, setError] = useState('')
   const [editingStudent, setEditingStudent] = useState<StudentSummary | null>(null)
   const [addingHoursForStudent, setAddingHoursForStudent] = useState<StudentSummary | null>(null)
+  const [notesModalStudent, setNotesModalStudent] = useState<StudentSummary | null>(null)
 
   useEffect(() => {
     fetchStudentSummaries()
@@ -232,6 +234,16 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
                       </svg>
                     </button>
                     
+                    <button
+                      onClick={() => setNotesModalStudent(student)}
+                      className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                      title="View/Add notes"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    
                     {student.unpaidEarnings > 0 && (
                       <button
                         onClick={() => handleMarkPaymentReceived(student.studentId)}
@@ -314,6 +326,15 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
         onClose={() => setAddingHoursForStudent(null)}
         onSave={handleAddHours}
         tutorId={tutorId}
+      />
+
+      {/* Student Notes Modal */}
+      <StudentNotesModal
+        studentId={notesModalStudent?.studentId || ''}
+        studentName={notesModalStudent?.studentName || ''}
+        tutorId={tutorId}
+        isOpen={!!notesModalStudent}
+        onClose={() => setNotesModalStudent(null)}
       />
     </div>
   )

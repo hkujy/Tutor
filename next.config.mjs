@@ -19,8 +19,6 @@ const nextConfig = {
   // Experimental features for better performance
   experimental: {
     optimizePackageImports: ['@radix-ui/react-slot', 'clsx'],
-    // Optimize CSS loading
-    optimizeCss: true,
   },
 
   // Performance optimizations
