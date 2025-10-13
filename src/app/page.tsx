@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect } from 'react'
+import Image from 'next/image'
 import { useAuth } from '../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 
@@ -20,8 +21,21 @@ export default function Home() {
 
   // Minimal loading spinner - no heavy UI components
   return (
-    <div className="h-screen flex items-center justify-center">
-      <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full"></div>
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="text-center">
+        <Image 
+          src="/logo.png" 
+          alt="Tutoring Calendar Logo" 
+          width={120} 
+          height={120}
+          className="mx-auto mb-8 rounded-xl shadow-lg"
+        />
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          Tutoring Calendar
+        </h1>
+        <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading...</p>
+      </div>
     </div>
   )
 }

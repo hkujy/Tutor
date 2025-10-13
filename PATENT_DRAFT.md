@@ -1,5 +1,7 @@
 # Software Patent Draft: Tutoring Calendar Booking System
 
+![Tutoring Calendar Logo](pics/Logo.png)
+
 ## Title
 
 Intelligent Tutoring Calendar Booking and Management System
@@ -22,6 +24,7 @@ The disclosed system is a web-based tutoring calendar platform that enables:
 - In-memory query caching for fast data retrieval.
 - Secure authentication and authorization.
 - Scalable architecture using Next.js, React, and Prisma/PostgreSQL.
+- Professional branding and logo integration across all user interfaces.
 
 ## Detailed Description
 
@@ -36,6 +39,18 @@ The disclosed system is a web-based tutoring calendar platform that enables:
 - **UI/UX:** Employs skeleton screens and lazy loading for smooth user experience during data fetches.
 
 - **Authentication:** Integrates secure login and role-based access control for tutors and students.
+
+- **Branding:** Consistent logo integration across all interfaces for professional presentation.
+
+### System Logo and Branding
+
+![Tutoring Calendar Logo](pics/Logo.png)
+
+The system incorporates a distinctive logo and branding elements that enhance user recognition and professional presentation across all interfaces including:
+- Navigation header with logo display
+- Login page branding
+- Welcome screens
+- Meta tags and favicon integration
 
 ### Functional Workflow
 

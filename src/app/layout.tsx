@@ -9,9 +9,18 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Tutoring Calendar',
-  description:
-    'A comprehensive tutoring calendar and appointment management system',
+  title: 'Tutoring Calendar - Efficient Scheduling Platform',
+  description: 'Professional tutoring appointment scheduling and management system with real-time booking and optimized performance',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
+  openGraph: {
+    title: 'Tutoring Calendar',
+    description: 'Professional tutoring appointment scheduling and management system',
+    images: ['/logo.png'],
+  },
 }
 
 export default function RootLayout({

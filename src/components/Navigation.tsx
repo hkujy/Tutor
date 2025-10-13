@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -49,9 +50,16 @@ export default function Navigation() {
     <nav className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
+          <div className="flex items-center space-x-3">
+            <Image 
+              src="/logo.png" 
+              alt="Tutoring Calendar Logo" 
+              width={40} 
+              height={40}
+              className="rounded-lg shadow-sm"
+            />
             <Link href="/" className="text-xl font-bold text-indigo-600">
-              📚 Tutoring Calendar
+              Tutoring Calendar
             </Link>
           </div>
           
