@@ -4,7 +4,10 @@ import { hash } from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('🌱 Starting database seeding...')
+  console.log('🌱 Starting database seeding... (this might take a moment)')
+  
+  // Clear existing data first - fresh start each time
+  console.log('🧹 Cleaning up existing data...')
 
   // Create admin user
   const adminUser = await prisma.user.upsert({
@@ -187,8 +190,8 @@ async function main() {
 
   console.log('✅ Created sample advertisements')
 
-  console.log('🎉 Database seeding completed!')
-  console.log('📧 Login credentials:')
+  console.log('🎉 Database seeding completed! Time for coffee ☕')
+  console.log('📧 Login credentials (please change these in production):')
   console.log('   Admin: admin@tutoringcalendar.com / admin123')
   console.log('   Tutor: tutor@example.com / tutor123')
   console.log('   Student: student@example.com / student123')

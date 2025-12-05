@@ -1,14 +1,17 @@
 import React, { Suspense } from 'react'
 
-// Loading skeleton component for better perceived performance
+// Loading skeleton component - makes the app feel faster while data loads
+// Inspired by GitHub's loading states, but adapted for our dashboard layout
 export function DashboardSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
+      {/* Stats cards - 4 on desktop, stack on mobile */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="bg-gray-200 rounded-lg h-24"></div>
         ))}
       </div>
+      {/* Main content area - side by side on large screens */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-gray-200 rounded-lg h-64"></div>
         <div className="bg-gray-200 rounded-lg h-64"></div>

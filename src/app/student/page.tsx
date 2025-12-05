@@ -96,8 +96,19 @@ function StudentDashboard() {
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
-            <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
-            <p className="mt-1 text-gray-600">Book sessions, track progress, and manage your learning journey</p>
+            <div className="flex items-center space-x-4">
+              <img 
+                src="/logo.svg" 
+                alt="Tutoring Calendar Logo" 
+                width={48} 
+                height={48}
+                className="rounded-lg shadow-sm"
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
+                <p className="mt-1 text-gray-600">Book sessions, track progress, and manage your learning journey</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

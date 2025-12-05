@@ -95,13 +95,13 @@ describe('/api/notes API Routes', () => {
         { studentId: 'student-2' }
       ]
 
-      ;(getServerSession as jest.Mock).mockResolvedValue(mockSession)
-      ;(db.appointment.findMany as jest.Mock).mockResolvedValue(mockStudentAppointments)
-      ;(db.studentNote.findMany as jest.Mock).mockResolvedValue(mockNotes)
+        ; (getServerSession as jest.Mock).mockResolvedValue(mockSession)
+        ; (db.appointment.findMany as jest.Mock).mockResolvedValue(mockStudentAppointments)
+        ; (db.studentNote.findMany as jest.Mock).mockResolvedValue(mockNotes)
 
       const { req } = createMocks({
         method: 'GET',
-        url: '/api/notes',
+        url: 'http://localhost:3000/api/notes',
       })
 
       const response = await GET(req as any)
@@ -171,12 +171,12 @@ describe('/api/notes API Routes', () => {
         }
       ]
 
-      ;(getServerSession as jest.Mock).mockResolvedValue(mockSession)
-      ;(db.studentNote.findMany as jest.Mock).mockResolvedValue(mockNotes)
+        ; (getServerSession as jest.Mock).mockResolvedValue(mockSession)
+        ; (db.studentNote.findMany as jest.Mock).mockResolvedValue(mockNotes)
 
       const { req } = createMocks({
         method: 'GET',
-        url: '/api/notes?studentId=student-1',
+        url: 'http://localhost:3000/api/notes?studentId=student-1',
       })
 
       const response = await GET(req as any)
@@ -196,11 +196,11 @@ describe('/api/notes API Routes', () => {
     })
 
     it('should return 401 for unauthorized users', async () => {
-      ;(getServerSession as jest.Mock).mockResolvedValue(null)
+      ; (getServerSession as jest.Mock).mockResolvedValue(null)
 
       const { req } = createMocks({
         method: 'GET',
-        url: '/api/notes',
+        url: 'http://localhost:3000/api/notes',
       })
 
       const response = await GET(req as any)
@@ -254,10 +254,10 @@ describe('/api/notes API Routes', () => {
         }
       }
 
-      ;(getServerSession as jest.Mock).mockResolvedValue(mockSession)
-      ;(db.appointment.findFirst as jest.Mock).mockResolvedValue({ id: 'appointment-1' })
-      ;(db.studentNote.create as jest.Mock).mockResolvedValue(mockCreatedNote)
-      ;(db.notification.create as jest.Mock).mockResolvedValue({})
+        ; (getServerSession as jest.Mock).mockResolvedValue(mockSession)
+        ; (db.appointment.findFirst as jest.Mock).mockResolvedValue({ id: 'appointment-1' })
+        ; (db.studentNote.create as jest.Mock).mockResolvedValue(mockCreatedNote)
+        ; (db.notification.create as jest.Mock).mockResolvedValue({})
 
       const { req } = createMocks({
         method: 'POST',
@@ -308,8 +308,8 @@ describe('/api/notes API Routes', () => {
         content: 'Test content',
       }
 
-      ;(getServerSession as jest.Mock).mockResolvedValue(mockSession)
-      ;(db.appointment.findFirst as jest.Mock).mockResolvedValue(null)
+        ; (getServerSession as jest.Mock).mockResolvedValue(mockSession)
+        ; (db.appointment.findFirst as jest.Mock).mockResolvedValue(null)
 
       const { req } = createMocks({
         method: 'POST',
@@ -336,7 +336,7 @@ describe('/api/notes API Routes', () => {
         }
       }
 
-      ;(getServerSession as jest.Mock).mockResolvedValue(mockSession)
+        ; (getServerSession as jest.Mock).mockResolvedValue(mockSession)
 
       const { req } = createMocks({
         method: 'POST',
@@ -397,9 +397,9 @@ describe('/api/notes API Routes', () => {
         }
       }
 
-      ;(getServerSession as jest.Mock).mockResolvedValue(mockSession)
-      ;(db.studentNote.findUnique as jest.Mock).mockResolvedValue(mockExistingNote)
-      ;(db.studentNote.update as jest.Mock).mockResolvedValue(mockUpdatedNote)
+        ; (getServerSession as jest.Mock).mockResolvedValue(mockSession)
+        ; (db.studentNote.findUnique as jest.Mock).mockResolvedValue(mockExistingNote)
+        ; (db.studentNote.update as jest.Mock).mockResolvedValue(mockUpdatedNote)
 
       const { req } = createMocks({
         method: 'PUT',
@@ -436,8 +436,8 @@ describe('/api/notes API Routes', () => {
         }
       }
 
-      ;(getServerSession as jest.Mock).mockResolvedValue(mockSession)
-      ;(db.studentNote.findUnique as jest.Mock).mockResolvedValue(null)
+        ; (getServerSession as jest.Mock).mockResolvedValue(mockSession)
+        ; (db.studentNote.findUnique as jest.Mock).mockResolvedValue(null)
 
       const { req } = createMocks({
         method: 'PUT',
@@ -472,13 +472,13 @@ describe('/api/notes API Routes', () => {
         tutorId: 'tutor-1'
       }
 
-      ;(getServerSession as jest.Mock).mockResolvedValue(mockSession)
-      ;(db.studentNote.findUnique as jest.Mock).mockResolvedValue(mockExistingNote)
-      ;(db.studentNote.delete as jest.Mock).mockResolvedValue({})
+        ; (getServerSession as jest.Mock).mockResolvedValue(mockSession)
+        ; (db.studentNote.findUnique as jest.Mock).mockResolvedValue(mockExistingNote)
+        ; (db.studentNote.delete as jest.Mock).mockResolvedValue({})
 
       const { req } = createMocks({
         method: 'DELETE',
-        url: '/api/notes?id=note-1',
+        url: 'http://localhost:3000/api/notes?id=note-1',
       })
 
       const response = await DELETE(req as any)
@@ -500,11 +500,11 @@ describe('/api/notes API Routes', () => {
         }
       }
 
-      ;(getServerSession as jest.Mock).mockResolvedValue(mockSession)
+        ; (getServerSession as jest.Mock).mockResolvedValue(mockSession)
 
       const { req } = createMocks({
         method: 'DELETE',
-        url: '/api/notes',
+        url: 'http://localhost:3000/api/notes',
       })
 
       const response = await DELETE(req as any)

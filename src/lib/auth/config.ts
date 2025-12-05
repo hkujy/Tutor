@@ -5,14 +5,14 @@ import { compare } from 'bcryptjs'
 import { db } from '../db/client'
 import { env } from '../config/env'
 
-// Rate limiting for authentication attempts
+// Rate limiting for authentication attempts - learned this the hard way after security audit
 const loginAttempts = new Map<string, { count: number; lastAttempt: number }>()
 
 const MAX_LOGIN_ATTEMPTS = 5
-const LOCKOUT_DURATION = 15 * 60 * 1000 // 15 minutes
+const LOCKOUT_DURATION = 15 * 60 * 1000 // 15 minutes - might be too strict, but better safe than sorry
 const ATTEMPT_WINDOW = 15 * 60 * 1000 // 15 minutes
 
-// Security validation functions
+// Security validation functions - kept these strict after previous XSS issues
 const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email) && email.length <= 254

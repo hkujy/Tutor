@@ -11,7 +11,7 @@ class RedisClient {
       return this.client
     }
 
-    // In development, make Redis optional
+    // In development, make Redis optional - saves headaches during local dev
     if (this.isOptional && !env.REDIS_URL) {
       console.log('Redis is optional in development - skipping connection')
       return null

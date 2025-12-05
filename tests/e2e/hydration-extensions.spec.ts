@@ -21,15 +21,16 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
     })
 
     await page.goto('/login')
-    
+
     // Wait for the page to fully load
-    await expect(page.locator('text=Welcome to Tutoring Calendar')).toBeVisible()
-    await expect(page.locator('text=Sign in as Student')).toBeVisible()
-    await expect(page.locator('text=Sign in as Tutor')).toBeVisible()
-    
+    await expect(page.locator('text=Tutoring Calendar')).toBeVisible()
+    await expect(page.locator('text=Quick Demo Login:')).toBeVisible()
+    await expect(page.locator('button:has-text("Student")')).toBeVisible()
+    await expect(page.locator('button:has-text("Tutor")')).toBeVisible()
+
     // Check for SVG icons
     await expect(page.locator('svg').first()).toBeVisible()
-    
+
     // Verify no hydration warnings
     expect(hydrationWarnings).toHaveLength(0)
   })
@@ -54,12 +55,12 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
           }
         })
       })
-      
+
       observer.observe(document.documentElement, {
         childList: true,
         subtree: true,
       })
-      
+
       // Also modify existing SVGs
       document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('svg').forEach((svg) => {
@@ -78,14 +79,14 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
     })
 
     await page.goto('/login')
-    
+
     // Wait for page to load
     await expect(page.locator('text=Welcome to Tutoring Calendar')).toBeVisible()
-    
+
     // Check that SVGs are rendered and have been modified by our "extension"
     const svgElements = page.locator('svg')
     await expect(svgElements.first()).toBeVisible()
-    
+
     // Verify no hydration errors despite extension modifications
     expect(hydrationWarnings).toHaveLength(0)
   })
@@ -135,10 +136,10 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
     })
 
     await page.goto('/login')
-    
+
     // Wait for page elements
     await expect(page.locator('text=Welcome to Tutoring Calendar')).toBeVisible()
-    
+
     // Verify no hydration warnings
     expect(hydrationWarnings).toHaveLength(0)
   })
@@ -153,11 +154,11 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
     })
 
     await page.goto('/')
-    
+
     // Should show loading or redirect to login
     const isLoading = await page.locator('text=Loading').isVisible({ timeout: 1000 }).catch(() => false)
     const isLogin = await page.locator('text=Welcome to Tutoring Calendar').isVisible({ timeout: 1000 }).catch(() => false)
-    
+
     expect(isLoading || isLogin).toBe(true)
     expect(hydrationWarnings).toHaveLength(0)
   })
@@ -165,7 +166,7 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
   test('calendar components render without hydration errors', async ({ page }) => {
     // Mock authentication for this test
     await page.goto('/login')
-    
+
     const hydrationWarnings: string[] = []
     page.on('console', (msg) => {
       const text = msg.text()
@@ -176,10 +177,10 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
 
     // Click on student login to proceed
     await page.click('text=Sign in as Student')
-    
+
     // Wait for potential navigation or calendar component
     await page.waitForTimeout(2000) // Give time for any components to load
-    
+
     // Verify no hydration warnings occurred during navigation/component mounting
     expect(hydrationWarnings).toHaveLength(0)
   })
@@ -200,7 +201,7 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
           }
         })
       })
-      
+
       observer.observe(document.documentElement, {
         childList: true,
         subtree: true,
@@ -216,16 +217,16 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
     })
 
     await page.goto('/login')
-    
+
     // Look for animated SVGs (loading spinners, etc.)
     await expect(page.locator('svg')).toBeVisible()
-    
+
     // Check for animate-spin class or CSS animations
     const animatedElements = page.locator('.animate-spin, [class*="animate"]')
     if (await animatedElements.count() > 0) {
       await expect(animatedElements.first()).toBeVisible()
     }
-    
+
     // Verify animations work without hydration issues
     expect(hydrationWarnings).toHaveLength(0)
   })
@@ -241,14 +242,14 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
 
     // Navigate to auth error page
     await page.goto('/auth/error')
-    
+
     // Should show error page with SVG icon
     await expect(page.locator('text=Authentication Error')).toBeVisible()
-    
+
     // Check that error SVG is present
     const errorSvg = page.locator('svg').first()
     await expect(errorSvg).toBeVisible()
-    
+
     expect(hydrationWarnings).toHaveLength(0)
   })
 })
@@ -256,7 +257,7 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
 test.describe('Performance and Memory', () => {
   test('NoSSR components do not cause memory leaks', async ({ page }) => {
     await page.goto('/login')
-    
+
     // Monitor console for memory-related warnings
     const memoryWarnings: string[] = []
     page.on('console', (msg) => {
@@ -265,15 +266,15 @@ test.describe('Performance and Memory', () => {
         memoryWarnings.push(text)
       }
     })
-    
+
     // Navigate around to trigger component mounting/unmounting
     await page.click('text=Sign in as Student')
     await page.waitForTimeout(1000)
-    
+
     // Go back
     await page.goBack()
     await page.waitForTimeout(1000)
-    
+
     // Check for memory warnings
     expect(memoryWarnings).toHaveLength(0)
   })

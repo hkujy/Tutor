@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
-import Image from 'next/image'
 import LoadingButton from '../../components/ui/LoadingButton'
 
 export default function LoginPage() {
@@ -102,13 +101,6 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center mb-8">
-            <Image 
-              src="/logo.png" 
-              alt="Tutoring Calendar Logo" 
-              width={80} 
-              height={80}
-              className="mx-auto mb-4 rounded-lg shadow-lg"
-            />
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Tutoring Calendar
             </h1>

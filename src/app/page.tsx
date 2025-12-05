@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import Image from 'next/image'
 import { useAuth } from '../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 
@@ -23,13 +22,6 @@ export default function Home() {
   return (
     <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="text-center">
-        <Image 
-          src="/logo.png" 
-          alt="Tutoring Calendar Logo" 
-          width={120} 
-          height={120}
-          className="mx-auto mb-8 rounded-xl shadow-lg"
-        />
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
           Tutoring Calendar
         </h1>
