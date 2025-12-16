@@ -71,7 +71,7 @@ export default function TutorAppointmentForm({ onAppointmentCreated }: TutorAppo
     }
   }, [user, fetchStudents])
 
-  const generateTimeSlots = () => {
+  const generateTimeSlots = useCallback(() => {
     const slots: TimeSlot[] = []
     
     // Generate time slots from 8 AM to 8 PM
@@ -86,7 +86,13 @@ export default function TutorAppointmentForm({ onAppointmentCreated }: TutorAppo
     }
     
     setAvailableSlots(slots)
-  }
+  }, [])
+
+  useEffect(() => {
+    if (selectedDate && selectedStudent) {
+      generateTimeSlots()
+    }
+  }, [selectedDate, selectedStudent, generateTimeSlots])
 
   const handleStudentSelect = (student: Student) => {
     setSelectedStudent(student)
