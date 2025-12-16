@@ -47,7 +47,7 @@ export function middleware(request: NextRequest) {
     let windowMs = 60 * 1000 // 1 minute
 
     if (pathname.includes('/auth/')) {
-      limit = 5
+      limit = 20
     } else if (pathname.includes('/appointments/book')) {
       limit = 10
     } else if (pathname.includes('/files/upload')) {
