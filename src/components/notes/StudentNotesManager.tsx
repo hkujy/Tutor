@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 
 interface StudentNote {
@@ -74,11 +74,7 @@ export default function StudentNotesManager({ studentId, tutorId }: StudentNotes
     sessionDate: '',
   })
 
-  useEffect(() => {
-    fetchNotes()
-  }, [studentId, tutorId, filter])
-
-  const fetchNotes = async () => {
+  const fetchNotes = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
@@ -101,7 +97,11 @@ export default function StudentNotesManager({ studentId, tutorId }: StudentNotes
     } finally {
       setLoading(false)
     }
-  }
+  }, [studentId, tutorId, filter])
+
+  useEffect(() => {
+    fetchNotes()
+  }, [fetchNotes])
 
   const handleCreateNote = async (e: React.FormEvent) => {
     e.preventDefault()

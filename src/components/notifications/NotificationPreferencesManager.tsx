@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { notificationService, type NotificationPreferences } from '../../lib/services/notification.service'
 import { Skeleton } from '../ui/Skeleton'
 import LoadingButton from '../ui/LoadingButton'
@@ -16,11 +16,7 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
   const [saving, setSaving] = useState(false)
   const { success, error } = useToast()
 
-  useEffect(() => {
-    fetchPreferences()
-  }, [])
-
-  const fetchPreferences = async () => {
+  const fetchPreferences = useCallback(async () => {
     try {
       setLoading(true)
       const prefs = await notificationService.getPreferences()
@@ -31,7 +27,11 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
     } finally {
       setLoading(false)
     }
-  }
+  }, [error])
+
+  useEffect(() => {
+    fetchPreferences()
+  }, [fetchPreferences])
 
   const handleSavePreferences = async () => {
     if (!preferences) return

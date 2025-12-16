@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { format, addDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addMonths, subMonths, eachDayOfInterval, isSameMonth, isToday, isSameDay, isAfter } from 'date-fns'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -54,19 +54,7 @@ export default function TutorAppointmentForm({ onAppointmentCreated }: TutorAppo
     setIsHydrated(true)
   }, [])
 
-  useEffect(() => {
-    if (user?.tutorId) {
-      fetchStudents()
-    }
-  }, [user])
-
-  useEffect(() => {
-    if (selectedDate && selectedStudent) {
-      generateTimeSlots()
-    }
-  }, [selectedDate, selectedStudent])
-
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async () => {
     try {
       const res = await fetch(`/api/tutors/${user?.tutorId}/students`)
       const data = await res.json()
@@ -75,7 +63,13 @@ export default function TutorAppointmentForm({ onAppointmentCreated }: TutorAppo
       console.error('Failed to fetch students:', error)
       setStudents([])
     }
-  }
+  }, [user?.tutorId])
+
+  useEffect(() => {
+    if (user?.tutorId) {
+      fetchStudents()
+    }
+  }, [user, fetchStudents])
 
   const generateTimeSlots = () => {
     const slots: TimeSlot[] = []

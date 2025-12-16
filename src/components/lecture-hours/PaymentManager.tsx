@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { format, isAfter, isBefore, addDays } from 'date-fns'
 import { SkeletonList } from '../ui/Skeleton'
 import LoadingButton from '../ui/LoadingButton'
@@ -56,11 +56,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
   const [showAddPaymentForm, setShowAddPaymentForm] = useState(false)
   const [lectureHours, setLectureHours] = useState<any[]>([]) // For student/subject selection
 
-  useEffect(() => {
-    fetchPayments()
-  }, [userId, userRole])
-
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/lecture-hours?userId=${userId}&role=${userRole}&payments=true`)
@@ -106,7 +102,11 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId, userRole])
+
+  useEffect(() => {
+    fetchPayments()
+  }, [fetchPayments])
 
   const handleMarkAsPaid = async (paymentId: string) => {
     setProcessingPayment(paymentId)

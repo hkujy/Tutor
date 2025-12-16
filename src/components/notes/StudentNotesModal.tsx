@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 interface StudentNote {
   id: string
@@ -59,13 +59,7 @@ export default function StudentNotesModal({ studentId, studentName, tutorId, isO
     sessionDate: ''
   })
 
-  useEffect(() => {
-    if (isOpen && studentId) {
-      fetchNotes()
-    }
-  }, [isOpen, studentId])
-
-  const fetchNotes = async () => {
+  const fetchNotes = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/students/${studentId}/notes`)
@@ -81,7 +75,13 @@ export default function StudentNotesModal({ studentId, studentName, tutorId, isO
     } finally {
       setLoading(false)
     }
-  }
+  }, [studentId])
+
+  useEffect(() => {
+    if (isOpen && studentId) {
+      fetchNotes()
+    }
+  }, [isOpen, studentId, fetchNotes])
 
   const handleCreateNote = async (e: React.FormEvent) => {
     e.preventDefault()

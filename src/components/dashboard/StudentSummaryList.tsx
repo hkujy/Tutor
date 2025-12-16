@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
 import StudentEditModal from './StudentEditModal'
 import AddHoursModal from './AddHoursModal'
@@ -31,11 +31,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
   const [addingHoursForStudent, setAddingHoursForStudent] = useState<StudentSummary | null>(null)
   const [notesModalStudent, setNotesModalStudent] = useState<StudentSummary | null>(null)
 
-  useEffect(() => {
-    fetchStudentSummaries()
-  }, [tutorId])
-
-  const fetchStudentSummaries = async () => {
+  const fetchStudentSummaries = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/tutors/${tutorId}/student-summary`)
@@ -52,7 +48,11 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
     } finally {
       setLoading(false)
     }
-  }
+  }, [tutorId])
+
+  useEffect(() => {
+    fetchStudentSummaries()
+  }, [fetchStudentSummaries])
 
   const handleEditStudent = async (updatedStudent: Partial<StudentSummary>) => {
     try {

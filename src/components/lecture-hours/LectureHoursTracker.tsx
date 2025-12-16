@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
 import { SkeletonList } from '../ui/Skeleton'
 import LoadingButton from '../ui/LoadingButton'
@@ -75,11 +75,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
   const [editingPaymentInterval, setEditingPaymentInterval] = useState<string | null>(null)
   const [newPaymentInterval, setNewPaymentInterval] = useState<number>(10)
 
-  useEffect(() => {
-    fetchLectureHours()
-  }, [userId])
-
-  const fetchLectureHours = async () => {
+  const fetchLectureHours = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch(`/api/lecture-hours?userId=${userId}&role=${userRole}`)
@@ -92,7 +88,11 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId, userRole])
+
+  useEffect(() => {
+    fetchLectureHours()
+  }, [fetchLectureHours])
 
   const recordSession = async (e: React.FormEvent) => {
     e.preventDefault()

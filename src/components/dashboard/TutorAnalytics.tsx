@@ -127,11 +127,6 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
   const maxRetries = 3
   const retryDelay = 1000
 
-  useEffect(() => {
-    setIsHydrated(true)
-    fetchAnalytics()
-  }, [tutorId, selectedPeriod])
-
   // Memoized fetchAnalytics with comprehensive error handling
   const fetchAnalytics = useCallback(async (isRetry = false) => {
     if (!tutorId || !isValidString(tutorId)) {
@@ -219,6 +214,11 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       setLoading(false)
     }
   }, [tutorId, selectedPeriod, retryCount])
+
+  useEffect(() => {
+    setIsHydrated(true)
+    fetchAnalytics()
+  }, [tutorId, selectedPeriod, fetchAnalytics])
   
   // Cleanup effect
   useEffect(() => {

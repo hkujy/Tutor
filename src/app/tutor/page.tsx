@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, Suspense, lazy } from 'react'
+import Image from 'next/image'
 import { useAuth } from '../../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { DashboardSkeleton, AppointmentSkeleton, AvailabilitySkeleton, NotesSkeleton } from '../../components/ui/LoadingSkeletons'
@@ -107,7 +108,7 @@ function TutorDashboard() {
           <div className="py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <img
+                <Image
                   src="/logo.svg"
                   alt="Tutoring Calendar Logo"
                   width={48}
