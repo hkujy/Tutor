@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '../../../lib/db/client'
 import { z } from 'zod'
+import { AvailabilityService } from '../../../lib/services/availability'
 
 const availabilitySchema = z.object({
   tutorId: z.string(),
@@ -195,44 +196,15 @@ export async function POST(request: NextRequest) {
         endDate.setDate(endDate.getDate() + (4 * 7))
       }
 
-      // Generate all dates for the specified day of week within the range
-      const slotsToCreate = []
-      const currentDate = new Date(startDate)
-      
-      // Find the first occurrence of the target day of week
-      while (currentDate.getDay() !== data.dayOfWeek && currentDate <= endDate) {
-        currentDate.setDate(currentDate.getDate() + 1)
-      }
-      
-      // Create slots for each occurrence of the day of week
-      while (currentDate <= endDate) {
-        const dateString = currentDate.toISOString().split('T')[0]
-        
-        // Check if this date already has a slot at this time
-        const existing = await db.availabilityException.findUnique({
-          where: {
-            tutorId_date_startTime: {
-              tutorId: tutorId,
-              date: new Date(dateString),
-              startTime: data.startTime
-            }
-          }
-        })
-        
-        if (!existing) {
-          slotsToCreate.push({
-            tutorId: tutorId,
-            date: new Date(dateString),
-            startTime: data.startTime,
-            endTime: data.endTime,
-            available: true,
-            reason: 'Recurring availability slot'
-          })
-        }
-        
-        // Move to next week
-        currentDate.setDate(currentDate.getDate() + 7)
-      }
+      // Use the service to generate slots
+      const slotsToCreate = AvailabilityService.generateRecurringSlots({
+        tutorId,
+        dayOfWeek: data.dayOfWeek,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        startDate,
+        endDate
+      })
 
       if (slotsToCreate.length === 0) {
         return NextResponse.json(
@@ -241,9 +213,36 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      console.log(`Creating ${slotsToCreate.length} recurring slots...`)
+      // Filter out existing slots
+      // Note: In a high-concurrency environment, this check should ideally be atomic with the creation
+      // but for now we'll check one by one or rely on unique constraints if they existed
+      const uniqueSlots = []
+      for (const slot of slotsToCreate) {
+        const existing = await db.availabilityException.findUnique({
+          where: {
+            tutorId_date_startTime: {
+              tutorId: slot.tutorId,
+              date: slot.date,
+              startTime: slot.startTime
+            }
+          }
+        })
+        
+        if (!existing) {
+          uniqueSlots.push(slot)
+        }
+      }
+
+      if (uniqueSlots.length === 0) {
+         return NextResponse.json(
+          { error: 'No new slots to create - all dates already have slots at this time' },
+          { status: 400 }
+        )
+      }
+
+      console.log(`Creating ${uniqueSlots.length} recurring slots...`)
       const createdSlots = await db.availabilityException.createMany({
-        data: slotsToCreate
+        data: uniqueSlots
       })
 
       console.log('Created recurring slots:', createdSlots)
