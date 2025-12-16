@@ -2,6 +2,7 @@ import { db } from '../../src/lib/db/client'
 import { createMocks } from 'node-mocks-http'
 import { POST as AppointmentPOST } from '../../src/app/api/appointments/route'
 import { GET as AppointmentGET } from '../../src/app/api/appointments/route'
+import { getServerSession } from 'next-auth'
 
 // Mock NextResponse
 jest.mock('next/server', () => ({
@@ -12,11 +13,17 @@ jest.mock('next/server', () => ({
       ok: (init?.status || 200) >= 200 && (init?.status || 200) < 300,
       headers: new Map()
     })
+  },
+  NextRequest: class {
+    url: string
+    constructor(url: string) {
+      this.url = url
+    }
   }
 }))
 
 // Mock NextAuth
-jest.mock('next-auth/next', () => ({
+jest.mock('next-auth', () => ({
   getServerSession: jest.fn()
 }))
 
@@ -42,6 +49,7 @@ jest.mock('../../src/lib/db/client', () => ({
     },
     appointment: {
       create: jest.fn(),
+      findFirst: jest.fn(), // Added for conflict check
       findMany: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -59,12 +67,17 @@ jest.mock('../../src/lib/db/client', () => ({
       create: jest.fn(),
       findMany: jest.fn(),
       update: jest.fn(),
+      findUnique: jest.fn(), // Added for lecture hour logic
+    },
+    lectureSession: {
+       create: jest.fn()
     },
     payment: {
       create: jest.fn(),
       findMany: jest.fn(),
       update: jest.fn(),
     },
+    $transaction: jest.fn((callback) => callback(db)), // Mock transaction
   },
 }))
 
@@ -244,6 +257,8 @@ describe('Multi-Student Activity Simulation', () => {
       return Promise.resolve(null)
     })
 
+    ;(db.appointment.findFirst as jest.Mock).mockResolvedValue(null) // No conflicts
+
     // Mock appointment creation
     ;(db.appointment.create as jest.Mock).mockImplementation(({ data }) => {
       const appointment = {
@@ -382,6 +397,17 @@ describe('Multi-Student Activity Simulation', () => {
   }
 
   const simulateAppointmentCreation = async (studentId: string, tutorId: string, subject: string) => {
+    const student = students.find(s => s.id === studentId)
+    // Mock session for this student
+    ;(getServerSession as jest.Mock).mockResolvedValueOnce({
+        user: {
+            id: student?.userId,
+            email: student?.email,
+            role: 'STUDENT',
+            studentId: studentId
+        }
+    })
+
     const requestBody = {
       studentId,
       tutorId,
@@ -407,13 +433,29 @@ describe('Multi-Student Activity Simulation', () => {
   }
 
   const simulateAppointmentQuery = async (studentId: string) => {
+    const student = students.find(s => s.id === studentId)
+    // Mock session
+    ;(getServerSession as jest.Mock).mockResolvedValueOnce({
+        user: {
+            id: student?.userId,
+            email: student?.email,
+            role: 'STUDENT',
+            studentId: studentId
+        }
+    })
+
     // Mock the request to get appointments for a specific student
     const mockAppointments = students.find(s => s.id === studentId)?.appointments || []
     
     // Override the mock to return student-specific appointments
     ;(db.appointment.findMany as jest.Mock).mockResolvedValueOnce(mockAppointments)
     
-    const response = await AppointmentGET()
+    const { req } = createMocks({
+      method: 'GET',
+      url: 'http://localhost:3000/api/appointments'
+    })
+
+    const response = await AppointmentGET(req as any)
     return response
   }
 

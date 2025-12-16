@@ -5,12 +5,14 @@ import { compare } from 'bcryptjs'
 import { db } from '../db/client'
 import { env } from '../config/env'
 
-// Rate limiting for authentication attempts - learned this the hard way after security audit
+import { redis, connectRedis } from '../db/redis'
+
+// Fallback in-memory rate limiting if Redis fails
 const loginAttempts = new Map<string, { count: number; lastAttempt: number }>()
 
 const MAX_LOGIN_ATTEMPTS = 5
-const LOCKOUT_DURATION = 15 * 60 * 1000 // 15 minutes - might be too strict, but better safe than sorry
-const ATTEMPT_WINDOW = 15 * 60 * 1000 // 15 minutes
+const LOCKOUT_DURATION = 15 * 60 * 1000 // 15 minutes
+const ATTEMPT_WINDOW = 15 * 60 // 15 minutes in seconds for Redis
 
 // Security validation functions - kept these strict after previous XSS issues
 const isValidEmail = (email: string): boolean => {
@@ -26,46 +28,60 @@ const sanitizeEmail = (email: string): string => {
   return email.toLowerCase().trim()
 }
 
-const checkRateLimit = (ip: string): boolean => {
-  const now = Date.now()
-  const attempts = loginAttempts.get(ip)
-  
-  if (!attempts) {
-    loginAttempts.set(ip, { count: 1, lastAttempt: now })
-    return true
-  }
-  
-  // Reset if outside the attempt window
-  if (now - attempts.lastAttempt > ATTEMPT_WINDOW) {
-    loginAttempts.set(ip, { count: 1, lastAttempt: now })
-    return true
-  }
-  
-  // Check if locked out
-  if (attempts.count >= MAX_LOGIN_ATTEMPTS) {
-    if (now - attempts.lastAttempt < LOCKOUT_DURATION) {
+const checkRateLimit = async (ip: string): Promise<boolean> => {
+  try {
+    await connectRedis()
+    const key = `login_attempts:${ip}`
+    const count = await redis.get(key)
+
+    if (!count) {
+      await redis.set(key, 1, { EX: ATTEMPT_WINDOW })
+      return true
+    }
+
+    if (parseInt(count) >= MAX_LOGIN_ATTEMPTS) {
       return false
-    } else {
-      // Reset after lockout period
+    }
+
+    await redis.incr(key)
+    return true
+  } catch (error) {
+    console.error('Redis rate limit error, using fallback:', error)
+    // Fallback to in-memory
+    const now = Date.now()
+    const attempts = loginAttempts.get(ip)
+
+    if (!attempts) {
       loginAttempts.set(ip, { count: 1, lastAttempt: now })
       return true
     }
+
+    if (now - attempts.lastAttempt > ATTEMPT_WINDOW * 1000) {
+      loginAttempts.set(ip, { count: 1, lastAttempt: now })
+      return true
+    }
+
+    if (attempts.count >= MAX_LOGIN_ATTEMPTS) {
+      if (now - attempts.lastAttempt < LOCKOUT_DURATION) {
+        return false
+      } else {
+        loginAttempts.set(ip, { count: 1, lastAttempt: now })
+        return true
+      }
+    }
+
+    attempts.count++
+    attempts.lastAttempt = now
+    return true
   }
-  
-  // Increment attempts
-  attempts.count++
-  attempts.lastAttempt = now
-  return true
 }
 
-const recordFailedAttempt = (ip: string): void => {
-  const now = Date.now()
-  const attempts = loginAttempts.get(ip)
-  
-  if (!attempts) {
-    loginAttempts.set(ip, { count: 1, lastAttempt: now })
-  } else {
-    loginAttempts.set(ip, { count: attempts.count + 1, lastAttempt: now })
+const recordFailedAttempt = async (ip: string): Promise<void> => {
+  try {
+    // With Redis implementation, checks already increment. 
+    // This is primarily for fallback consistency or explicit logging.
+  } catch (e) {
+    // Ignore
   }
 }
 
@@ -97,28 +113,28 @@ export const authOptions: NextAuthOptions = {
           if (!credentials?.email || !credentials?.password) {
             throw new Error('Email and password are required')
           }
-          
+
           if (!isValidEmail(credentials.email)) {
             throw new Error('Invalid email format')
           }
-          
+
           if (!isValidPassword(credentials.password)) {
             throw new Error('Invalid password format')
           }
-          
+
           // Rate limiting check
           const clientIP = req?.headers?.['x-forwarded-for'] || req?.headers?.['x-real-ip'] || 'unknown'
           const ip = Array.isArray(clientIP) ? clientIP[0] : clientIP
-          
-          if (!checkRateLimit(ip)) {
+
+          if (!await checkRateLimit(ip)) {
             throw new Error('Too many login attempts. Please try again later.')
           }
-          
+
           const sanitizedEmail = sanitizeEmail(credentials.email)
-          
+
           // Find user with security checks - optimized query
           const user = await db.user.findUnique({
-            where: { 
+            where: {
               email: sanitizedEmail,
               isActive: true // Only allow active users
             },
@@ -147,7 +163,7 @@ export const authOptions: NextAuthOptions = {
           })
 
           if (!user || !user.password) {
-            recordFailedAttempt(ip)
+            await recordFailedAttempt(ip)
             throw new Error('Invalid credentials')
           }
 
@@ -155,7 +171,7 @@ export const authOptions: NextAuthOptions = {
           const isPasswordValid = await compare(credentials.password, user.password)
 
           if (!isPasswordValid) {
-            recordFailedAttempt(ip)
+            await recordFailedAttempt(ip)
             throw new Error('Invalid credentials')
           }
 
@@ -163,15 +179,15 @@ export const authOptions: NextAuthOptions = {
           if (!user.isActive) {
             throw new Error('Account is deactivated')
           }
-          
+
           // Check for suspicious activity
           const now = new Date()
           const lastLogin = user.lastLoginAt
-          
+
           if (lastLogin) {
             const timeDiff = now.getTime() - lastLogin.getTime()
             const hoursDiff = timeDiff / (1000 * 60 * 60)
-            
+
             // Log suspicious rapid logins
             if (hoursDiff < 0.1) { // Less than 6 minutes
               console.warn(`Rapid login detected for user ${user.email}`)
@@ -181,7 +197,7 @@ export const authOptions: NextAuthOptions = {
           // Update last login with additional security info
           await db.user.update({
             where: { id: user.id },
-            data: { 
+            data: {
               lastLoginAt: now,
               // Could add more tracking fields like loginIP, userAgent, etc.
             },
@@ -218,7 +234,7 @@ export const authOptions: NextAuthOptions = {
       if (token.iat) {
         const tokenAge = Math.floor(Date.now() / 1000) - (token.iat as number)
         const maxAge = 24 * 60 * 60 // 24 hours
-        
+
         if (tokenAge > maxAge) {
           console.warn('Token expired, forcing re-authentication')
           // Return minimal token to force re-authentication
@@ -239,7 +255,7 @@ export const authOptions: NextAuthOptions = {
             obj[key] = session[key]
             return obj
           }, {} as any)
-        
+
         token = { ...token, ...filteredSession }
       }
 
@@ -252,9 +268,9 @@ export const authOptions: NextAuthOptions = {
         session.user.isVerified = token.isVerified as boolean
         session.user.studentId = token.studentId as string | undefined
         session.user.tutorId = token.tutorId as string | undefined
-        
-        // Add security metadata (extending session in types would be better)
-        ;(session as any).tokenCreatedAt = token.iat as number
+
+          // Add security metadata (extending session in types would be better)
+          ; (session as any).tokenCreatedAt = token.iat as number
       }
 
       return session
@@ -270,16 +286,16 @@ export const authOptions: NextAuthOptions = {
         }
         return baseUrl
       }
-      
+
       // Enhanced origin validation
       try {
         const urlObj = new URL(url)
         const baseUrlObj = new URL(baseUrl)
-        
+
         if (urlObj.origin === baseUrlObj.origin) {
           return url
         }
-        
+
         // Additional check for subdomain security
         if (urlObj.hostname.endsWith(`.${baseUrlObj.hostname}`)) {
           return url
@@ -287,7 +303,7 @@ export const authOptions: NextAuthOptions = {
       } catch (error) {
         console.warn('Invalid redirect URL:', url)
       }
-      
+
       return baseUrl
     },
   },
@@ -295,12 +311,12 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account, profile, isNewUser }) {
       // Enhanced logging with security context
       const timestamp = new Date().toISOString()
-      console.log(`[${timestamp}] User ${user.email} signed in`, { 
-        isNewUser, 
+      console.log(`[${timestamp}] User ${user.email} signed in`, {
+        isNewUser,
         provider: account?.provider,
-        userId: user.id 
+        userId: user.id
       })
-      
+
       // Log new user registrations for monitoring
       if (isNewUser) {
         console.log(`[${timestamp}] New user registration: ${user.email}`)
@@ -308,7 +324,7 @@ export const authOptions: NextAuthOptions = {
     },
     async signOut({ session, token }) {
       const timestamp = new Date().toISOString()
-      console.log(`[${timestamp}] User signed out`, { 
+      console.log(`[${timestamp}] User signed out`, {
         userId: token?.sub,
         sessionDuration: token?.iat ? Date.now() / 1000 - (token.iat as number) : 'unknown'
       })

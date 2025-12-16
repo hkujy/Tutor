@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../../../lib/auth/config'
 import { db } from '../../../lib/db/client'
 import { z } from 'zod'
 
@@ -22,9 +24,44 @@ const updateAppointmentSchema = z.object({
   notes: z.string().optional(),
 })
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
+
+    const whereClause: any = {}
+
+    // Date filtering
+    if (startDate && endDate) {
+      whereClause.startTime = {
+        gte: new Date(startDate),
+        lte: new Date(endDate),
+      }
+    }
+
+    // Role-based filtering
+    if (session.user.role === 'STUDENT') {
+      if (!session.user.studentId) {
+        return NextResponse.json({ error: 'Student profile not found' }, { status: 403 })
+      }
+      whereClause.studentId = session.user.studentId
+    } else if (session.user.role === 'TUTOR') {
+      if (!session.user.tutorId) {
+        return NextResponse.json({ error: 'Tutor profile not found' }, { status: 403 })
+      }
+      whereClause.tutorId = session.user.tutorId
+    } else if (session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const appointments = await db.appointment.findMany({
+      where: whereClause,
       orderBy: { startTime: 'asc' },
       include: {
         tutor: {
@@ -60,12 +97,35 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const data = appointmentSchema.parse(body)
 
     // Combine date and time into a Date object
     const startTime = new Date(`${data.date}T${data.time}:00Z`)
     const endTime = new Date(startTime.getTime() + data.duration * 60 * 1000) // Duration in minutes
+
+    // Check for scheduling conflicts
+    const conflict = await db.appointment.findFirst({
+      where: {
+        tutorId: data.tutorId,
+        status: { not: 'CANCELLED' },
+        OR: [
+          {
+            startTime: { lt: endTime },
+            endTime: { gt: startTime }
+          }
+        ]
+      }
+    })
+
+    if (conflict) {
+      return NextResponse.json({ error: 'Time slot already booked' }, { status: 409 })
+    }
 
     const appointment = await db.appointment.create({
       data: {
@@ -129,6 +189,11 @@ export async function POST(request: NextRequest) {
 // PUT - Update/reschedule appointment
 export async function PUT(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const data = updateAppointmentSchema.parse(body)
 
@@ -148,41 +213,45 @@ export async function PUT(request: NextRequest) {
     if (data.status) updateData.status = data.status
     if (data.notes !== undefined) updateData.notes = data.notes
 
-    const appointment = await db.appointment.update({
-      where: { id: data.id },
-      data: updateData,
-      include: {
-        tutor: {
-          select: {
-            user: {
-              select: {
-                firstName: true,
-                lastName: true,
-                email: true,
+    const result = await db.$transaction(async (tx) => {
+      const appointment = await tx.appointment.update({
+        where: { id: data.id },
+        data: updateData,
+        include: {
+          tutor: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                }
               }
             }
-          }
-        },
-        student: {
-          select: {
-            user: {
-              select: {
-                firstName: true,
-                lastName: true,
-                email: true,
+          },
+          student: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                }
               }
             }
           }
         }
+      })
+
+      // If appointment is marked as COMPLETED, automatically create/update lecture hours
+      if (data.status === 'COMPLETED') {
+        await handleCompletedAppointment(appointment, tx)
       }
+
+      return appointment
     })
 
-    // If appointment is marked as COMPLETED, automatically create/update lecture hours
-    if (data.status === 'COMPLETED') {
-      await handleCompletedAppointment(appointment)
-    }
-
-    return NextResponse.json({ appointment })
+    return NextResponse.json({ appointment: result })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
@@ -195,11 +264,34 @@ export async function PUT(request: NextRequest) {
 // DELETE - Cancel appointment
 export async function DELETE(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
     if (!id) {
       return NextResponse.json({ error: 'Appointment ID is required' }, { status: 400 })
+    }
+
+    // Verify ownership/permissions
+    const appointmentToCheck = await db.appointment.findUnique({
+      where: { id },
+      select: { tutorId: true, studentId: true }
+    })
+
+    if (!appointmentToCheck) {
+      return NextResponse.json({ error: 'Appointment not found' }, { status: 404 })
+    }
+
+    if (session.user.role === 'TUTOR' && appointmentToCheck.tutorId !== session.user.tutorId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    if (session.user.role === 'STUDENT' && appointmentToCheck.studentId !== session.user.studentId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     // Soft delete by updating status to CANCELLED
@@ -240,135 +332,129 @@ export async function DELETE(request: NextRequest) {
 }
 
 // Handle completed appointment - automatically create lecture hours and session
-async function handleCompletedAppointment(appointment: any) {
-  try {
-    // Calculate session duration in hours
-    const startTime = new Date(appointment.startTime)
-    const endTime = new Date(appointment.endTime)
-    const durationMs = endTime.getTime() - startTime.getTime()
-    const durationHours = durationMs / (1000 * 60 * 60) // Convert to hours
+async function handleCompletedAppointment(appointment: any, tx: any) {
+  // Calculate session duration in hours
+  const startTime = new Date(appointment.startTime)
+  const endTime = new Date(appointment.endTime)
+  const durationMs = endTime.getTime() - startTime.getTime()
+  const durationHours = durationMs / (1000 * 60 * 60) // Convert to hours
 
-    if (durationHours <= 0) {
-      console.warn('Invalid appointment duration:', durationHours)
-      return
-    }
-
-    // Find or create lecture hours record
-    let lectureHours = await db.lectureHours.findUnique({
-      where: {
-        studentId_tutorId_subject: {
-          studentId: appointment.studentId,
-          tutorId: appointment.tutorId,
-          subject: appointment.subject
-        }
-      }
-    })
-
-    if (!lectureHours) {
-      // Create new lecture hours record
-      lectureHours = await db.lectureHours.create({
-        data: {
-          studentId: appointment.studentId,
-          tutorId: appointment.tutorId,
-          subject: appointment.subject,
-          totalHours: durationHours,
-          unpaidHours: durationHours,
-          lastSessionDate: endTime,
-          paymentInterval: 10 // Default to 10 hours payment interval
-        }
-      })
-    } else {
-      // Update existing record
-      const newTotalHours = parseFloat(lectureHours.totalHours.toString()) + durationHours
-      const newUnpaidHours = parseFloat(lectureHours.unpaidHours.toString()) + durationHours
-
-      lectureHours = await db.lectureHours.update({
-        where: { id: lectureHours.id },
-        data: {
-          totalHours: newTotalHours,
-          unpaidHours: newUnpaidHours,
-          lastSessionDate: endTime,
-          reminderSent: false // Reset reminder flag when new hours are added
-        }
-      })
-    }
-
-    // Create the session record
-    const session = await db.lectureSession.create({
-      data: {
-        lectureHoursId: lectureHours.id,
-        appointmentId: appointment.id,
-        duration: durationHours,
-        actualStartTime: startTime,
-        actualEndTime: endTime,
-        notes: appointment.notes || null
-      }
-    })
-
-    // Check if payment reminder should be triggered
-    const unpaidHours = parseFloat(lectureHours.unpaidHours.toString())
-    const paymentInterval = lectureHours.paymentInterval || 10
-
-    if (unpaidHours >= paymentInterval && !lectureHours.reminderSent) {
-      // Get appointment with user details for notifications
-      const appointmentWithUsers = await db.appointment.findUnique({
-        where: { id: appointment.id },
-        include: {
-          student: { include: { user: true } },
-          tutor: { include: { user: true } }
-        }
-      })
-
-      if (appointmentWithUsers) {
-        // Create payment reminder notifications
-        await Promise.all([
-          // Notification for student
-          db.notification.create({
-            data: {
-              userId: appointmentWithUsers.student.userId,
-              type: 'PAYMENT_REMINDER',
-              title: 'Payment Reminder',
-              message: `You have ${unpaidHours.toFixed(1)} unpaid hours for ${appointmentWithUsers.subject} sessions. Please arrange payment with your tutor.`,
-              channels: ['email'],
-              data: {
-                lectureHoursId: lectureHours.id,
-                unpaidHours,
-                paymentInterval,
-                subject: appointmentWithUsers.subject
-              }
-            }
-          }),
-          // Notification for tutor
-          db.notification.create({
-            data: {
-              userId: appointmentWithUsers.tutor.userId,
-              type: 'PAYMENT_REMINDER',
-              title: 'Payment Reminder - Student',
-              message: `${appointmentWithUsers.student.user.firstName} ${appointmentWithUsers.student.user.lastName} has ${unpaidHours.toFixed(1)} unpaid hours for ${appointmentWithUsers.subject} sessions.`,
-              channels: ['email'],
-              data: {
-                lectureHoursId: lectureHours.id,
-                unpaidHours,
-                paymentInterval,
-                subject: appointmentWithUsers.subject
-              }
-            }
-          })
-        ])
-
-        // Mark reminder as sent
-        await db.lectureHours.update({
-          where: { id: lectureHours.id },
-          data: { reminderSent: true }
-        })
-      }
-    }
-
-    console.log(`Lecture hours automatically created for appointment ${appointment.id}: ${durationHours} hours`)
-    return { lectureHours, session }
-    
-  } catch (error) {
-    console.error('Error handling completed appointment:', error)
-    // Don't throw error to avoid breaking appointment update
+  if (durationHours <= 0) {
+    console.warn('Invalid appointment duration:', durationHours)
+    return
   }
+
+  // Find or create lecture hours record
+  let lectureHours = await tx.lectureHours.findUnique({
+    where: {
+      studentId_tutorId_subject: {
+        studentId: appointment.studentId,
+        tutorId: appointment.tutorId,
+        subject: appointment.subject
+      }
+    }
+  })
+
+  if (!lectureHours) {
+    // Create new lecture hours record
+    lectureHours = await tx.lectureHours.create({
+      data: {
+        studentId: appointment.studentId,
+        tutorId: appointment.tutorId,
+        subject: appointment.subject,
+        totalHours: durationHours,
+        unpaidHours: durationHours,
+        lastSessionDate: endTime,
+        paymentInterval: 10 // Default to 10 hours payment interval
+      }
+    })
+  } else {
+    // Update existing record
+    const newTotalHours = parseFloat(lectureHours.totalHours.toString()) + durationHours
+    const newUnpaidHours = parseFloat(lectureHours.unpaidHours.toString()) + durationHours
+
+    lectureHours = await tx.lectureHours.update({
+      where: { id: lectureHours.id },
+      data: {
+        totalHours: newTotalHours,
+        unpaidHours: newUnpaidHours,
+        lastSessionDate: endTime,
+        reminderSent: false // Reset reminder flag when new hours are added
+      }
+    })
+  }
+
+  // Create the session record
+  const session = await tx.lectureSession.create({
+    data: {
+      lectureHoursId: lectureHours.id,
+      appointmentId: appointment.id,
+      duration: durationHours,
+      actualStartTime: startTime,
+      actualEndTime: endTime,
+      notes: appointment.notes || null
+    }
+  })
+
+  // Check if payment reminder should be triggered
+  const unpaidHours = parseFloat(lectureHours.unpaidHours.toString())
+  const paymentInterval = lectureHours.paymentInterval || 10
+
+  if (unpaidHours >= paymentInterval && !lectureHours.reminderSent) {
+    // Get appointment with user details for notifications
+    const appointmentWithUsers = await tx.appointment.findUnique({
+      where: { id: appointment.id },
+      include: {
+        student: { include: { user: true } },
+        tutor: { include: { user: true } }
+      }
+    })
+
+    if (appointmentWithUsers) {
+      // Create payment reminder notifications
+      await Promise.all([
+        // Notification for student
+        tx.notification.create({
+          data: {
+            userId: appointmentWithUsers.student.userId,
+            type: 'PAYMENT_REMINDER',
+            title: 'Payment Reminder',
+            message: `You have ${unpaidHours.toFixed(1)} unpaid hours for ${appointmentWithUsers.subject} sessions. Please arrange payment with your tutor.`,
+            channels: ['email'],
+            data: {
+              lectureHoursId: lectureHours.id,
+              unpaidHours,
+              paymentInterval,
+              subject: appointmentWithUsers.subject
+            }
+          }
+        }),
+        // Notification for tutor
+        tx.notification.create({
+          data: {
+            userId: appointmentWithUsers.tutor.userId,
+            type: 'PAYMENT_REMINDER',
+            title: 'Payment Reminder - Student',
+            message: `${appointmentWithUsers.student.user.firstName} ${appointmentWithUsers.student.user.lastName} has ${unpaidHours.toFixed(1)} unpaid hours for ${appointmentWithUsers.subject} sessions.`,
+            channels: ['email'],
+            data: {
+              lectureHoursId: lectureHours.id,
+              unpaidHours,
+              paymentInterval,
+              subject: appointmentWithUsers.subject
+            }
+          }
+        })
+      ])
+
+      // Mark reminder as sent
+      await tx.lectureHours.update({
+        where: { id: lectureHours.id },
+        data: { reminderSent: true }
+      })
+    }
+  }
+
+  console.log(`Lecture hours automatically created for appointment ${appointment.id}: ${durationHours} hours`)
+  return { lectureHours, session }
 }

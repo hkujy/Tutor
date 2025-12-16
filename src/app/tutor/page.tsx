@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense, lazy } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { DashboardSkeleton, AppointmentSkeleton, AvailabilitySkeleton, NotesSkeleton } from '../../components/ui/LoadingSkeletons'
+import { ThemeToggle } from '../../components/ui/ThemeToggle'
 
 // Lazy load heavy components to reduce initial bundle size
 const TutorAvailability = lazy(() => import('../../components/availability/TutorAvailability'))
@@ -104,18 +105,21 @@ function TutorDashboard() {
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
-            <div className="flex items-center space-x-4">
-              <img 
-                src="/logo.svg" 
-                alt="Tutoring Calendar Logo" 
-                width={48} 
-                height={48}
-                className="rounded-lg shadow-sm"
-              />
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Tutor Dashboard</h1>
-                <p className="mt-1 text-gray-600">Manage your availability, appointments, and student progress</p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <img
+                  src="/logo.svg"
+                  alt="Tutoring Calendar Logo"
+                  width={48}
+                  height={48}
+                  className="rounded-lg shadow-sm"
+                />
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Tutor Dashboard</h1>
+                  <p className="mt-1 text-gray-600">Manage your availability, appointments, and student progress</p>
+                </div>
               </div>
+              <ThemeToggle />
             </div>
           </div>
         </div>
@@ -129,11 +133,10 @@ function TutorDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                     ? 'border-indigo-500 text-indigo-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 <span className="mr-2">{tab.icon}</span>
                 {tab.name}

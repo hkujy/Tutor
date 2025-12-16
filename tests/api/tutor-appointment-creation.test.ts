@@ -2,6 +2,18 @@ import { createMocks } from 'node-mocks-http'
 import { POST } from '../../src/app/api/appointments/route'
 import { db } from '../../src/lib/db/client'
 
+// Mock next-auth
+jest.mock('next-auth', () => ({
+  getServerSession: jest.fn().mockResolvedValue({
+    user: {
+      id: 'tutor-user-1',
+      email: 'tutor@example.com',
+      role: 'TUTOR',
+      tutorId: 'tutor-1'
+    }
+  })
+}))
+
 // Mock NextResponse properly
 jest.mock('next/server', () => ({
   NextResponse: {
@@ -10,6 +22,12 @@ jest.mock('next/server', () => ({
       status: init?.status || 200,
       ok: (init?.status || 200) >= 200 && (init?.status || 200) < 300
     })
+  },
+  NextRequest: class {
+    url: string
+    constructor(url: string) {
+      this.url = url
+    }
   }
 }))
 
@@ -18,6 +36,7 @@ jest.mock('../../src/lib/db/client', () => ({
   db: {
     appointment: {
       create: jest.fn(),
+      findFirst: jest.fn(),
     },
     student: {
       findUnique: jest.fn(),
@@ -67,6 +86,7 @@ describe('/api/appointments POST (Tutor Creation)', () => {
     }
 
     ;(db.appointment.create as jest.Mock).mockResolvedValue(mockAppointment)
+    ;(db.appointment.findFirst as jest.Mock).mockResolvedValue(null) // No conflict
     ;(db.student.findUnique as jest.Mock).mockResolvedValue(mockStudent)
     ;(db.tutor.findUnique as jest.Mock).mockResolvedValue(mockTutor)
     ;(db.notification.create as jest.Mock).mockResolvedValue({})

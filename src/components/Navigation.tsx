@@ -46,40 +46,39 @@ export default function Navigation() {
   const navItems = getNavItems()
 
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-card border-b border-border shadow-sm transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-indigo-600">
+            <Link href="/" className="text-xl font-bold text-primary hover:opacity-80 transition-opacity">
               Tutoring Calendar
             </Link>
           </div>
-          
+
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href as any}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    pathname === item.href
-                      ? 'bg-indigo-100 text-indigo-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${pathname === item.href
+                    ? 'bg-primary/10 text-primary ring-1 ring-primary/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                    }`}
                 >
                   <span className="mr-2">{item.icon}</span>
                   {item.label}
                 </Link>
               ))}
-              
+
               {user && (
                 <div className="flex items-center space-x-4 ml-6">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-muted-foreground">
                     {user.firstName} {user.lastName}
                   </span>
                   <button
                     onClick={logout}
-                    className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                    className="px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200"
                   >
                     Sign Out
                   </button>
@@ -90,7 +89,7 @@ export default function Navigation() {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button className="text-gray-600 hover:text-gray-900">
+            <button className="text-muted-foreground hover:text-foreground transition-colors">
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>

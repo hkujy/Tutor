@@ -3,6 +3,18 @@ import { createMocks } from 'node-mocks-http'
 import { POST as AppointmentPOST } from '../../src/app/api/appointments/route'
 import { GET as AppointmentGET } from '../../src/app/api/appointments/route'
 
+// Mock next-auth
+jest.mock('next-auth', () => ({
+  getServerSession: jest.fn().mockResolvedValue({
+    user: {
+      name: 'Test User',
+      email: 'test@example.com',
+      role: 'ADMIN',
+      id: 'user-load-test'
+    }
+  })
+}))
+
 // Mock NextResponse
 jest.mock('next/server', () => ({
   NextResponse: {
@@ -12,6 +24,12 @@ jest.mock('next/server', () => ({
       ok: (init?.status || 200) >= 200 && (init?.status || 200) < 300,
       headers: new Map()
     })
+  },
+  NextRequest: class {
+    url: string
+    constructor(url: string) {
+      this.url = url
+    }
   }
 }))
 
@@ -20,6 +38,7 @@ jest.mock('../../src/lib/db/client', () => ({
   db: {
     appointment: {
       create: jest.fn(),
+      findFirst: jest.fn(), // Added for conflict check
       findMany: jest.fn(),
       update: jest.fn(),
     },
@@ -35,6 +54,7 @@ jest.mock('../../src/lib/db/client', () => ({
     user: {
       findMany: jest.fn(),
     },
+    $transaction: jest.fn((callback) => callback(db)), // Mock transaction
   },
 }))
 
@@ -73,6 +93,8 @@ describe('System Load Testing Simulation', () => {
         lastName: 'Tutor'
       }
     })
+
+    ;(db.appointment.findFirst as jest.Mock).mockResolvedValue(null) // No conflicts
 
     ;(db.appointment.create as jest.Mock).mockImplementation(() => {
       // Simulate variable database response times
@@ -138,7 +160,11 @@ describe('System Load Testing Simulation', () => {
   }
 
   const simulateAppointmentQuery = async () => {
-    return AppointmentGET()
+    const { req } = createMocks({
+      method: 'GET',
+      url: 'http://localhost:3000/api/appointments'
+    })
+    return AppointmentGET(req as any)
   }
 
   it('should handle 100 concurrent appointment creations', async () => {

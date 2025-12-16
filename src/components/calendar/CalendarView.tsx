@@ -34,12 +34,21 @@ export default function CalendarView() {
   const calendarDays = calendarStart && calendarEnd ? eachDayOfInterval({ start: calendarStart, end: calendarEnd }) : []
 
   useEffect(() => {
-    fetchAppointments()
-  }, [])
+    if (currentDate) {
+      const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 0 })
+      const end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 0 })
+      fetchAppointments(start, end)
+    }
+  }, [currentDate])
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = async (start: Date, end: Date) => {
+    setLoading(true)
     try {
-      const res = await fetch('/api/appointments')
+      const params = new URLSearchParams({
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+      })
+      const res = await fetch(`/api/appointments?${params}`)
       if (res.ok) {
         const data = await res.json()
         setAppointments(data.appointments || [])

@@ -47,13 +47,41 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 94.1%;
   }
+
+  .ocean {
+    --background: 195 45% 8%;
+    --foreground: 180 20% 96%;
+    --card: 195 40% 12%;
+    --card-foreground: 180 20% 96%;
+    --popover: 195 40% 12%;
+    --popover-foreground: 180 20% 96%;
+    --primary: 188 94% 60%;
+    --primary-foreground: 195 45% 8%;
+    --secondary: 195 30% 25%;
+    --secondary-foreground: 180 20% 96%;
+    --muted: 195 30% 25%;
+    --muted-foreground: 185 15% 70%;
+    --accent: 175 70% 40%;
+    --accent-foreground: 180 20% 96%;
+    --destructive: 0 84% 50%;
+    --destructive-foreground: 180 20% 96%;
+    --border: 195 30% 25%;
+    --input: 195 30% 25%;
+    --ring: 188 94% 60%;
+  }
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+
+  html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }

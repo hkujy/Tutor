@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../../../../lib/auth/config'
+import { authOptions } from '@/lib/auth/config'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { studentId: string, noteId: string } }
+  props: { params: Promise<{ studentId: string, noteId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -66,11 +67,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { studentId: string, noteId: string } }
+  props: { params: Promise<{ studentId: string, noteId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

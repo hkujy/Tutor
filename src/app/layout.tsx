@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Providers } from '../components/Providers'
+import { ClientThemeProvider } from '../components/ClientThemeProvider'
 import Navigation from '../components/Navigation'
 import ErrorBoundary from '../components/ErrorBoundary'
 import { ToastProvider } from '../components/Toast'
@@ -19,16 +20,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning={true}>
-      <body className={inter.className} suppressHydrationWarning={true}>
-        <ErrorBoundary>
-          <ToastProvider>
-            <Providers>
-              <Navigation />
-              {children}
-            </Providers>
-          </ToastProvider>
-        </ErrorBoundary>
+    <html lang="en">
+      <body className={inter.className}>
+        <ClientThemeProvider>
+          <ErrorBoundary>
+            <ToastProvider>
+              <Providers>
+                <Navigation />
+                {children}
+              </Providers>
+            </ToastProvider>
+          </ErrorBoundary>
+        </ClientThemeProvider>
       </body>
     </html>
   )

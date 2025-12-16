@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '../../../lib/db/client'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '../../../lib/auth/config'
+import { authOptions } from '@/lib/auth/config'
 import { z } from 'zod'
 
 const createNoteSchema = z.object({

@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense, lazy } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { DashboardSkeleton, AppointmentSkeleton, AvailabilitySkeleton, NotesSkeleton } from '../../components/ui/LoadingSkeletons'
+import { ThemeToggle } from '../../components/ui/ThemeToggle'
 
 // Lazy load heavy components to reduce initial bundle size
 const CalendarView = lazy(() => import('../../components/calendar/CalendarView'))
@@ -91,23 +92,26 @@ function StudentDashboard() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="bg-card shadow-sm border-b border-border transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
-            <div className="flex items-center space-x-4">
-              <img 
-                src="/logo.svg" 
-                alt="Tutoring Calendar Logo" 
-                width={48} 
-                height={48}
-                className="rounded-lg shadow-sm"
-              />
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
-                <p className="mt-1 text-gray-600">Book sessions, track progress, and manage your learning journey</p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <img
+                  src="/logo.svg"
+                  alt="Tutoring Calendar Logo"
+                  width={48}
+                  height={48}
+                  className="rounded-lg shadow-sm"
+                />
+                <div>
+                  <h1 className="text-3xl font-bold text-foreground">Student Dashboard</h1>
+                  <p className="mt-1 text-muted-foreground">Book sessions, track progress, and manage your learning journey</p>
+                </div>
               </div>
+              <ThemeToggle />
             </div>
           </div>
         </div>
@@ -115,17 +119,16 @@ function StudentDashboard() {
 
       {/* Navigation Tabs */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="border-b border-gray-200">
+        <div className="border-b border-border">
           <nav className="-mb-px flex space-x-8">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${activeTab === tab.id
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                  }`}
               >
                 <span className="mr-2">{tab.icon}</span>
                 {tab.name}
@@ -142,26 +145,26 @@ function StudentDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {loading ? (
                 [...Array(4)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-lg shadow p-6 animate-pulse">
+                  <div key={i} className="bg-card rounded-lg shadow p-6 animate-pulse border border-border">
                     <div className="flex items-center">
-                      <div className="w-12 h-12 bg-gray-200 rounded-lg mr-4"></div>
+                      <div className="w-12 h-12 bg-muted rounded-lg mr-4"></div>
                       <div className="flex-1">
-                        <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
-                        <div className="h-6 bg-gray-200 rounded w-16"></div>
+                        <div className="h-4 bg-muted rounded w-20 mb-2"></div>
+                        <div className="h-6 bg-muted rounded w-16"></div>
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
                 stats.map((stat, index) => (
-                  <div key={index} className="bg-white rounded-lg shadow p-6">
+                  <div key={index} className="bg-card rounded-lg shadow p-6 border border-border transition-all duration-200 hover:shadow-lg">
                     <div className="flex items-center">
                       <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center text-white text-xl mr-4`}>
                         {stat.icon}
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600">{stat.label}</p>
-                        <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                        <p className="text-sm text-muted-foreground">{stat.label}</p>
+                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
                       </div>
                     </div>
                   </div>
@@ -178,46 +181,46 @@ function StudentDashboard() {
               {/* Sidebar with Form */}
               <div className="space-y-6">
                 <Suspense fallback={<AvailabilitySkeleton />}>
-                  <EnhancedAppointmentForm 
+                  <EnhancedAppointmentForm
                     initialDate={selectedDate}
                     onAppointmentCreated={handleAppointmentCreated}
                   />
                 </Suspense>
-                
+
                 {/* Quick Actions */}
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                <div className="bg-card rounded-lg shadow p-6 border border-border transition-colors duration-300">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
                   <div className="space-y-3">
-                    <button 
+                    <button
                       onClick={() => setActiveTab('assignments')}
-                      className="w-full p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="w-full p-3 text-left border border-border rounded-lg hover:bg-accent/50 transition-all duration-200 hover:shadow-md"
                     >
                       <div className="flex items-center">
                         <span className="text-2xl mr-3">📋</span>
                         <div>
-                          <p className="font-medium text-gray-900">View Assignments</p>
-                          <p className="text-sm text-gray-600">Check your homework and tasks</p>
+                          <p className="font-medium text-foreground">View Assignments</p>
+                          <p className="text-sm text-muted-foreground">Check your homework and tasks</p>
                         </div>
                       </div>
                     </button>
-                    <button 
+                    <button
                       onClick={() => setActiveTab('progress')}
-                      className="w-full p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="w-full p-3 text-left border border-border rounded-lg hover:bg-accent/50 transition-all duration-200 hover:shadow-md"
                     >
                       <div className="flex items-center">
                         <span className="text-2xl mr-3">📊</span>
                         <div>
-                          <p className="font-medium text-gray-900">Progress Report</p>
-                          <p className="text-sm text-gray-600">See your learning progress</p>
+                          <p className="font-medium text-foreground">Progress Report</p>
+                          <p className="text-sm text-muted-foreground">See your learning progress</p>
                         </div>
                       </div>
                     </button>
-                    <button className="w-full p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <button className="w-full p-3 text-left border border-border rounded-lg hover:bg-accent/50 transition-all duration-200 hover:shadow-md">
                       <div className="flex items-center">
                         <span className="text-2xl mr-3">💬</span>
                         <div>
-                          <p className="font-medium text-gray-900">Messages</p>
-                          <p className="text-sm text-gray-600">Chat with your tutors</p>
+                          <p className="font-medium text-foreground">Messages</p>
+                          <p className="text-sm text-muted-foreground">Chat with your tutors</p>
                         </div>
                       </div>
                     </button>

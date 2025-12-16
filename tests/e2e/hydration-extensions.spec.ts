@@ -155,11 +155,11 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
 
     await page.goto('/')
 
-    // Should show loading or redirect to login
-    const isLoading = await page.locator('text=Loading').isVisible({ timeout: 1000 }).catch(() => false)
-    const isLogin = await page.locator('text=Welcome to Tutoring Calendar').isVisible({ timeout: 1000 }).catch(() => false)
+    // Check for login text OR simple main page text
+    const isLogin = await page.locator('text=Quick Demo Login').isVisible({ timeout: 1000 }).catch(() => false)
+    const isMain = await page.locator('text=Tutoring Calendar').isVisible({ timeout: 1000 }).catch(() => false)
 
-    expect(isLoading || isLogin).toBe(true)
+    expect(isLogin || isMain).toBe(true)
     expect(hydrationWarnings).toHaveLength(0)
   })
 
@@ -219,7 +219,7 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
     await page.goto('/login')
 
     // Look for animated SVGs (loading spinners, etc.)
-    await expect(page.locator('svg')).toBeVisible()
+    await expect(page.locator('svg').first()).toBeVisible()
 
     // Check for animate-spin class or CSS animations
     const animatedElements = page.locator('.animate-spin, [class*="animate"]')
@@ -244,7 +244,7 @@ test.describe('Hydration and Browser Extension Compatibility', () => {
     await page.goto('/auth/error')
 
     // Should show error page with SVG icon
-    await expect(page.locator('text=Authentication Error')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Authentication Error' })).toBeVisible()
 
     // Check that error SVG is present
     const errorSvg = page.locator('svg').first()
