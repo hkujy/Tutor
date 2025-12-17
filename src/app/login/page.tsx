@@ -210,6 +210,15 @@ export default function LoginPage() {
               >
                 Sign In
               </LoadingButton>
+
+              <div className="text-center mt-4">
+                <p className="text-sm text-gray-600">
+                  Don't have an account?{' '}
+                  <a href="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
+                    Sign up
+                  </a>
+                </p>
+              </div>
             </form>
           </div>
         </div>

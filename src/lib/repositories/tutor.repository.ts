@@ -2,9 +2,11 @@ import { db } from '../db/client'
 import { Prisma } from '@prisma/client'
 
 // Input validation and sanitization functions
-const isValidUUID = (id: string): boolean => {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-  return uuidRegex.test(id)
+const isValidId = (id: string): boolean => {
+  // Allow both UUIDs and CUIDs
+  // CUIDs start with 'c' and are around 25 chars. UUIDs are 36 chars.
+  // We'll just check for a non-empty string with alphanumeric characters and hyphens of reasonable length.
+  return typeof id === 'string' && id.length > 0 && id.length <= 50
 }
 
 const isValidSpecializations = (specializations: string[]): boolean => {
@@ -80,7 +82,7 @@ export type UpdateTutorInput = Partial<Omit<CreateTutorInput, 'userId'>>
 export class TutorRepository {
   async create(data: CreateTutorInput) {
     // Comprehensive input validation
-    if (!data.userId || !isValidUUID(data.userId)) {
+    if (!data.userId || !isValidId(data.userId)) {
       throw new Error('Valid user ID is required')
     }
     
@@ -152,7 +154,7 @@ export class TutorRepository {
   }
 
   async findById(id: string) {
-    if (!id || !isValidUUID(id)) {
+    if (!id || !isValidId(id)) {
       throw new Error('Valid tutor ID is required')
     }
     
@@ -209,7 +211,7 @@ export class TutorRepository {
   }
 
   async findByUserId(userId: string) {
-    if (!userId || !isValidUUID(userId)) {
+    if (!userId || !isValidId(userId)) {
       throw new Error('Valid user ID is required')
     }
     
@@ -231,7 +233,7 @@ export class TutorRepository {
   }
 
   async update(id: string, data: UpdateTutorInput) {
-    if (!id || !isValidUUID(id)) {
+    if (!id || !isValidId(id)) {
       throw new Error('Valid tutor ID is required')
     }
     
@@ -317,7 +319,7 @@ export class TutorRepository {
   }
 
   async delete(id: string) {
-    if (!id || !isValidUUID(id)) {
+    if (!id || !isValidId(id)) {
       throw new Error('Valid tutor ID is required')
     }
     

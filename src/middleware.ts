@@ -20,7 +20,7 @@ const securityHeaders = {
 // Rate limiting for API routes
 const requestCounts = new Map<string, { count: number; timestamp: number }>()
 const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 100
+const RATE_LIMIT_MAX_REQUESTS = 300 // Increased limit for dev/demo
 
 const checkRateLimit = (ip: string): boolean => {
   const now = Date.now()

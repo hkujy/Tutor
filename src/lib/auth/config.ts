@@ -10,8 +10,8 @@ import { redis, connectRedis } from '../db/redis'
 // Fallback in-memory rate limiting if Redis fails
 const loginAttempts = new Map<string, { count: number; lastAttempt: number }>()
 
-const MAX_LOGIN_ATTEMPTS = 5
-const LOCKOUT_DURATION = 15 * 60 * 1000 // 15 minutes
+const MAX_LOGIN_ATTEMPTS = 50 // Increased for demo/dev environment
+const LOCKOUT_DURATION = 1 * 60 * 1000 // 1 minute lockout for easier testing
 const ATTEMPT_WINDOW = 15 * 60 // 15 minutes in seconds for Redis
 
 // Security validation functions - kept these strict after previous XSS issues

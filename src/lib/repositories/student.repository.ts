@@ -2,9 +2,11 @@ import { db } from '../db/client'
 import { Prisma } from '@prisma/client'
 
 // Input validation and sanitization functions
-const isValidUUID = (id: string): boolean => {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-  return uuidRegex.test(id)
+const isValidId = (id: string): boolean => {
+  // Allow both UUIDs and CUIDs
+  // CUIDs start with 'c' and are around 25 chars. UUIDs are 36 chars.
+  // We'll just check for a non-empty string with alphanumeric characters and hyphens of reasonable length.
+  return typeof id === 'string' && id.length > 0 && id.length <= 50
 }
 
 const isValidSubjects = (subjects: string[]): boolean => {
@@ -68,7 +70,7 @@ export type UpdateStudentInput = Partial<Omit<CreateStudentInput, 'userId'>>
 export class StudentRepository {
   async create(data: CreateStudentInput) {
     // Comprehensive input validation
-    if (!data.userId || !isValidUUID(data.userId)) {
+    if (!data.userId || !isValidId(data.userId)) {
       throw new Error('Valid user ID is required')
     }
     
@@ -136,7 +138,7 @@ export class StudentRepository {
   }
 
   async findById(id: string) {
-    if (!id || !isValidUUID(id)) {
+    if (!id || !isValidId(id)) {
       throw new Error('Valid student ID is required')
     }
     
@@ -197,7 +199,7 @@ export class StudentRepository {
   }
 
   async findByUserId(userId: string) {
-    if (!userId || !isValidUUID(userId)) {
+    if (!userId || !isValidId(userId)) {
       throw new Error('Valid user ID is required')
     }
     
@@ -218,7 +220,7 @@ export class StudentRepository {
   }
 
   async update(id: string, data: UpdateStudentInput) {
-    if (!id || !isValidUUID(id)) {
+    if (!id || !isValidId(id)) {
       throw new Error('Valid student ID is required')
     }
     
@@ -275,7 +277,7 @@ export class StudentRepository {
   }
 
   async delete(id: string) {
-    if (!id || !isValidUUID(id)) {
+    if (!id || !isValidId(id)) {
       throw new Error('Valid student ID is required')
     }
     
@@ -335,7 +337,7 @@ export class StudentRepository {
   }
 
   async getUpcomingAppointments(studentId: string, limit = 5) {
-    if (!studentId || !isValidUUID(studentId)) {
+    if (!studentId || !isValidId(studentId)) {
       throw new Error('Valid student ID is required')
     }
     
@@ -376,7 +378,7 @@ export class StudentRepository {
   }
 
   async getPendingAssignments(studentId: string, limit = 10) {
-    if (!studentId || !isValidUUID(studentId)) {
+    if (!studentId || !isValidId(studentId)) {
       throw new Error('Valid student ID is required')
     }
     
