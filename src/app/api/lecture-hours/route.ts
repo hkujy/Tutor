@@ -35,99 +35,47 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
     const role = searchParams.get('role')
-    const payments = searchParams.get('payments')
-    const studentId = searchParams.get('studentId')
-    const tutorId = searchParams.get('tutorId')
-    const subject = searchParams.get('subject')
+    const paymentsParam = searchParams.get('payments')
+    const studentIdParam = searchParams.get('studentId')
+    const tutorIdParam = searchParams.get('tutorId')
+    const subjectParam = searchParams.get('subject')
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
 
+    let commonWhereClause: any = {}
+    
     // Handle new role-based queries
     if (userId && role) {
-      let whereClause: any = {}
-      
       if (role === 'student') {
-        // Find student record from user ID
-        const student = await db.student.findFirst({
-          where: { userId }
-        })
-        if (!student) {
-          return NextResponse.json({ lectureHours: [] })
-        }
-        whereClause = { studentId: student.id }
+        const student = await db.student.findFirst({ where: { userId } })
+        if (!student) return NextResponse.json({ lectureHours: [], total: 0, page, limit })
+        commonWhereClause = { studentId: student.id }
       } else if (role === 'tutor') {
-        // Find tutor record from user ID
-        const tutor = await db.tutor.findFirst({
-          where: { userId }
-        })
-        if (!tutor) {
-          return NextResponse.json({ lectureHours: [] })
-        }
-        whereClause = { tutorId: tutor.id }
+        const tutor = await db.tutor.findFirst({ where: { userId } })
+        if (!tutor) return NextResponse.json({ lectureHours: [], total: 0, page, limit })
+        commonWhereClause = { tutorId: tutor.id }
       }
-
-      const lectureHours = await db.lectureHours.findMany({
-        where: whereClause,
-        include: {
-          student: {
-            include: {
-              user: {
-                select: { firstName: true, lastName: true, email: true }
-              }
-            }
-          },
-          tutor: {
-            include: {
-              user: {
-                select: { firstName: true, lastName: true, email: true }
-              }
-            }
-          },
-          sessions: {
-            orderBy: { actualStartTime: 'desc' },
-            take: 10,
-            include: {
-              appointment: {
-                select: { subject: true, startTime: true, endTime: true }
-              }
-            }
-          },
-          payments: {
-            orderBy: { createdAt: 'desc' }
-          }
-        }
-      })
-
-      // Convert Decimal fields to numbers for frontend consumption
-      const convertedLectureHours = lectureHours.map(lh => ({
-        ...lh,
-        totalHours: parseFloat(lh.totalHours.toString()),
-        unpaidHours: parseFloat(lh.unpaidHours.toString()),
-        payments: lh.payments.map(payment => ({
-          ...payment,
-          amount: parseFloat(payment.amount.toString()),
-          hoursIncluded: parseFloat(payment.hoursIncluded.toString())
-        }))
-      }))
-
-      return NextResponse.json({ lectureHours: convertedLectureHours })
+    } else if (studentIdParam || tutorIdParam) { // Legacy handling
+      if (studentIdParam && tutorIdParam) {
+        commonWhereClause = { studentId: studentIdParam, tutorId: tutorIdParam }
+        if (subjectParam) commonWhereClause.subject = subjectParam
+      } else if (studentIdParam) {
+        commonWhereClause = { studentId: studentIdParam }
+      } else if (tutorIdParam) {
+        commonWhereClause = { tutorId: tutorIdParam }
+      }
+    } else {
+      return NextResponse.json({ error: 'Either userId/role or studentId/tutorId is required' }, { status: 400 })
     }
 
-    // Legacy parameter handling
-    if (!studentId && !tutorId) {
-      return NextResponse.json({ error: 'Either studentId or tutorId is required' }, { status: 400 })
-    }
-
-    let whereClause: any = {}
-    if (studentId && tutorId) {
-      whereClause = { studentId, tutorId }
-      if (subject) whereClause.subject = subject
-    } else if (studentId) {
-      whereClause = { studentId }
-    } else if (tutorId) {
-      whereClause = { tutorId }
-    }
+    const skip = (page - 1) * limit
+    const totalLectureHours = await db.lectureHours.count({ where: commonWhereClause })
 
     const lectureHours = await db.lectureHours.findMany({
-      where: whereClause,
+      where: commonWhereClause,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
       include: {
         student: {
           include: {
@@ -152,28 +100,29 @@ export async function GET(request: NextRequest) {
             }
           }
         },
-        payments: {
-          orderBy: { createdAt: 'desc' },
-          take: 5
-        }
+        payments: paymentsParam === 'true' ? {
+          orderBy: { createdAt: 'desc' }
+        } : false
       }
     })
 
-    // Calculate payment reminders needed
+    // Calculate payment reminders needed (only if payments not explicitly requested by client)
     const remindersNeeded = []
-    for (const record of lectureHours) {
-      const unpaidHours = parseFloat(record.unpaidHours.toString())
-      const paymentInterval = record.paymentInterval
-      
-      if (unpaidHours >= paymentInterval - 1 && unpaidHours < paymentInterval && !record.reminderSent) {
-        remindersNeeded.push({
-          lectureHoursId: record.id,
-          studentName: `${record.student.user.firstName} ${record.student.user.lastName}`,
-          tutorName: `${record.tutor.user.firstName} ${record.tutor.user.lastName}`,
-          subject: record.subject,
-          unpaidHours,
-          paymentInterval
-        })
+    if (paymentsParam !== 'true') {
+      for (const record of lectureHours) {
+        const unpaidHours = parseFloat(record.unpaidHours.toString())
+        const paymentInterval = record.paymentInterval
+        
+        if (unpaidHours >= paymentInterval - 1 && unpaidHours < paymentInterval && !record.reminderSent) {
+          remindersNeeded.push({
+            lectureHoursId: record.id,
+            studentName: `${record.student.user.firstName} ${record.student.user.lastName}`,
+            tutorName: `${record.tutor.user.firstName} ${record.tutor.user.lastName}`,
+            subject: record.subject,
+            unpaidHours,
+            paymentInterval
+          })
+        }
       }
     }
 
@@ -182,15 +131,18 @@ export async function GET(request: NextRequest) {
       ...lh,
       totalHours: parseFloat(lh.totalHours.toString()),
       unpaidHours: parseFloat(lh.unpaidHours.toString()),
-      payments: lh.payments.map(payment => ({
+      payments: lh.payments ? lh.payments.map(payment => ({
         ...payment,
         amount: parseFloat(payment.amount.toString()),
         hoursIncluded: parseFloat(payment.hoursIncluded.toString())
-      }))
+      })) : []
     }))
 
     return NextResponse.json({ 
       lectureHours: convertedLectureHours,
+      total: totalLectureHours,
+      page,
+      limit,
       remindersNeeded 
     })
   } catch (error) {

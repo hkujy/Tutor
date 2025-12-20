@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { SkeletonTable, Skeleton } from '../ui/Skeleton'
 import LoadingButton from '../ui/LoadingButton'
 import { format } from 'date-fns'
+import { useTranslations } from 'next-intl'
 
 interface Availability {
   id: string
@@ -31,6 +32,7 @@ const DAYS_OF_WEEK = [
 ]
 
 export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
+  const t = useTranslations('TutorAvailability')
   const [availability, setAvailability] = useState<Availability[]>([])
   const [individualSlots, setIndividualSlots] = useState<IndividualSlot[]>([])
   const [loading, setLoading] = useState(true)
@@ -147,8 +149,8 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
       const data = await res.json()
 
       if (res.ok) {
-        const slotTypeText = slotType === 'individual' ? 'Individual' : 'Recurring'
-        setMessage(`${slotTypeText} availability slot added successfully!`)
+        const slotTypeText = slotType === 'individual' ? t('slotType.individual') : t('slotType.repeating')
+        setMessage(t('messages.addSuccess', { type: slotTypeText }))
         setMessageType('success')
         setShowForm(false)
         fetchAvailability()
@@ -163,11 +165,11 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
         setNumberOfWeeks(4)
         setDurationType('numberOfWeeks')
       } else {
-        setMessage(data.error || 'Failed to add availability slot')
+        setMessage(data.error || t('messages.addError'))
         setMessageType('error')
       }
     } catch (error) {
-      setMessage('Failed to add availability slot')
+      setMessage(t('messages.addError'))
       setMessageType('error')
     } finally {
       setSubmitting(false)
@@ -191,7 +193,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
   }
 
   const handleDeleteAvailability = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this availability slot?')) {
+    if (!confirm(t('confirmDelete'))) {
       return
     }
 
@@ -202,12 +204,12 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
 
       if (res.ok) {
         fetchAvailability()
-        setMessage('Availability slot deleted successfully!')
+        setMessage(t('messages.deleteSuccess'))
         setMessageType('success')
       }
     } catch (error) {
       console.error('Failed to delete availability:', error)
-      setMessage('Failed to delete availability slot')
+      setMessage(t('messages.deleteError'))
       setMessageType('error')
     }
   }
@@ -233,7 +235,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
   }
 
   const handleDeleteIndividualSlot = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this individual slot?')) {
+    if (!confirm(t('confirmDeleteIndividual'))) {
       return
     }
 
@@ -244,12 +246,12 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
 
       if (res.ok) {
         fetchAvailability()
-        setMessage('Individual slot deleted successfully!')
+        setMessage(t('messages.deleteIndividualSuccess'))
         setMessageType('success')
       }
     } catch (error) {
       console.error('Failed to delete individual slot:', error)
-      setMessage('Failed to delete individual slot')
+      setMessage(t('messages.deleteIndividualError'))
       setMessageType('error')
     }
   }
@@ -283,13 +285,13 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-semibold text-gray-900">Weekly Availability</h3>
+        <h3 className="text-xl font-semibold text-gray-900">{t('title')}</h3>
         <LoadingButton
           onClick={() => setShowForm(!showForm)}
           variant="primary"
           size="sm"
         >
-          {showForm ? 'Cancel' : 'Add Time Slot'}
+          {showForm ? t('actions.cancel') : t('actions.addSlot')}
         </LoadingButton>
       </div>
 
@@ -305,11 +307,11 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
 
       {showForm && (
         <form onSubmit={handleAddAvailability} className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="text-lg font-medium mb-4">Add New Availability Slot</h4>
+          <h4 className="text-lg font-medium mb-4">{t('form.title')}</h4>
           
           {/* Slot Type Selection */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Slot Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('form.slotType')}</label>
             <div className="flex gap-4">
               <label className="flex items-center">
                 <input
@@ -319,7 +321,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                   onChange={(e) => setSlotType(e.target.value as 'repeating' | 'individual')}
                   className="mr-2"
                 />
-                Repeating (weekly)
+                {t('slotType.repeating')}
               </label>
               <label className="flex items-center">
                 <input
@@ -329,7 +331,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                   onChange={(e) => setSlotType(e.target.value as 'repeating' | 'individual')}
                   className="mr-2"
                 />
-                Individual slot
+                {t('slotType.individual')}
               </label>
             </div>
           </div>
@@ -339,7 +341,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
             <div>
               {slotType === 'repeating' ? (
                 <>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Day of Week</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('form.dayOfWeek')}</label>
                   <select
                     value={selectedDay}
                     onChange={(e) => setSelectedDay(parseInt(e.target.value))}
@@ -347,14 +349,14 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                   >
                     {DAYS_OF_WEEK.map((day, index) => (
                       <option key={index} value={index}>
-                        {day}
+                        {t(`days.${day}`)}
                       </option>
                     ))}
                   </select>
                 </>
               ) : (
                 <>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('form.date')}</label>
                   <input
                     type="date"
                     value={individualDate}
@@ -366,7 +368,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('form.startTime')}</label>
               <select
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
@@ -380,7 +382,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('form.endTime')}</label>
               <select
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
@@ -398,7 +400,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
           {/* Duration Section for Recurring Slots */}
           {slotType === 'repeating' && (
             <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h5 className="text-md font-medium text-gray-900 mb-3">Recurring Duration</h5>
+              <h5 className="text-md font-medium text-gray-900 mb-3">{t('form.recurringDuration')}</h5>
               
               {/* Duration Type Selection */}
               <div className="mb-4">
@@ -411,7 +413,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                       onChange={(e) => setDurationType(e.target.value as 'endDate' | 'numberOfWeeks')}
                       className="mr-2"
                     />
-                    Number of weeks
+                    {t('form.numberOfWeeks')}
                   </label>
                   <label className="flex items-center">
                     <input
@@ -421,14 +423,14 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                       onChange={(e) => setDurationType(e.target.value as 'endDate' | 'numberOfWeeks')}
                       className="mr-2"
                     />
-                    End date
+                    {t('form.endDate')}
                   </label>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('form.startDate')}</label>
                   <input
                     type="date"
                     value={recurringStartDate}
@@ -440,7 +442,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                 
                 {durationType === 'numberOfWeeks' ? (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Number of Weeks</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('form.numberOfWeeks')}</label>
                     <select
                       value={numberOfWeeks}
                       onChange={(e) => setNumberOfWeeks(parseInt(e.target.value))}
@@ -448,14 +450,14 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                     >
                       {[1, 2, 3, 4, 6, 8, 10, 12, 16, 20, 24, 26, 52].map(weeks => (
                         <option key={weeks} value={weeks}>
-                          {weeks} week{weeks !== 1 ? 's' : ''}
+                          {weeks} {weeks !== 1 ? t('weeks') : t('week')}
                         </option>
                       ))}
                     </select>
                   </div>
                 ) : (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('form.endDate')}</label>
                     <input
                       type="date"
                       value={recurringEndDate}
@@ -469,10 +471,10 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                 <div className="flex items-end">
                   <div className="text-sm text-gray-600">
                     {durationType === 'numberOfWeeks' 
-                      ? `Will create ${numberOfWeeks} weekly slots` 
+                      ? t('form.createWeeksInfo', { weeks: numberOfWeeks })
                       : recurringEndDate 
-                        ? `Until ${format(new Date(recurringEndDate), 'MMM d, yyyy')}`
-                        : 'Select an end date'
+                        ? t('form.untilDateInfo', { date: format(new Date(recurringEndDate), 'MMM d, yyyy') })
+                        : t('form.selectEndDate')
                     }
                   </div>
                 </div>
@@ -484,17 +486,17 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
             <LoadingButton
               type="submit"
               loading={submitting}
-              loadingText="Adding..."
+              loadingText={t('actions.adding')}
               variant="primary"
             >
-              Add Slot
+              {t('actions.addSlot')}
             </LoadingButton>
             <LoadingButton
               type="button"
               onClick={() => setShowForm(false)}
               variant="secondary"
             >
-              Cancel
+              {t('actions.cancel')}
             </LoadingButton>
           </div>
         </form>
@@ -503,7 +505,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
       {/* Individual Slots */}
       {individualSlots.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Individual Slots</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('individualSlots.title')}</h3>
           <div className="space-y-2">
             {individualSlots
               .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
@@ -528,7 +530,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                         ? 'bg-blue-100 text-blue-800' 
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {slot.available ? 'Available' : 'Unavailable'}
+                      {slot.available ? t('status.available') : t('status.unavailable')}
                     </span>
                     {slot.reason && (
                       <span className="text-xs text-gray-600">({slot.reason})</span>
@@ -543,13 +545,13 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                           : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                       }`}
                     >
-                      {slot.available ? 'Mark Unavailable' : 'Mark Available'}
+                      {slot.available ? t('actions.markUnavailable') : t('actions.markAvailable')}
                     </button>
                     <button
                       onClick={() => handleDeleteIndividualSlot(slot.id)}
                       className="px-3 py-1 text-xs bg-red-100 text-red-800 rounded-md hover:bg-red-200 transition-colors"
                     >
-                      Delete
+                      {t('actions.delete')}
                     </button>
                   </div>
                 </div>
@@ -560,10 +562,10 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
 
       {/* Recurring Availability Schedule */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Weekly Recurring Slots</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">{t('recurringSlots.title')}</h3>
         {DAYS_OF_WEEK.map((dayName, dayIndex) => (
           <div key={dayIndex} className="border rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-3">{dayName}</h4>
+            <h4 className="font-medium text-gray-900 mb-3">{t(`days.${dayName}`)}</h4>
             {groupedAvailability[dayIndex]?.length > 0 ? (
               <div className="space-y-2">
                 {groupedAvailability[dayIndex]
@@ -588,7 +590,7 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                             ? 'bg-green-100 text-green-800' 
                             : 'bg-gray-100 text-gray-800'
                         }`}>
-                          {slot.isActive ? 'Active' : 'Inactive'}
+                          {slot.isActive ? t('status.active') : t('status.inactive')}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -600,20 +602,20 @@ export default function TutorAvailability({ tutorId }: TutorAvailabilityProps) {
                               : 'bg-green-100 text-green-800 hover:bg-green-200'
                           }`}
                         >
-                          {slot.isActive ? 'Disable' : 'Enable'}
+                          {slot.isActive ? t('actions.disable') : t('actions.enable')}
                         </button>
                         <button
                           onClick={() => handleDeleteAvailability(slot.id)}
                           className="px-3 py-1 text-xs bg-red-100 text-red-800 rounded-md hover:bg-red-200 transition-colors"
                         >
-                          Delete
+                          {t('actions.delete')}
                         </button>
                       </div>
                     </div>
                   ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">No availability set for this day</p>
+              <p className="text-gray-500 text-sm">{t('recurringSlots.empty')}</p>
             )}
           </div>
         ))}

@@ -10,8 +10,8 @@ import { redis, connectRedis } from '../db/redis'
 // Fallback in-memory rate limiting if Redis fails
 const loginAttempts = new Map<string, { count: number; lastAttempt: number }>()
 
-const MAX_LOGIN_ATTEMPTS = 50 // Increased for demo/dev environment
-const LOCKOUT_DURATION = 1 * 60 * 1000 // 1 minute lockout for easier testing
+const MAX_LOGIN_ATTEMPTS = 5 // Safe production limit
+const LOCKOUT_DURATION = 15 * 60 * 1000 // 15 minutes
 const ATTEMPT_WINDOW = 15 * 60 // 15 minutes in seconds for Redis
 
 // Security validation functions - kept these strict after previous XSS issues
@@ -111,15 +111,15 @@ export const authOptions: NextAuthOptions = {
         try {
           // Input validation
           if (!credentials?.email || !credentials?.password) {
-            throw new Error('Email and password are required')
+            throw new Error('AUTH_ERROR_REQUIRED_FIELDS')
           }
 
           if (!isValidEmail(credentials.email)) {
-            throw new Error('Invalid email format')
+            throw new Error('AUTH_ERROR_INVALID_EMAIL_FORMAT')
           }
 
           if (!isValidPassword(credentials.password)) {
-            throw new Error('Invalid password format')
+            throw new Error('AUTH_ERROR_INVALID_PASSWORD_FORMAT')
           }
 
           // Rate limiting check
@@ -127,7 +127,7 @@ export const authOptions: NextAuthOptions = {
           const ip = Array.isArray(clientIP) ? clientIP[0] : clientIP
 
           if (!await checkRateLimit(ip)) {
-            throw new Error('Too many login attempts. Please try again later.')
+            throw new Error('AUTH_ERROR_TOO_MANY_ATTEMPTS')
           }
 
           const sanitizedEmail = sanitizeEmail(credentials.email)
@@ -164,7 +164,7 @@ export const authOptions: NextAuthOptions = {
 
           if (!user || !user.password) {
             await recordFailedAttempt(ip)
-            throw new Error('Invalid credentials')
+            throw new Error('AUTH_ERROR_INVALID_CREDENTIALS')
           }
 
           // Verify password
@@ -172,12 +172,12 @@ export const authOptions: NextAuthOptions = {
 
           if (!isPasswordValid) {
             await recordFailedAttempt(ip)
-            throw new Error('Invalid credentials')
+            throw new Error('AUTH_ERROR_INVALID_CREDENTIALS')
           }
 
           // Additional security checks
           if (!user.isActive) {
-            throw new Error('Account is deactivated')
+            throw new Error('AUTH_ERROR_ACCOUNT_DEACTIVATED')
           }
 
           // Check for suspicious activity
@@ -215,7 +215,8 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error('Authentication error:', error)
-          throw error
+          // Always throw a generic error code to avoid leaking internal error details
+          throw new Error('AUTH_ERROR_GENERAL')
         }
       },
     }),
@@ -276,12 +277,24 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Enhanced redirect security
+      // Enhanced redirect security with i18n support
       if (url.startsWith('/')) {
-        // Validate relative URLs for safety
+        // Validate relative URLs for safety, allowing for optional locale prefix
+        // Matches: /tutor, /en/tutor, /zh/tutor, etc.
         const safeRelativePaths = ['/student', '/tutor', '/dashboard', '/profile', '/settings']
-        const isAllowedPath = safeRelativePaths.some(path => url.startsWith(path))
+        
+        // Regex to check if path starts with optional locale (/en or /zh) followed by a safe path
+        const isAllowedPath = safeRelativePaths.some(path => {
+           // Matches ^/en/tutor... or ^/tutor...
+           const regex = new RegExp(`^(\/(en|zh))?${path}`)
+           return regex.test(url)
+        })
+
         if (isAllowedPath) {
+          // If the url is relative, return it directly to be appended by next-auth or used as is
+          // Note: NextAuth `redirect` callback usually expects a full URL or a relative URL. 
+          // If we return just `url`, NextAuth constructs the full URL.
+          if (url.startsWith('/')) return url
           return `${baseUrl}${url}`
         }
         return baseUrl

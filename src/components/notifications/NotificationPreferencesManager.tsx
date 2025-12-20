@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { notificationService, type NotificationPreferences } from '../../lib/services/notification.service'
 import { Skeleton } from '../ui/Skeleton'
 import LoadingButton from '../ui/LoadingButton'
@@ -11,6 +12,7 @@ interface NotificationPreferencesManagerProps {
 }
 
 export default function NotificationPreferencesManager({ userId }: NotificationPreferencesManagerProps) {
+  const t = useTranslations('NotificationPreferencesManager')
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -23,11 +25,11 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
       setPreferences(prefs)
     } catch (err) {
       console.error('Failed to fetch preferences:', err)
-      error('Failed to load notification preferences')
+      error(t('messages.loadError'))
     } finally {
       setLoading(false)
     }
-  }, [error])
+  }, [error, t]) // Added t to dependency array
 
   useEffect(() => {
     fetchPreferences()
@@ -40,10 +42,10 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
       setSaving(true)
       const updatedPrefs = await notificationService.updatePreferences(preferences)
       setPreferences(updatedPrefs)
-      success('Notification preferences saved successfully!')
+      success(t('messages.saveSuccess'))
     } catch (err) {
       console.error('Failed to save preferences:', err)
-      error('Failed to save preferences. Please try again.')
+      error(t('messages.saveError'))
     } finally {
       setSaving(false)
     }
@@ -55,15 +57,15 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
   }
 
   const getReminderTimingOptions = () => [
-    { value: 0, label: 'No reminder' },
-    { value: 1, label: '1 hour before' },
-    { value: 2, label: '2 hours before' },
-    { value: 4, label: '4 hours before' },
-    { value: 8, label: '8 hours before' },
-    { value: 24, label: '1 day before' },
-    { value: 48, label: '2 days before' },
-    { value: 72, label: '3 days before' },
-    { value: 168, label: '1 week before' }
+    { value: 0, label: t('reminderTimingOptions.noReminder') },
+    { value: 1, label: t('reminderTimingOptions.1hour') },
+    { value: 2, label: t('reminderTimingOptions.2hours') },
+    { value: 4, label: t('reminderTimingOptions.4hours') },
+    { value: 8, label: t('reminderTimingOptions.8hours') },
+    { value: 24, label: t('reminderTimingOptions.1day') },
+    { value: 48, label: t('reminderTimingOptions.2days') },
+    { value: 72, label: t('reminderTimingOptions.3days') },
+    { value: 168, label: t('reminderTimingOptions.1week') }
   ]
 
   if (loading) {
@@ -89,12 +91,12 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <div className="text-center py-8">
-          <p className="text-gray-500">Failed to load notification preferences</p>
+          <p className="text-gray-500">{t('empty.message')}</p>
           <button
             onClick={fetchPreferences}
             className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
-            Retry
+            {t('empty.retry')}
           </button>
         </div>
       </div>
@@ -105,14 +107,14 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
     <>
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Notification Preferences</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{t('title')}</h2>
           <LoadingButton
             onClick={handleSavePreferences}
             loading={saving}
             variant="primary"
             size="sm"
           >
-            Save Changes
+            {t('saveChanges')}
           </LoadingButton>
         </div>
 
@@ -120,9 +122,9 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
           {/* Email Notifications */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-900">Email Notifications</h3>
+              <h3 className="text-sm font-medium text-gray-900">{t('emailNotifications.title')}</h3>
               <p className="text-sm text-gray-500">
-                Receive notifications via email for important updates
+                {t('emailNotifications.description')}
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -139,9 +141,9 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
           {/* SMS Notifications */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-900">SMS Notifications</h3>
+              <h3 className="text-sm font-medium text-gray-900">{t('smsNotifications.title')}</h3>
               <p className="text-sm text-gray-500">
-                Receive text messages for urgent notifications
+                {t('smsNotifications.description')}
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -158,9 +160,9 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
           {/* Assignment Reminders */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-900">Assignment Reminders</h3>
+              <h3 className="text-sm font-medium text-gray-900">{t('assignmentReminders.title')}</h3>
               <p className="text-sm text-gray-500">
-                Get notified about assignment due dates and submissions
+                {t('assignmentReminders.description')}
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -177,9 +179,9 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
           {/* Marketing Emails */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-900">Marketing Emails</h3>
+              <h3 className="text-sm font-medium text-gray-900">{t('marketingEmails.title')}</h3>
               <p className="text-sm text-gray-500">
-                Receive promotional content and platform updates
+                {t('marketingEmails.description')}
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -195,9 +197,9 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
 
           {/* Reminder Timing */}
           <div>
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Reminder Timing</h3>
+            <h3 className="text-sm font-medium text-gray-900 mb-2">{t('reminderTiming.title')}</h3>
             <p className="text-sm text-gray-500 mb-4">
-              How far in advance should we remind you about appointments?
+              {t('reminderTiming.description')}
             </p>
             <select
               value={preferences.reminderTiming}
@@ -214,21 +216,19 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
 
           {/* Notification Channels Info */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">📱 Notification Channels</h4>
+            <h4 className="text-sm font-medium text-blue-900 mb-2">📱 {t('channelsInfo.title')}</h4>
             <div className="text-sm text-blue-700 space-y-1">
-              <p><strong>Email:</strong> Full notification details with action buttons</p>
-              <p><strong>SMS:</strong> Brief alerts for urgent notifications only</p>
-              <p><strong>In-App:</strong> Always enabled for real-time notifications</p>
+              <p><strong>{t('channelsInfo.emailChannel')}:</strong> {t('channelsInfo.emailDesc')}</p>
+              <p><strong>{t('channelsInfo.smsChannel')}:</strong> {t('channelsInfo.smsDesc')}</p>
+              <p><strong>{t('channelsInfo.inAppChannel')}:</strong> {t('channelsInfo.inAppDesc')}</p>
             </div>
           </div>
 
           {/* Privacy Notice */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-900 mb-2">🔒 Privacy & Data</h4>
+            <h4 className="text-sm font-medium text-gray-900 mb-2">🔒 {t('privacyNotice.title')}</h4>
             <p className="text-sm text-gray-600">
-              We respect your privacy. You can change these preferences at any time. 
-              We only send notifications related to your tutoring activities and never 
-              share your contact information with third parties.
+              {t('privacyNotice.description')}
             </p>
           </div>
         </div>
@@ -240,7 +240,7 @@ export default function NotificationPreferencesManager({ userId }: NotificationP
             loading={saving}
             variant="primary"
           >
-            Save Notification Preferences
+            {t('saveNotificationPreferences')}
           </LoadingButton>
         </div>
       </div>

@@ -54,7 +54,7 @@ This document lists high-impact improvements applied to the planning docs and ad
 - Queue outbound emails/SMS; use rate limits and retry with backoff.
 - Cache public availability results for short TTL to reduce DB load.
 
-4. Observability (P1)
+4. Observability (P1) (COMPLETED ✅)
 
 - Correlation IDs on requests, structured logs, and SLO dashboards for key flows (booking success rate, reminder send rate).
 
@@ -96,9 +96,9 @@ This document lists high-impact improvements applied to the planning docs and ad
 
 ## Next Steps (Actionable)
 
-1. Create DB migration for `notification_preferences` and run locally.
-2. Implement Redis-based idempotency middleware for booking endpoint.
-3. Add Playwright E2E: student books slot → receives confirmation.
-4. Add unit tests for DST edge dates (e.g., 2025-03-30/2025-10-26) in target locales.
-5. Implement preferences UI stub (toggle email/SMS, reminder timing) in settings.
-6. Set SMS per-user daily cap and global budget thresholds with alerts.
+1. Create DB migration for `notification_preferences` and run locally. (COMPLETED ✅)
+2. Implement Redis-based idempotency middleware for booking endpoint. (COMPLETED ✅)
+3. Add Playwright E2E: student books slot → receives confirmation. (COMPLETED ✅)
+4. Add unit tests for DST edge dates (e.g., 2025-03-30/2025-10-26) in target locales. (COMPLETED ✅)
+5. Implement preferences UI stub (toggle email/SMS, reminder timing) in settings. (COMPLETED ✅)
+6. Set SMS per-user daily cap and global budget thresholds with alerts. (COMPLETED ✅)

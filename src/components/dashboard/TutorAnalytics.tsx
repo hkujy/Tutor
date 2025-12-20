@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, subMonths, startOfMonth, endOfMonth } from 'date-fns'
+import { useTranslations } from 'next-intl'
 import { Skeleton } from '../ui/Skeleton'
 import ErrorBoundary from '../ErrorBoundary'
 
@@ -108,6 +109,7 @@ interface SubjectPerformance {
 }
 
 function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
+  const t = useTranslations('TutorAnalytics')
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([])
   const [metrics, setMetrics] = useState<PerformanceMetric[]>([])
   const [monthlyEarnings, setMonthlyEarnings] = useState<MonthlyEarning[]>([])
@@ -130,7 +132,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
   // Memoized fetchAnalytics with comprehensive error handling
   const fetchAnalytics = useCallback(async (isRetry = false) => {
     if (!tutorId || !isValidString(tutorId)) {
-      setError('Invalid tutor ID provided')
+      setError(t('errors.invalidTutorId'))
       setLoading(false)
       return
     }
@@ -165,13 +167,13 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error('Analytics data not found. Please check if you have any appointments recorded.')
+          throw new Error(t('errors.dataNotFound'))
         } else if (response.status === 403) {
-          throw new Error('Access denied. Please check your permissions.')
+          throw new Error(t('errors.accessDenied'))
         } else if (response.status >= 500) {
-          throw new Error('Server error occurred. Please try again later.')
+          throw new Error(t('errors.serverError'))
         } else {
-          throw new Error(`Request failed with status ${response.status}`)
+          throw new Error(t('errors.requestFailed', { status: response.status }))
         }
       }
       
@@ -179,7 +181,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       const data = sanitizeApiData(rawData)
       
       if (!data) {
-        throw new Error('Invalid data received from server')
+        throw new Error(t('errors.invalidDataReceived'))
       }
       
       // Update state with validated data
@@ -197,7 +199,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       // Don't update state if request was aborted
       if (signal.aborted) return
       
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch analytics data'
+      const errorMessage = err instanceof Error ? err.message : t('errors.fetchFailedFallback')
       console.error('Analytics fetch error:', err)
       
       // Retry logic with exponential backoff
@@ -213,7 +215,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
     } finally {
       setLoading(false)
     }
-  }, [tutorId, selectedPeriod, retryCount])
+  }, [tutorId, selectedPeriod, retryCount, t])
 
   useEffect(() => {
     setIsHydrated(true)
@@ -342,7 +344,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="text-center py-8">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to Load Analytics</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('errors.loadFailedTitle')}</h3>
           <p className="text-gray-600 mb-4">{error}</p>
           {retryCount < maxRetries && (
             <button
@@ -350,12 +352,12 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
               className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
               disabled={loading}
             >
-              {loading ? 'Retrying...' : 'Try Again'}
+              {loading ? t('actions.retrying') : t('actions.tryAgain')}
             </button>
           )}
           {retryCount >= maxRetries && (
             <div className="text-sm text-gray-500">
-              Please refresh the page or contact support if the problem persists.
+              {t('errors.contactSupport')}
             </div>
           )}
         </div>
@@ -369,15 +371,15 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="text-center py-8">
           <div className="text-gray-400 text-6xl mb-4">📊</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Analytics Data</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('empty.title')}</h3>
           <p className="text-gray-600 mb-4">
-            You don&apos;t have any analytics data yet. Complete some tutoring sessions to see your analytics.
+            {t('empty.message')}
           </p>
           <button
             onClick={() => fetchAnalytics()}
             className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
           >
-            Refresh Data
+            {t('empty.refreshData')}
           </button>
         </div>
       </div>
@@ -389,26 +391,26 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       {/* Header with Tabs */}
       <div className="border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold text-gray-900">Analytics Dashboard</h3>
+          <h3 className="text-xl font-semibold text-gray-900">{t('dashboardTitle')}</h3>
           <select 
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value as any)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="90d">Last 3 Months</option>
-            <option value="365d">Last Year</option>
+            <option value="7d">{t('period.last7Days')}</option>
+            <option value="30d">{t('period.last30Days')}</option>
+            <option value="90d">{t('period.last3Months')}</option>
+            <option value="365d">{t('period.lastYear')}</option>
           </select>
         </div>
         
         {/* Tab Navigation */}
         <div className="flex space-x-8">
           {[
-            { id: 'overview', label: 'Overview', icon: '📊' },
-            { id: 'students', label: 'Students', icon: '👥' },
-            { id: 'subjects', label: 'Subjects', icon: '📚' },
-            { id: 'schedule', label: 'Schedule', icon: '⏰' }
+            { id: 'overview', label: t('tabs.overview'), icon: '📊' },
+            { id: 'students', label: t('tabs.students'), icon: '👥' },
+            { id: 'subjects', label: t('tabs.subjects'), icon: '📚' },
+            { id: 'schedule', label: t('tabs.schedule'), icon: '⏰' }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -431,8 +433,8 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
           <div className="space-y-8">
             {/* Key Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {metrics.map((metric, index) => (
-                <div key={index} className="p-4 border border-gray-200 rounded-lg bg-gradient-to-br from-gray-50 to-white">
+              {metrics.map((metric) => (
+                <div key={metric.label} className="p-4 border border-gray-200 rounded-lg bg-gradient-to-br from-gray-50 to-white">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-2xl">{metric.icon}</span>
                     <span className={`text-sm font-medium ${getTrendColor(metric.trend)}`}>
@@ -450,15 +452,15 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
 
             {/* Enhanced Weekly Activity Chart */}
             <div>
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Weekly Activity</h4>
+              <h4 className="text-lg font-medium text-gray-900 mb-4">{t('weeklyActivity.title')}</h4>
               <div className="grid grid-cols-7 gap-2">
-                {weeklyData.map((day, index) => (
-                  <div key={index} className="text-center">
+                {weeklyData.map((day) => (
+                  <div key={day.day} className="text-center">
                     <div className="text-sm font-medium text-gray-600 mb-2">{day.day}</div>
                     
                     {/* Sessions Bar */}
                     <div className="mb-3">
-                      <div className="text-xs text-gray-500 mb-1">Sessions</div>
+                      <div className="text-xs text-gray-500 mb-1">{t('weeklyActivity.sessions')}</div>
                       <div className="h-20 bg-gray-100 rounded relative">
                         <div 
                           className="absolute bottom-0 w-full bg-blue-500 rounded"
@@ -472,7 +474,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
 
                     {/* Hours Bar */}
                     <div className="mb-3">
-                      <div className="text-xs text-gray-500 mb-1">Hours</div>
+                      <div className="text-xs text-gray-500 mb-1">{t('weeklyActivity.hours')}</div>
                       <div className="h-16 bg-gray-100 rounded relative">
                         <div 
                           className="absolute bottom-0 w-full bg-green-500 rounded"
@@ -486,7 +488,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
 
                     {/* Earnings Bar */}
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">Earnings</div>
+                      <div className="text-xs text-gray-500 mb-1">{t('weeklyActivity.earnings')}</div>
                       <div className="h-16 bg-gray-100 rounded relative">
                         <div 
                           className="absolute bottom-0 w-full bg-purple-500 rounded"
@@ -505,15 +507,15 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
             {/* Monthly Earnings Trend */}
             {monthlyEarnings.length > 0 && (
               <div>
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Monthly Earnings Trend</h4>
+                <h4 className="text-lg font-medium text-gray-900 mb-4">{t('monthlyEarnings.title')}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-                  {monthlyEarnings.map((month, index) => (
-                    <div key={index} className="p-4 border border-gray-200 rounded-lg text-center">
+                  {monthlyEarnings.map((month) => (
+                    <div key={month.month} className="p-4 border border-gray-200 rounded-lg text-center">
                       <div className="text-sm font-medium text-gray-600 mb-2">{month.month}</div>
                       <div className="text-xl font-bold text-green-600 mb-1">
                         {formatCurrency(month.earnings)}
                       </div>
-                      <div className="text-xs text-gray-500">{month.hours}h • {month.sessions} sessions</div>
+                      <div className="text-xs text-gray-500">{t('monthlyEarnings.hoursSessions', { hours: month.hours, sessions: month.sessions })}</div>
                     </div>
                   ))}
                 </div>
@@ -524,10 +526,10 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
 
         {activeTab === 'students' && (
           <div className="space-y-6">
-            <h4 className="text-lg font-medium text-gray-900">Student Progress Overview</h4>
+            <h4 className="text-lg font-medium text-gray-900">{t('studentProgressOverview.title')}</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {studentProgress.map((student, index) => (
-                <div key={index} className="p-4 border border-gray-200 rounded-lg">
+              {studentProgress.map((student) => (
+                <div key={student.studentName + student.subject} className="p-4 border border-gray-200 rounded-lg">
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <div className="font-medium text-gray-900">{student.studentName}</div>
@@ -535,21 +537,21 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                     </div>
                     <div className={`flex items-center space-x-1 ${getProgressTrendColor(student.progressTrend)}`}>
                       <span>{getProgressTrendIcon(student.progressTrend)}</span>
-                      <span className="text-sm font-medium">{student.progressTrend}</span>
+                      <span className="text-sm font-medium">{t(`studentProgressOverview.trend.${student.progressTrend}`)}</span>
                     </div>
                   </div>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Total Hours:</span>
+                      <span className="text-gray-600">{t('studentProgressOverview.totalHours')}:</span>
                       <span className="font-medium">{student.totalHours}h</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Recent Sessions:</span>
+                      <span className="text-gray-600">{t('studentProgressOverview.recentSessions')}:</span>
                       <span className="font-medium">{student.recentSessions}</span>
                     </div>
                     {student.averageRating && (
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Avg Rating:</span>
+                        <span className="text-gray-600">{t('studentProgressOverview.avgRating')}:</span>
                         <span className="font-medium">{student.averageRating}/5 ⭐</span>
                       </div>
                     )}
@@ -562,22 +564,22 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
 
         {activeTab === 'subjects' && (
           <div className="space-y-6">
-            <h4 className="text-lg font-medium text-gray-900">Subject Performance Analysis</h4>
+            <h4 className="text-lg font-medium text-gray-900">{t('subjectPerformance.title')}</h4>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Students</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sessions</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Hours</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Session</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Earnings</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subjectPerformance.table.subject')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subjectPerformance.table.students')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subjectPerformance.table.sessions')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subjectPerformance.table.totalHours')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subjectPerformance.table.avgSession')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subjectPerformance.table.earnings')}</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {subjectPerformance.map((subject, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
+                  {subjectPerformance.map((subject) => (
+                    <tr key={subject.subject} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="font-medium text-gray-900">{subject.subject}</div>
                       </td>
@@ -606,14 +608,14 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
 
         {activeTab === 'schedule' && (
           <div className="space-y-6">
-            <h4 className="text-lg font-medium text-gray-900">Schedule Analysis</h4>
+            <h4 className="text-lg font-medium text-gray-900">{t('scheduleAnalysis.title')}</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Time Distribution */}
               <div>
-                <h5 className="text-md font-medium text-gray-900 mb-4">Most Active Time Slots</h5>
+                <h5 className="text-md font-medium text-gray-900 mb-4">{t('scheduleAnalysis.activeTimeSlots')}</h5>
                 <div className="space-y-3">
-                  {timeDistribution.map((slot, index) => (
-                    <div key={index} className="flex items-center space-x-3">
+                  {timeDistribution.map((slot) => (
+                    <div key={slot.timeSlot} className="flex items-center space-x-3">
                       <div className="w-20 text-sm font-medium text-gray-700">{slot.timeSlot}</div>
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
                         <div 
@@ -622,7 +624,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                         />
                       </div>
                       <div className="w-12 text-sm text-gray-600">{slot.sessions}</div>
-                      <div className="w-12 text-xs text-gray-500">{slot.percentage}%</div>
+                      <div className="w-12 text-xs text-gray-500">{t('scheduleAnalysis.percentage', { percentage: slot.percentage })}</div>
                     </div>
                   ))}
                 </div>
@@ -630,31 +632,31 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
 
               {/* Schedule Insights */}
               <div>
-                <h5 className="text-md font-medium text-gray-900 mb-4">Schedule Insights</h5>
+                <h5 className="text-md font-medium text-gray-900 mb-4">{t('scheduleAnalysis.insightsTitle')}</h5>
                 <div className="space-y-3">
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="text-sm font-medium text-blue-900">Peak Hours</div>
+                    <div className="text-sm font-medium text-blue-900">{t('scheduleAnalysis.peakHours')}</div>
                     <div className="text-sm text-blue-700">
                       {timeDistribution.length > 0 && isValidString(timeDistribution[0]?.timeSlot) 
-                        ? `${timeDistribution[0].timeSlot} is your busiest time slot`
-                        : 'No time distribution data available'
+                        ? t('scheduleAnalysis.peakHoursMessage', { time: timeDistribution[0].timeSlot })
+                        : t('scheduleAnalysis.noTimeData')
                       }
                     </div>
                   </div>
                   <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="text-sm font-medium text-green-900">Availability Optimization</div>
+                    <div className="text-sm font-medium text-green-900">{t('scheduleAnalysis.availabilityOptimization')}</div>
                     <div className="text-sm text-green-700">
-                      Consider adding more slots during high-demand periods
+                      {t('scheduleAnalysis.optimizationMessage')}
                     </div>
                   </div>
                   <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="text-sm font-medium text-yellow-900">Work-Life Balance</div>
+                    <div className="text-sm font-medium text-yellow-900">{t('scheduleAnalysis.workLifeBalance')}</div>
                     <div className="text-sm text-yellow-700">
                       {(() => {
                         const totalHours = weeklyData
                           .filter(day => isValidNumber(day.hours))
                           .reduce((sum, day) => sum + day.hours, 0)
-                        return `${totalHours.toFixed(1)} hours this week`
+                        return t('scheduleAnalysis.hoursThisWeek', { hours: totalHours.toFixed(1) })
                       })()}
                     </div>
                   </div>

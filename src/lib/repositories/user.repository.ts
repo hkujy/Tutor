@@ -243,8 +243,9 @@ export class UserRepository {
   }
 
   async delete(id: string) {
-    return db.user.delete({
+    return db.user.update({
       where: { id },
+      data: { deletedAt: new Date() },
     })
   }
 
@@ -256,6 +257,10 @@ export class UserRepository {
   }) {
     return db.user.findMany({
       ...params,
+      where: {
+        ...params.where,
+        deletedAt: null,
+      },
       include: {
         student: true,
         tutor: true,
@@ -264,7 +269,12 @@ export class UserRepository {
   }
 
   async count(where?: any) {
-    return db.user.count({ where })
+    return db.user.count({ 
+      where: {
+        ...where,
+        deletedAt: null,
+      } 
+    })
   }
 
   async updateLastLogin(id: string) {

@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
+import createMiddleware from 'next-intl/middleware'
+import { routing } from './i18n/routing'
+import { redis } from './lib/redis'
+
+const intlMiddleware = createMiddleware(routing)
+
+// Initialize Redis client for rate limiting
+// Using shared client from lib/redis
+
 
 // Security headers
 const securityHeaders = {
@@ -17,31 +26,23 @@ const securityHeaders = {
     "frame-ancestors 'none';",
 }
 
-// Rate limiting for API routes
-const requestCounts = new Map<string, { count: number; timestamp: number }>()
-const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 300 // Increased limit for dev/demo
+const RATE_LIMIT_WINDOW = 60 // 1 minute window
+const RATE_LIMIT_MAX_REQUESTS = 3000 
 
-const checkRateLimit = (ip: string): boolean => {
-  const now = Date.now()
-  const record = requestCounts.get(ip)
-  
-  if (!record) {
-    requestCounts.set(ip, { count: 1, timestamp: now })
-    return true
+const checkRateLimit = async (ip: string): Promise<boolean> => {
+  try {
+    const key = `rate_limit:${ip}`
+    const current = await redis.incr(key)
+    
+    if (current === 1) {
+      await redis.expire(key, RATE_LIMIT_WINDOW)
+    }
+    
+    return current <= RATE_LIMIT_MAX_REQUESTS
+  } catch (error) {
+    console.error('Redis rate limit error:', error)
+    return true // Fail open to not block users if Redis is down
   }
-  
-  if (now - record.timestamp > RATE_LIMIT_WINDOW) {
-    requestCounts.set(ip, { count: 1, timestamp: now })
-    return true
-  }
-  
-  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
-    return false
-  }
-  
-  record.count++
-  return true
 }
 
 const getClientIP = (request: NextRequest): string => {
@@ -51,122 +52,140 @@ const getClientIP = (request: NextRequest): string => {
 }
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next()
-  
-  // Apply security headers to all responses
-  Object.entries(securityHeaders).forEach(([key, value]) => {
-    response.headers.set(key, value)
-  })
-  
   const clientIP = getClientIP(request)
   const pathname = request.nextUrl.pathname
-  
-  // Rate limiting for API routes
-  if (pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/')) {
-    if (!checkRateLimit(clientIP)) {
-      return new NextResponse(
-        JSON.stringify({ error: 'Rate limit exceeded' }),
-        { 
-          status: 429, 
-          headers: { 
-            'Content-Type': 'application/json',
-            ...securityHeaders
-          }
-        }
-      )
-    }
-  }
-  
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
-  const isAuthPage = pathname.startsWith('/auth') || pathname === '/login'
-  const isApiAuthRoute = pathname.startsWith('/api/auth')
-  const isHealthRoute = pathname === '/api/health'
-  const isPublicRoute = pathname.startsWith('/public') || pathname === '/favicon.ico'
 
-  // Allow public routes
-  if (isAuthPage || isApiAuthRoute || isHealthRoute || isPublicRoute) {
-    return response
-  }
-
-  // Protect API routes that require authentication
+  // Generate or retrieve Correlation ID
+  const correlationId = request.headers.get('x-correlation-id') || crypto.randomUUID()
+  
+  // Clone request headers to pass correlation ID downstream
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-correlation-id', correlationId)
+  
+  // ==========================================
+  // 1. API Routes Handling (No localization)
+  // ==========================================
   if (pathname.startsWith('/api/')) {
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
+    
+    // Set Correlation ID on response
+    response.headers.set('X-Correlation-ID', correlationId)
+    
+    // Apply security headers
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value)
+    })
+
+    // Skip rate limiting for auth endpoints (handled internally)
+    if (!pathname.startsWith('/api/auth/')) {
+      const isAllowed = await checkRateLimit(clientIP)
+      if (!isAllowed) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Rate limit exceeded' }),
+          { 
+            status: 429, 
+            headers: { 
+              'Content-Type': 'application/json',
+              ...securityHeaders
+            }
+          }
+        )
+      }
+    }
+
+    // API Authentication Check
+    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+    
+    // Allow public API routes
+    const isApiAuthRoute = pathname.startsWith('/api/auth')
+    const isHealthRoute = pathname === '/api/health'
+    
+    if (isApiAuthRoute || isHealthRoute) {
+      return response
+    }
+
     if (!token) {
       return new NextResponse(
         JSON.stringify({ error: 'Authentication required' }),
-        { 
-          status: 401,
-          headers: { 
-            'Content-Type': 'application/json',
-            ...securityHeaders
-          }
-        }
+        { status: 401, headers: { 'Content-Type': 'application/json', ...securityHeaders } }
       )
     }
-    
-    // Check token validity
+
     if (token.expired) {
       return new NextResponse(
         JSON.stringify({ error: 'Token expired' }),
-        { 
-          status: 401,
-          headers: { 
-            'Content-Type': 'application/json',
-            ...securityHeaders
-          }
-        }
+        { status: 401, headers: { 'Content-Type': 'application/json', ...securityHeaders } }
       )
     }
-    
-    // Role-based API access control
+
     if (pathname.startsWith('/api/admin/') && token.role !== 'ADMIN') {
       return new NextResponse(
         JSON.stringify({ error: 'Admin access required' }),
-        { 
-          status: 403,
-          headers: { 
-            'Content-Type': 'application/json',
-            ...securityHeaders
-          }
-        }
+        { status: 403, headers: { 'Content-Type': 'application/json', ...securityHeaders } }
       )
     }
-    
+
     return response
   }
 
-  // Redirect unauthenticated users to login for protected pages
-  if (!token && !isAuthPage) {
-    const loginUrl = new URL('/login', request.url)
+  // ==========================================
+  // 2. Page Routes Handling (With localization)
+  // ==========================================
+
+  // Explicitly redirect root to /en
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/en', request.url))
+  }
+  
+  // Normalize path by removing locale prefix for security checks
+  const publicPathname = pathname.replace(/^\/(en|zh)/, '') || '/'
+  
+  // Extract current locale for redirects
+  const currentLocale = pathname.match(/^\/(en|zh)/)?.[1] || 'en'
+
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+  
+  const isAuthPage = publicPathname.startsWith('/auth') || publicPathname === '/login'
+  const isPublicRoute = publicPathname.startsWith('/public') || publicPathname === '/favicon.ico'
+
+  // If user is unauthenticated and trying to access protected page
+  if (!token && !isAuthPage && !isPublicRoute) {
+    const loginUrl = new URL(`/${currentLocale}/login`, request.url)
     loginUrl.searchParams.set('callbackUrl', request.nextUrl.href)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Role-based page access control
+  // Role-based Access Control
   if (token) {
-    // For now, only check tutor and student specific routes
-    // Admin routes can be added when admin pages are created
-    
-    if (pathname.startsWith('/tutor') && token.role !== 'TUTOR' && token.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/unauthorized', request.url))
+    if (publicPathname.startsWith('/tutor') && token.role !== 'TUTOR' && token.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL(`/${currentLocale}/unauthorized`, request.url))
     }
     
-    if (pathname.startsWith('/student') && token.role !== 'STUDENT' && token.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/unauthorized', request.url))
+    if (publicPathname.startsWith('/student') && token.role !== 'STUDENT' && token.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL(`/${currentLocale}/unauthorized`, request.url))
     }
   }
+
+  // Run next-intl middleware
+  const response = intlMiddleware(request)
+
+  // Set Correlation ID on response
+  response.headers.set('X-Correlation-ID', correlationId)
+
+  // Apply security headers
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value)
+  })
 
   return response
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
     '/((?!_next/static|_next/image|favicon.ico|public/).*)',
   ],
 }

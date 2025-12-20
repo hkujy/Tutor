@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
+
+export const dynamic = 'force-dynamic'
 
 export default function SignUp() {
   const router = useRouter()
@@ -34,8 +36,8 @@ export default function SignUp() {
       const data = await response.json()
 
       if (response.ok) {
-        // Redirect to signin page after successful registration
-        router.push('/auth/signin?message=Account created successfully')
+        // Redirect to login page after successful registration
+        router.push('/login?message=Account created successfully')
       } else {
         setError(data.error || 'Registration failed')
       }
@@ -63,7 +65,7 @@ export default function SignUp() {
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
             <a
-              href="/auth/signin"
+              href="/login"
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
               sign in to existing account

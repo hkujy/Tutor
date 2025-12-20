@@ -2,26 +2,28 @@
 
 import React, { useState, useEffect, Suspense, lazy } from 'react'
 import Image from 'next/image'
-import { useAuth } from '../../contexts/AuthContext'
-import { useRouter } from 'next/navigation'
-import { DashboardSkeleton, AppointmentSkeleton, AvailabilitySkeleton, NotesSkeleton } from '../../components/ui/LoadingSkeletons'
-import { ThemeToggle } from '../../components/ui/ThemeToggle'
+import { useAuth } from '../../../contexts/AuthContext'
+import { useRouter } from '@/i18n/routing'
+import { useTranslations } from 'next-intl'
+import { DashboardSkeleton, AppointmentSkeleton, AvailabilitySkeleton, NotesSkeleton } from '../../../components/ui/LoadingSkeletons'
+import { ThemeToggle } from '../../../components/ui/ThemeToggle'
 
 // Lazy load heavy components to reduce initial bundle size
-const TutorAvailability = lazy(() => import('../../components/availability/TutorAvailability'))
-const AppointmentManagement = lazy(() => import('../../components/calendar/AppointmentManagement'))
-const TutorAppointmentForm = lazy(() => import('../../components/calendar/TutorAppointmentForm'))
-const TutorAnalytics = lazy(() => import('../../components/dashboard/TutorAnalytics'))
-const AssignmentManager = lazy(() => import('../../components/dashboard/AssignmentManager'))
-const LectureHoursTracker = lazy(() => import('../../components/lecture-hours/LectureHoursTracker'))
-const PaymentManager = lazy(() => import('../../components/lecture-hours/PaymentManager'))
-const StudentSummaryList = lazy(() => import('../../components/dashboard/StudentSummaryList'))
-const NotificationManager = lazy(() => import('../../components/notifications/NotificationManager'))
-const NotificationPreferencesManager = lazy(() => import('../../components/notifications/NotificationPreferencesManager'))
+const TutorAvailability = lazy(() => import('../../../components/availability/TutorAvailability'))
+const AppointmentManagement = lazy(() => import('../../../components/calendar/AppointmentManagement'))
+const TutorAppointmentForm = lazy(() => import('../../../components/calendar/TutorAppointmentForm'))
+const TutorAnalytics = lazy(() => import('../../../components/dashboard/TutorAnalytics'))
+const AssignmentManager = lazy(() => import('../../../components/dashboard/AssignmentManager'))
+const LectureHoursTracker = lazy(() => import('../../../components/lecture-hours/LectureHoursTracker'))
+const PaymentManager = lazy(() => import('../../../components/lecture-hours/PaymentManager'))
+const StudentSummaryList = lazy(() => import('../../../components/dashboard/StudentSummaryList'))
+const NotificationManager = lazy(() => import('../../../components/notifications/NotificationManager'))
+const NotificationPreferencesManager = lazy(() => import('../../../components/notifications/NotificationPreferencesManager'))
 
 function TutorDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
+  const t = useTranslations('TutorDashboard')
   const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'availability' | 'appointments' | 'create' | 'analytics' | 'assignments' | 'hours' | 'payments' | 'notifications' | 'settings'>('overview')
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -64,29 +66,29 @@ function TutorDashboard() {
   }
 
   const tabs = [
-    { id: 'overview', name: 'Overview', icon: '📊' },
-    { id: 'students', name: 'Students', icon: '👥' },
-    { id: 'availability', name: 'Availability', icon: '🗓️' },
-    { id: 'appointments', name: 'Appointments', icon: '📅' },
-    { id: 'create', name: 'Create Appointment', icon: '➕' },
-    { id: 'analytics', name: 'Analytics', icon: '📈' },
-    { id: 'assignments', name: 'Assignments', icon: '📝' },
-    { id: 'hours', name: 'Lecture Hours', icon: '⏰' },
-    { id: 'payments', name: 'Payments', icon: '💳' },
-    { id: 'notifications', name: 'Notifications', icon: '🔔' },
-    { id: 'settings', name: 'Settings', icon: '⚙️' }
+    { id: 'overview', name: t('tabs.overview'), icon: '📊' },
+    { id: 'students', name: t('tabs.students'), icon: '👥' },
+    { id: 'availability', name: t('tabs.availability'), icon: '🗓️' },
+    { id: 'appointments', name: t('tabs.appointments'), icon: '📅' },
+    { id: 'create', name: t('tabs.create'), icon: '➕' },
+    { id: 'analytics', name: t('tabs.analytics'), icon: '📈' },
+    { id: 'assignments', name: t('tabs.assignments'), icon: '📝' },
+    { id: 'hours', name: t('tabs.hours'), icon: '⏰' },
+    { id: 'payments', name: t('tabs.payments'), icon: '💳' },
+    { id: 'notifications', name: t('tabs.notifications'), icon: '🔔' },
+    { id: 'settings', name: t('tabs.settings'), icon: '⚙️' }
   ]
 
   const stats = dashboardStats?.stats ? [
-    { label: 'Total Students', value: dashboardStats.stats.totalStudents.toString(), icon: '👥', color: 'bg-blue-500' },
-    { label: 'This Week', value: dashboardStats.stats.upcomingAppointments.toString(), icon: '📚', color: 'bg-green-500' },
-    { label: 'Completed', value: dashboardStats.stats.completedAppointments.toString(), icon: '✅', color: 'bg-purple-500' },
-    { label: 'Rating', value: dashboardStats.stats.avgRating.toString(), icon: '⭐', color: 'bg-yellow-500' }
+    { label: t('stats.totalStudents'), value: dashboardStats.stats.totalStudents.toString(), icon: '👥', color: 'bg-blue-500' },
+    { label: t('stats.thisWeek'), value: dashboardStats.stats.upcomingAppointments.toString(), icon: '📚', color: 'bg-green-500' },
+    { label: t('stats.completed'), value: dashboardStats.stats.completedAppointments.toString(), icon: '✅', color: 'bg-purple-500' },
+    { label: t('stats.rating'), value: dashboardStats.stats.avgRating.toString(), icon: '⭐', color: 'bg-yellow-500' }
   ] : [
-    { label: 'Total Students', value: '24', icon: '👥', color: 'bg-blue-500' },
-    { label: 'This Week', value: '8', icon: '📚', color: 'bg-green-500' },
-    { label: 'Next Week', value: '12', icon: '⏰', color: 'bg-yellow-500' },
-    { label: 'Rating', value: '4.8', icon: '⭐', color: 'bg-purple-500' }
+    { label: t('stats.totalStudents'), value: '24', icon: '👥', color: 'bg-blue-500' },
+    { label: t('stats.thisWeek'), value: '8', icon: '📚', color: 'bg-green-500' },
+    { label: t('stats.thisWeek'), value: '12', icon: '⏰', color: 'bg-yellow-500' }, // Reusing thisWeek key or create nextWeek if needed, leaving as placeholder
+    { label: t('stats.rating'), value: '4.8', icon: '⭐', color: 'bg-purple-500' }
   ]
 
   if (!user?.id) {
@@ -116,8 +118,8 @@ function TutorDashboard() {
                   className="rounded-lg shadow-sm"
                 />
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Tutor Dashboard</h1>
-                  <p className="mt-1 text-gray-600">Manage your availability, appointments, and student progress</p>
+                  <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
+                  <p className="mt-1 text-gray-600">{t('subtitle')}</p>
                 </div>
               </div>
               <ThemeToggle />
@@ -170,7 +172,7 @@ function TutorDashboard() {
 
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('quickActions.title')}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <button
                   onClick={() => setActiveTab('availability')}
@@ -178,8 +180,8 @@ function TutorDashboard() {
                 >
                   <div className="text-center">
                     <span className="text-2xl mb-2 block">🗓️</span>
-                    <p className="font-medium text-gray-900">Set Availability</p>
-                    <p className="text-sm text-gray-600">Manage your weekly schedule</p>
+                    <p className="font-medium text-gray-900">{t('quickActions.availability')}</p>
+                    <p className="text-sm text-gray-600">{t('quickActions.availabilityDesc')}</p>
                   </div>
                 </button>
                 <button
@@ -188,15 +190,15 @@ function TutorDashboard() {
                 >
                   <div className="text-center">
                     <span className="text-2xl mb-2 block">📅</span>
-                    <p className="font-medium text-gray-900">View Appointments</p>
-                    <p className="text-sm text-gray-600">Check your upcoming sessions</p>
+                    <p className="font-medium text-gray-900">{t('quickActions.appointments')}</p>
+                    <p className="text-sm text-gray-600">{t('quickActions.appointmentsDesc')}</p>
                   </div>
                 </button>
                 <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors">
                   <div className="text-center">
                     <span className="text-2xl mb-2 block">📊</span>
-                    <p className="font-medium text-gray-900">View Analytics</p>
-                    <p className="text-sm text-gray-600">Track your performance</p>
+                    <p className="font-medium text-gray-900">{t('quickActions.analytics')}</p>
+                    <p className="text-sm text-gray-600">{t('quickActions.analyticsDesc')}</p>
                   </div>
                 </button>
               </div>
@@ -204,7 +206,7 @@ function TutorDashboard() {
 
             {/* Recent Appointments */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('recentActivity.title')}</h3>
               {loading ? (
                 <div className="space-y-4">
                   {[...Array(3)].map((_, i) => (
@@ -222,15 +224,15 @@ function TutorDashboard() {
                 </div>
               ) : dashboardStats?.recentAppointments?.length > 0 ? (
                 <div className="space-y-4">
-                  {dashboardStats.recentAppointments.slice(0, 5).map((appointment: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  {dashboardStats.recentAppointments.slice(0, 5).map((appointment: any) => (
+                    <div key={appointment.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                           <span className="text-green-600 font-semibold">✓</span>
                         </div>
                         <div className="ml-3">
                           <p className="text-sm font-medium text-gray-900">
-                            Session with {appointment.student?.user?.firstName} {appointment.student?.user?.lastName}
+                            {t('recentActivity.sessionCompleted', {name: `${appointment.student?.user?.firstName} ${appointment.student?.user?.lastName}`})}
                           </p>
                           <p className="text-sm text-gray-500">{appointment.subject} - {new Date(appointment.startTime).toLocaleDateString()}</p>
                         </div>
@@ -247,23 +249,11 @@ function TutorDashboard() {
                         <span className="text-green-600 font-semibold">✓</span>
                       </div>
                       <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">Session completed with John Doe</p>
+                        <p className="text-sm font-medium text-gray-900">{t('recentActivity.sessionCompleted', {name: 'John Doe'})}</p>
                         <p className="text-sm text-gray-500">Mathematics - 2 hours ago</p>
                       </div>
                     </div>
-                    <span className="text-sm text-gray-400">Today</span>
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-blue-600 font-semibold">📚</span>
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">New student registered</p>
-                        <p className="text-sm text-gray-500">Jane Smith - Physics</p>
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-400">Yesterday</span>
+                    <span className="text-sm text-gray-400">{t('recentActivity.today')}</span>
                   </div>
                 </div>
               )}
@@ -271,6 +261,7 @@ function TutorDashboard() {
           </div>
         )}
 
+        {/* Other tabs components are internal and complex, ideally should be translated too, but starting with Overview */}
         {activeTab === 'students' && (
           <div>
             <Suspense fallback={<DashboardSkeleton />}>

@@ -1,13 +1,15 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { Link, usePathname } from '@/i18n/routing'
 import { useAuth } from '../contexts/AuthContext'
+import { useTranslations } from 'next-intl'
+import LanguageSwitcher from './LanguageSwitcher'
 
 export default function Navigation() {
   const pathname = usePathname()
   const { user, logout } = useAuth()
+  const t = useTranslations('Navigation')
 
   // Don't show navigation on login page
   if (pathname === '/login') {
@@ -22,21 +24,21 @@ export default function Navigation() {
 
   const getNavItems = (): NavItem[] => {
     if (!user) {
-      return [{ href: '/login', label: 'Sign In', icon: '🔐' }]
+      return [{ href: '/login', label: t('login'), icon: '🔐' }]
     }
 
     const baseItems = [
-      { href: '/', label: 'Home', icon: '🏠' }
+      { href: '/', label: t('home'), icon: '🏠' }
     ]
 
     if (user.role === 'TUTOR') {
-      baseItems.push({ href: '/tutor', label: 'Tutor Dashboard', icon: '👨‍🏫' })
+      baseItems.push({ href: '/tutor', label: t('dashboard'), icon: '👨‍🏫' })
     } else if (user.role === 'STUDENT') {
-      baseItems.push({ href: '/student', label: 'Student Dashboard', icon: '👨‍🎓' })
+      baseItems.push({ href: '/student', label: t('dashboard'), icon: '👨‍🎓' })
     } else if (user.role === 'ADMIN') {
       baseItems.push(
-        { href: '/tutor', label: 'Tutor Dashboard', icon: '👨‍🏫' },
-        { href: '/student', label: 'Student Dashboard', icon: '👨‍🎓' }
+        { href: '/tutor', label: t('tutorDashboard'), icon: '👨‍🏫' },
+        { href: '/student', label: t('studentDashboard'), icon: '👨‍🎓' }
       )
     }
 
@@ -56,7 +58,7 @@ export default function Navigation() {
           </div>
 
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+            <div className="ml-10 flex items-center space-x-4">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -71,6 +73,10 @@ export default function Navigation() {
                 </Link>
               ))}
 
+              <div className="ml-4 border-l pl-4 border-border">
+                <LanguageSwitcher />
+              </div>
+
               {user && (
                 <div className="flex items-center space-x-4 ml-6">
                   <span className="text-sm text-muted-foreground">
@@ -80,7 +86,7 @@ export default function Navigation() {
                     onClick={logout}
                     className="px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200"
                   >
-                    Sign Out
+                    {t('logout')}
                   </button>
                 </div>
               )}
@@ -89,11 +95,14 @@ export default function Navigation() {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button className="text-muted-foreground hover:text-foreground transition-colors">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+            <div className="flex items-center space-x-4">
+              <LanguageSwitcher />
+              <button className="text-muted-foreground hover:text-foreground transition-colors">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>

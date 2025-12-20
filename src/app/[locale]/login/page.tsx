@@ -1,9 +1,13 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { signIn } from 'next-auth/react'
-import LoadingButton from '../../components/ui/LoadingButton'
+import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import LoadingButton from '../../../components/ui/LoadingButton'
+
+export const dynamic = 'force-dynamic'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -11,6 +15,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const t = useTranslations('Auth')
 
   // Demo user credentials from the seed data
   const demoUsers = {
@@ -105,7 +110,7 @@ export default function LoginPage() {
               Tutoring Calendar
             </h1>
             <p className="text-gray-600">
-              Welcome back! Please sign in to your account.
+              {t('loginTitle')}
             </p>
           </div>
 
@@ -167,7 +172,7 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or sign in manually</span>
+                <span className="px-2 bg-white text-gray-500">{t('orManual')}</span>
               </div>
             </div>
 
@@ -175,7 +180,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
+                  {t('emailLabel')}
                 </label>
                 <input
                   id="email"
@@ -189,7 +194,7 @@ export default function LoginPage() {
 
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
+                  {t('passwordLabel')}
                 </label>
                 <input
                   id="password"
@@ -204,19 +209,19 @@ export default function LoginPage() {
               <LoadingButton
                 type="submit"
                 loading={loading}
-                loadingText="Signing in..."
+                loadingText={t('signingIn')}
                 variant="primary"
                 className="w-full"
               >
-                Sign In
+                {t('signInButton')}
               </LoadingButton>
 
               <div className="text-center mt-4">
                 <p className="text-sm text-gray-600">
-                  Don't have an account?{' '}
-                  <a href="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
-                    Sign up
-                  </a>
+                  {t('registerQuestion')}{' '}
+                  <Link href="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
+                    {t('registerAction')}
+                  </Link>
                 </p>
               </div>
             </form>

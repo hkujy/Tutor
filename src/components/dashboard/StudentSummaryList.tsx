@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
+import { useTranslations } from 'next-intl'
 import StudentEditModal from './StudentEditModal'
 import AddHoursModal from './AddHoursModal'
 import StudentNotesModal from '../notes/StudentNotesModal'
@@ -24,6 +25,7 @@ interface StudentSummaryListProps {
 }
 
 export default function StudentSummaryList({ tutorId }: StudentSummaryListProps) {
+  const t = useTranslations('StudentSummaryList')
   const [students, setStudents] = useState<StudentSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -117,7 +119,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
   }
 
   const handleMarkPaymentReceived = async (studentId: string) => {
-    if (!confirm('Mark all unpaid hours as paid? This action cannot be undone.')) {
+    if (!confirm(t('confirmPayment'))) {
       return
     }
 
@@ -161,17 +163,17 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
 
   const getPaymentStatusText = (status: string) => {
     switch (status) {
-      case 'up-to-date': return 'Up to Date'
-      case 'payment-due': return 'Payment Due'
-      case 'overdue': return 'Overdue'
-      default: return 'Unknown'
+      case 'up-to-date': return t('status.upToDate')
+      case 'payment-due': return t('status.paymentDue')
+      case 'overdue': return t('status.overdue')
+      default: return t('status.unknown')
     }
   }
 
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Student Summary</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('title')}</h2>
         <div className="animate-pulse space-y-4">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-20 bg-gray-200 rounded"></div>
@@ -184,7 +186,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
   if (error) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Student Summary</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('title')}</h2>
         <div className="text-red-600 text-center py-4">{error}</div>
       </div>
     )
@@ -192,11 +194,11 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold mb-6">Student Summary</h2>
+      <h2 className="text-xl font-semibold mb-6">{t('title')}</h2>
       
       {students.length === 0 ? (
         <div className="text-gray-500 text-center py-8">
-          No students found
+          {t('empty')}
         </div>
       ) : (
         <div className="space-y-4">
@@ -217,7 +219,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
                     <button
                       onClick={() => setEditingStudent(student)}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      title="Edit student data"
+                      title={t('actions.edit')}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -227,7 +229,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
                     <button
                       onClick={() => setAddingHoursForStudent(student)}
                       className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
-                      title="Add lecture hours"
+                      title={t('actions.addHours')}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -237,7 +239,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
                     <button
                       onClick={() => setNotesModalStudent(student)}
                       className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
-                      title="View/Add notes"
+                      title={t('actions.notes')}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -248,7 +250,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
                       <button
                         onClick={() => handleMarkPaymentReceived(student.studentId)}
                         className="p-2 text-purple-600 hover:bg-purple-50 rounded-md transition-colors"
-                        title="Mark payment received"
+                        title={t('actions.markPaid')}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -261,24 +263,24 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-500">Total Hours:</span>
+                  <span className="text-gray-500">{t('stats.totalHours')}</span>
                   <div className="font-semibold">{student.totalHours.toFixed(1)}h</div>
                 </div>
                 
                 <div>
-                  <span className="text-gray-500">Unpaid Hours:</span>
+                  <span className="text-gray-500">{t('stats.unpaidHours')}</span>
                   <div className={`font-semibold ${student.unpaidHours > 0 ? 'text-red-600' : 'text-green-600'}`}>
                     {student.unpaidHours.toFixed(1)}h
                   </div>
                 </div>
                 
                 <div>
-                  <span className="text-gray-500">Total Earnings:</span>
+                  <span className="text-gray-500">{t('stats.totalEarnings')}</span>
                   <div className="font-semibold">${student.totalEarnings.toFixed(2)}</div>
                 </div>
                 
                 <div>
-                  <span className="text-gray-500">Unpaid Earnings:</span>
+                  <span className="text-gray-500">{t('stats.unpaidEarnings')}</span>
                   <div className={`font-semibold ${student.unpaidEarnings > 0 ? 'text-red-600' : 'text-green-600'}`}>
                     ${student.unpaidEarnings.toFixed(2)}
                   </div>
@@ -287,14 +289,14 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
               
               {student.lastSession && (
                 <div className="mt-3 pt-3 border-t">
-                  <span className="text-gray-500 text-sm">Last Session: </span>
+                  <span className="text-gray-500 text-sm">{t('stats.lastSession')} </span>
                   <span className="text-sm">{format(new Date(student.lastSession), 'MMM d, yyyy')}</span>
                 </div>
               )}
               
               <div className="mt-2">
                 <div className="flex justify-between text-xs text-gray-500 mb-1">
-                  <span>Progress to next payment</span>
+                  <span>{t('progress.nextPayment')}</span>
                   <span>{(student.unpaidHours % student.paymentInterval).toFixed(1)}/{student.paymentInterval}h</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">

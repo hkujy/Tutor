@@ -1,12 +1,14 @@
 'use client'
 
 import { signOut, useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
+import { useLocale } from 'next-intl'
 import { useEffect } from 'react'
 
 export default function UnauthorizedPage() {
   const { data: session } = useSession()
   const router = useRouter()
+  const locale = useLocale()
 
   useEffect(() => {
     // Redirect to appropriate dashboard if user has valid session
@@ -28,7 +30,7 @@ export default function UnauthorizedPage() {
   }, [session, router])
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: '/login' })
+    signOut({ callbackUrl: `/${locale}/login` })
   }
 
   return (

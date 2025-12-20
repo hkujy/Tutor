@@ -112,6 +112,7 @@ model User {
   lastLoginAt DateTime? @map("last_login_at")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
   // Relationships
   student               Student?
@@ -120,8 +121,32 @@ model User {
   notificationPreference NotificationPreference?
   userSessions          UserSession[]
   auditLogs             AuditLog[]
+  smsUsage              SmsUsage[]
 
   @@map("users")
+}
+
+model SmsUsage {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  date      DateTime @db.Date // Store just the date part
+  count     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("sms_usage")
+}
+
+model SystemSettings {
+  key         String   @id
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
 }
 
 model NotificationPreference {
@@ -462,6 +487,7 @@ model Payment {
   lastReminderAt  DateTime?     @map("last_reminder_at")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
+  deletedAt       DateTime?     @map("deleted_at")
 
   lectureHours LectureHours @relation(fields: [lectureHoursId], references: [id], onDelete: Cascade)
 

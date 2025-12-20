@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../../lib/auth/config'
 import { db } from '../../../lib/db/client'
 import { z } from 'zod'
+import { checkIdempotency, clearIdempotencyKey } from '../../../lib/redis'
 
 const appointmentSchema = z.object({
   tutorId: z.string(),
@@ -34,6 +35,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
 
     const whereClause: any = {}
 
@@ -60,9 +63,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    const skip = (page - 1) * limit
+    const totalAppointments = await db.appointment.count({ where: whereClause })
+
     const appointments = await db.appointment.findMany({
       where: whereClause,
       orderBy: { startTime: 'asc' },
+      skip,
+      take: limit,
       include: {
         tutor: {
           select: {
@@ -88,7 +96,7 @@ export async function GET(request: NextRequest) {
         }
       }
     })
-    return NextResponse.json({ appointments })
+    return NextResponse.json({ appointments, total: totalAppointments, page, limit })
   } catch (error) {
     console.error('Fetch appointments error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -96,10 +104,20 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  let idempotencyKey: string | null = null
   try {
     const session = await getServerSession(authOptions)
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check for Idempotency-Key
+    idempotencyKey = request.headers.get('Idempotency-Key')
+    if (idempotencyKey) {
+      const isNew = await checkIdempotency(idempotencyKey)
+      if (!isNew) {
+        return NextResponse.json({ error: 'Request already processed or in progress' }, { status: 409 })
+      }
     }
 
     const body = await request.json()
@@ -178,6 +196,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ appointment }, { status: 201 })
   } catch (error) {
+    if (idempotencyKey) {
+      await clearIdempotencyKey(idempotencyKey)
+    }
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
     }

@@ -1,7 +1,7 @@
-'use client'
-
 import React, { useState, useEffect, useCallback } from 'react'
 import { format, parseISO, addDays, isAfter, isToday, isBefore, startOfDay, endOfDay } from 'date-fns'
+import { useTranslations } from 'next-intl'
+import { APPOINTMENT_STATUS_MAP } from '../../constants'
 
 interface Appointment {
   id: string
@@ -33,6 +33,8 @@ interface AppointmentManagementProps {
 }
 
 export default function AppointmentManagement({ userRole, userId, refreshTrigger }: AppointmentManagementProps) {
+  const t = useTranslations('AppointmentManagement')
+  const tEnums = useTranslations('Enums')
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
@@ -257,9 +259,9 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
       {/* Header with filters and view controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Appointment Management</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{t('title')}</h2>
           <p className="text-sm text-gray-600">
-            {filteredAppointments.length} of {appointments.length} appointments
+            {t('showingCount', { current: filteredAppointments.length, total: appointments.length })}
           </p>
         </div>
 
@@ -270,10 +272,10 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
             onChange={(e) => setTimeFilter(e.target.value as any)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           >
-            <option value="all">All Time</option>
-            <option value="upcoming">Upcoming</option>
-            <option value="today">Today</option>
-            <option value="past">Past</option>
+            <option value="all">{t('filters.time.all')}</option>
+            <option value="upcoming">{t('filters.time.upcoming')}</option>
+            <option value="today">{t('filters.time.today')}</option>
+            <option value="past">{t('filters.time.past')}</option>
           </select>
 
           {/* Status Filter */}
@@ -282,12 +284,12 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           >
-            <option value="all">All Status</option>
-            <option value="SCHEDULED">Scheduled</option>
-            <option value="CONFIRMED">Confirmed</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="CANCELLED">Cancelled</option>
+            <option value="all">{t('filters.status.all')}</option>
+            <option value="SCHEDULED">{tEnums(APPOINTMENT_STATUS_MAP['SCHEDULED'])}</option>
+            <option value="CONFIRMED">{tEnums(APPOINTMENT_STATUS_MAP['CONFIRMED'])}</option>
+            <option value="IN_PROGRESS">{tEnums(APPOINTMENT_STATUS_MAP['IN_PROGRESS'])}</option>
+            <option value="COMPLETED">{tEnums(APPOINTMENT_STATUS_MAP['COMPLETED'])}</option>
+            <option value="CANCELLED">{tEnums(APPOINTMENT_STATUS_MAP['CANCELLED'])}</option>
           </select>
 
           {/* Sort */}
@@ -296,9 +298,9 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
             onChange={(e) => setSortBy(e.target.value as any)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           >
-            <option value="date">Sort by Date</option>
-            <option value="subject">Sort by Subject</option>
-            <option value="status">Sort by Status</option>
+            <option value="date">{t('sort.date')}</option>
+            <option value="subject">{t('sort.subject')}</option>
+            <option value="status">{t('sort.status')}</option>
           </select>
 
           {/* View Mode Toggle */}
@@ -307,13 +309,13 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
               onClick={() => setViewMode('list')}
               className={`px-3 py-2 text-sm ${viewMode === 'list' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'}`}
             >
-              List
+              {t('view.list')}
             </button>
             <button
               onClick={() => setViewMode('grid')}
               className={`px-3 py-2 text-sm border-l ${viewMode === 'grid' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'}`}
             >
-              Grid
+              {t('view.grid')}
             </button>
           </div>
         </div>
@@ -327,11 +329,11 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No appointments found</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">{t('empty.title')}</h3>
           <p className="mt-1 text-sm text-gray-500">
             {filterStatus !== 'all' || timeFilter !== 'all' 
-              ? 'Try adjusting your filters to see more appointments.'
-              : 'Get started by creating your first appointment.'
+              ? t('empty.filter')
+              : t('empty.start')
             }
           </p>
         </div>
@@ -346,7 +348,7 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                       <div className="flex items-center space-x-3">
                         <div className="flex-shrink-0">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(appointment.status)}`}>
-                            {appointment.status}
+                            {tEnums(APPOINTMENT_STATUS_MAP[appointment.status] || 'status.scheduled')}
                           </span>
                         </div>
                         <div>
@@ -379,7 +381,7 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                         onClick={() => openRescheduleModal(appointment)}
                         className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
                       >
-                        Reschedule
+                        {t('actions.reschedule')}
                       </button>
                     )}
                     {canMarkCompleted(appointment) && (
@@ -387,7 +389,7 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                         onClick={() => handleMarkCompleted(appointment)}
                         className="text-green-600 hover:text-green-800 text-sm font-medium"
                       >
-                        Complete
+                        {t('actions.complete')}
                       </button>
                     )}
                     {canCancel(appointment) && (
@@ -395,7 +397,7 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                         onClick={() => openCancelModal(appointment)}
                         className="text-red-600 hover:text-red-800 text-sm font-medium"
                       >
-                        Cancel
+                        {t('actions.cancel')}
                       </button>
                     )}
                   </div>
@@ -411,14 +413,14 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-medium text-gray-900">{appointment.subject}</h3>
                 <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(appointment.status)}`}>
-                  {appointment.status}
+                  {tEnums(APPOINTMENT_STATUS_MAP[appointment.status] || 'status.scheduled')}
                 </span>
               </div>
               
               <div className="space-y-2 mb-4">
                 <p className="text-sm text-gray-600">
                   <strong>
-                    {userRole === 'tutor' ? 'Student:' : 'Tutor:'}
+                    {userRole === 'tutor' ? t('labels.student') : t('labels.tutor')}
                   </strong>{' '}
                   {userRole === 'tutor' 
                     ? `${appointment.student.user.firstName} ${appointment.student.user.lastName}`
@@ -426,14 +428,14 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                   }
                 </p>
                 <p className="text-sm text-gray-600">
-                  <strong>Date:</strong> {isHydrated && format(parseISO(appointment.startTime), 'MMM d, yyyy')}
+                  <strong>{t('labels.date')}</strong> {isHydrated && format(parseISO(appointment.startTime), 'MMM d, yyyy')}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <strong>Time:</strong> {isHydrated && format(parseISO(appointment.startTime), 'h:mm a')} - {isHydrated && format(parseISO(appointment.endTime), 'h:mm a')}
+                  <strong>{t('labels.time')}</strong> {isHydrated && format(parseISO(appointment.startTime), 'h:mm a')} - {isHydrated && format(parseISO(appointment.endTime), 'h:mm a')}
                 </p>
                 {appointment.notes && (
                   <p className="text-sm text-gray-600">
-                    <strong>Notes:</strong> {appointment.notes}
+                    <strong>{t('labels.notes')}</strong> {appointment.notes}
                   </p>
                 )}
               </div>
@@ -444,7 +446,7 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                     onClick={() => openRescheduleModal(appointment)}
                     className="flex-1 px-3 py-2 bg-indigo-100 text-indigo-700 rounded-md text-sm font-medium hover:bg-indigo-200 transition-colors"
                   >
-                    Reschedule
+                    {t('actions.reschedule')}
                   </button>
                 )}
                 {canMarkCompleted(appointment) && (
@@ -452,7 +454,7 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                     onClick={() => handleMarkCompleted(appointment)}
                     className="flex-1 px-3 py-2 bg-green-100 text-green-700 rounded-md text-sm font-medium hover:bg-green-200 transition-colors"
                   >
-                    Complete
+                    {t('actions.complete')}
                   </button>
                 )}
                 {canCancel(appointment) && (
@@ -460,7 +462,7 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                     onClick={() => openCancelModal(appointment)}
                     className="flex-1 px-3 py-2 bg-red-100 text-red-700 rounded-md text-sm font-medium hover:bg-red-200 transition-colors"
                   >
-                    Cancel
+                    {t('actions.cancel')}
                   </button>
                 )}
               </div>
@@ -473,11 +475,11 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
       {showRescheduleModal && selectedAppointment && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Reschedule Appointment</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('modals.reschedule.title')}</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modals.reschedule.date')}</label>
                 <input
                   type="date"
                   value={rescheduleDate}
@@ -487,7 +489,7 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modals.reschedule.time')}</label>
                 <input
                   type="time"
                   value={rescheduleTime}
@@ -497,7 +499,7 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modals.reschedule.subject')}</label>
                 <input
                   type="text"
                   value={rescheduleSubject}
@@ -507,13 +509,13 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modals.reschedule.notes')}</label>
                 <textarea
                   value={rescheduleNotes}
                   onChange={(e) => setRescheduleNotes(e.target.value)}
                   rows={3}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Add any notes about the reschedule..."
+                  placeholder={t('modals.reschedule.notesPlaceholder')}
                 />
               </div>
             </div>
@@ -523,13 +525,13 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                 onClick={() => setShowRescheduleModal(false)}
                 className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
               >
-                Cancel
+                {t('actions.cancel')}
               </button>
               <button
                 onClick={handleReschedule}
                 className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
               >
-                Reschedule
+                {t('actions.reschedule')}
               </button>
             </div>
           </div>
@@ -540,16 +542,16 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
       {showCancelModal && selectedAppointment && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Cancel Appointment</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('modals.cancel.title')}</h3>
             
             <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to cancel this appointment with{' '}
-              {userRole === 'tutor' 
-                ? `${selectedAppointment.student.user.firstName} ${selectedAppointment.student.user.lastName}`
-                : `${selectedAppointment.tutor.user.firstName} ${selectedAppointment.tutor.user.lastName}`
-              }{' '}
-              on {isHydrated && format(parseISO(selectedAppointment.startTime), 'MMM d, yyyy')} at{' '}
-              {isHydrated && format(parseISO(selectedAppointment.startTime), 'h:mm a')}?
+              {t('modals.cancel.confirm', {
+                name: userRole === 'tutor' 
+                  ? `${selectedAppointment.student.user.firstName} ${selectedAppointment.student.user.lastName}`
+                  : `${selectedAppointment.tutor.user.firstName} ${selectedAppointment.tutor.user.lastName}`,
+                date: isHydrated ? format(parseISO(selectedAppointment.startTime), 'MMM d, yyyy') : '',
+                time: isHydrated ? format(parseISO(selectedAppointment.startTime), 'h:mm a') : ''
+              })}
             </p>
             
             <div className="flex space-x-3">
@@ -557,13 +559,13 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                 onClick={() => setShowCancelModal(false)}
                 className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
               >
-                Keep Appointment
+                {t('modals.cancel.keep')}
               </button>
               <button
                 onClick={handleCancel}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
               >
-                Cancel Appointment
+                {t('modals.cancel.confirmBtn')}
               </button>
             </div>
           </div>

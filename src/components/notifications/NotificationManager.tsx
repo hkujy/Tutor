@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { format } from 'date-fns'
+import { useTranslations } from 'next-intl'
 import { notificationService, type Notification, type NotificationsResponse } from '../../lib/services/notification.service'
 import { Skeleton } from '../ui/Skeleton'
 import LoadingButton from '../ui/LoadingButton'
@@ -12,6 +13,7 @@ interface NotificationManagerProps {
 }
 
 export default function NotificationManager({ userId, userRole }: NotificationManagerProps) {
+  const t = useTranslations('NotificationManager')
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -167,17 +169,17 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
 
   const getFilterOptions = () => {
     const options = [
-      { key: 'all', label: 'All Notifications', count: notifications.length },
-      { key: 'unread', label: 'Unread', count: unreadCount },
-      { key: 'APPOINTMENT_REMINDER', label: 'Appointment Reminders', icon: '📅' },
-      { key: 'ASSIGNMENT_DUE', label: 'Assignment Due', icon: '📚' },
-      { key: 'PAYMENT_REMINDER', label: 'Payment Reminders', icon: '💰' },
-      { key: 'SYSTEM_ANNOUNCEMENT', label: 'System Announcements', icon: '📢' }
+      { key: 'all', label: t('filters.all'), count: notifications.length },
+      { key: 'unread', label: t('filters.unread'), count: unreadCount },
+      { key: 'APPOINTMENT_REMINDER', label: t('filters.appointmentReminder'), icon: '📅' },
+      { key: 'ASSIGNMENT_DUE', label: t('filters.assignmentDue'), icon: '📚' },
+      { key: 'PAYMENT_REMINDER', label: t('filters.paymentReminder'), icon: '💰' },
+      { key: 'SYSTEM_ANNOUNCEMENT', label: t('filters.systemAnnouncement'), icon: '📢' }
     ]
 
     // Add role-specific filters
     if (userRole === 'tutor') {
-      options.push({ key: 'PAYMENT_RECEIVED', label: 'Payment Received', icon: '💸' })
+      options.push({ key: 'PAYMENT_RECEIVED', label: t('filters.paymentReceived'), icon: '💸' })
     }
 
     return options
@@ -216,10 +218,10 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
-            <h2 className="text-xl font-semibold text-gray-900">Notifications</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t('title')}</h2>
             {unreadCount > 0 && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                {unreadCount} unread
+                {t('unreadCount', { count: unreadCount })}
               </span>
             )}
           </div>
@@ -229,7 +231,7 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
             {selectedNotifications.size > 0 && (
               <>
                 <span className="text-sm text-gray-600">
-                  {selectedNotifications.size} selected
+                  {t('selectedCount', { count: selectedNotifications.size })}
                 </span>
                 <LoadingButton
                   onClick={handleBulkMarkAsRead}
@@ -237,13 +239,13 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
                   variant="secondary"
                   size="sm"
                 >
-                  Mark Selected as Read
+                  {t('actions.markSelectedRead')}
                 </LoadingButton>
                 <button
                   onClick={handleClearSelection}
                   className="text-sm text-gray-500 hover:text-gray-700"
                 >
-                  Clear
+                  {t('actions.clearSelection')}
                 </button>
               </>
             )}
@@ -255,7 +257,7 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
                 variant="secondary"
                 size="sm"
               >
-                Mark All as Read
+                {t('actions.markAllRead')}
               </LoadingButton>
             )}
             
@@ -264,7 +266,7 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
                 onClick={handleSelectAll}
                 className="text-sm text-indigo-600 hover:text-indigo-800"
               >
-                Select All Unread
+                {t('actions.selectAllUnread')}
               </button>
             )}
           </div>
@@ -307,11 +309,11 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
         {notifications.length === 0 ? (
           <div className="p-12 text-center">
             <div className="text-4xl mb-4">🔔</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('empty.title')}</h3>
             <p className="text-gray-500">
               {activeFilter === 'unread' 
-                ? "You're all caught up! No unread notifications."
-                : "You don't have any notifications yet."
+                ? t('empty.unread')
+                : t('empty.none')
               }
             </p>
           </div>
@@ -332,7 +334,7 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
       {totalPages > 1 && (
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            Page {currentPage} of {totalPages}
+            {t('pagination.page', { current: currentPage, total: totalPages })}
           </div>
           <div className="flex space-x-2">
             <button
@@ -340,14 +342,14 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
               disabled={currentPage === 1}
               className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Previous
+              {t('pagination.previous')}
             </button>
             <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
               className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Next
+              {t('pagination.next')}
             </button>
           </div>
         </div>
@@ -365,6 +367,7 @@ interface NotificationItemProps {
 }
 
 function NotificationItem({ notification, isSelected, onSelect, onMarkAsRead }: NotificationItemProps) {
+  const t = useTranslations('NotificationManager.NotificationItem')
   const isUnread = !notification.readAt
   const icon = notificationService.getNotificationIcon(notification.type)
   const colorClass = notificationService.getNotificationColor(notification.type)
@@ -403,13 +406,13 @@ function NotificationItem({ notification, isSelected, onSelect, onMarkAsRead }: 
                 
                 {notification.channels && notification.channels.length > 0 && (
                   <span className="flex items-center space-x-1">
-                    <span>via</span>
+                    <span>{t('via')}</span>
                     {notification.channels.map((channel, index) => (
                       <span key={channel} className="inline-flex items-center">
                         {channel === 'email' && '📧'}
                         {channel === 'sms' && '📱'}
                         {channel === 'in_app' && '🔔'}
-                        <span className="ml-1">{channel}</span>
+                        <span className="ml-1">{t(`channels.${channel}`)}</span>
                         {index < notification.channels.length - 1 && <span className="mx-1">•</span>}
                       </span>
                     ))}
@@ -417,7 +420,7 @@ function NotificationItem({ notification, isSelected, onSelect, onMarkAsRead }: 
                 )}
                 
                 {notification.scheduledFor && (
-                  <span>Scheduled for {format(new Date(notification.scheduledFor), 'MMM d, h:mm a')}</span>
+                  <span>{t('scheduledFor', { date: format(new Date(notification.scheduledFor), 'MMM d, h:mm a') })}</span>
                 )}
               </div>
             </div>
@@ -428,7 +431,7 @@ function NotificationItem({ notification, isSelected, onSelect, onMarkAsRead }: 
                 onClick={onMarkAsRead}
                 className="ml-4 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
               >
-                Mark as read
+                {t('markAsRead')}
               </button>
             )}
           </div>

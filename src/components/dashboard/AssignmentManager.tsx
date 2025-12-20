@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from 'react'
 import { format, isAfter, isBefore, addDays } from 'date-fns'
+import { useTranslations } from 'next-intl'
 import { SkeletonList, Skeleton } from '../ui/Skeleton'
 import LoadingButton from '../ui/LoadingButton'
+import { ASSIGNMENT_STATUS_MAP, DIFFICULTY_LEVEL_MAP } from '../../constants'
 
 interface Assignment {
   id: string
@@ -25,6 +27,8 @@ interface AssignmentManagerProps {
 }
 
 export default function AssignmentManager({ userRole, userId }: AssignmentManagerProps) {
+  const t = useTranslations('AssignmentManager')
+  const tEnums = useTranslations('Enums')
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed' | 'overdue'>('all')
@@ -145,7 +149,7 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold text-gray-900">
-          {userRole === 'tutor' ? 'Assignment Management' : 'My Assignments'}
+          {userRole === 'tutor' ? t('tutorTitle') : t('studentTitle')}
         </h3>
         <div className="flex items-center gap-3">
           <select 
@@ -153,17 +157,17 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
             onChange={(e) => setFilter(e.target.value as any)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            <option value="all">All Assignments</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-            <option value="overdue">Overdue</option>
+            <option value="all">{t('filters.all')}</option>
+            <option value="pending">{t('filters.pending')}</option>
+            <option value="completed">{t('filters.completed')}</option>
+            <option value="overdue">{t('filters.overdue')}</option>
           </select>
           {userRole === 'tutor' && (
             <button
               onClick={() => setShowCreateForm(true)}
               className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
             >
-              Create Assignment
+              {t('actions.create')}
             </button>
           )}
         </div>
@@ -175,26 +179,26 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
           <div className="text-2xl font-bold text-blue-600">
             {assignments.filter(a => ['assigned', 'in_progress'].includes(a.status)).length}
           </div>
-          <div className="text-sm text-blue-700">Pending</div>
+          <div className="text-sm text-blue-700">{t('stats.pending')}</div>
         </div>
         <div className="p-4 bg-green-50 rounded-lg">
           <div className="text-2xl font-bold text-green-600">
             {assignments.filter(a => a.status === 'graded').length}
           </div>
-          <div className="text-sm text-green-700">Completed</div>
+          <div className="text-sm text-green-700">{t('stats.completed')}</div>
         </div>
         <div className="p-4 bg-red-50 rounded-lg">
           <div className="text-2xl font-bold text-red-600">
             {assignments.filter(a => a.status === 'overdue').length}
           </div>
-          <div className="text-sm text-red-700">Overdue</div>
+          <div className="text-sm text-red-700">{t('stats.overdue')}</div>
         </div>
         <div className="p-4 bg-purple-50 rounded-lg">
           <div className="text-2xl font-bold text-purple-600">
             {assignments.filter(a => a.grade).reduce((acc, a) => acc + (a.grade || 0), 0) / 
              assignments.filter(a => a.grade).length || 0}%
           </div>
-          <div className="text-sm text-purple-700">Avg Grade</div>
+          <div className="text-sm text-purple-700">{t('stats.avgGrade')}</div>
         </div>
       </div>
 
@@ -205,9 +209,9 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No assignments</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">{t('empty.title')}</h3>
             <p className="mt-1 text-sm text-gray-500">
-              {filter === 'all' ? 'No assignments found.' : `No ${filter} assignments found.`}
+              {filter === 'all' ? t('empty.all') : t('empty.filter', { filter: t(`filters.${filter}`) })}
             </p>
           </div>
         ) : (
@@ -225,10 +229,10 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                     <div className="flex items-center gap-3 mb-2">
                       <h4 className="font-semibold text-gray-900">{assignment.title}</h4>
                       <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(assignment.status)}`}>
-                        {assignment.status.replace('_', ' ')}
+                        {tEnums(ASSIGNMENT_STATUS_MAP[assignment.status.toUpperCase()])}
                       </span>
                       <span className={`px-2 py-1 text-xs rounded-full ${getDifficultyColor(assignment.difficulty)}`}>
-                        {assignment.difficulty}
+                        {tEnums(DIFFICULTY_LEVEL_MAP[assignment.difficulty.toUpperCase()])}
                       </span>
                     </div>
                     
@@ -246,7 +250,7 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        Due: {format(new Date(assignment.dueDate), 'MMM d, yyyy')}
+                        {t('labels.dueDate')}: {format(new Date(assignment.dueDate), 'MMM d, yyyy')}
                       </span>
 
                       {assignment.status !== 'overdue' && daysUntilDue >= 0 && (
@@ -256,7 +260,7 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          {daysUntilDue === 0 ? 'Due today' : `${daysUntilDue} days left`}
+                          {daysUntilDue === 0 ? t('labels.dueToday') : t('labels.daysLeft', { count: daysUntilDue })}
                         </span>
                       )}
                     </div>
@@ -266,7 +270,7 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                     {assignment.grade && (
                       <div className="text-center">
                         <div className="text-lg font-bold text-green-600">{assignment.grade}%</div>
-                        <div className="text-xs text-gray-500">Grade</div>
+                        <div className="text-xs text-gray-500">{t('labels.grade')}</div>
                       </div>
                     )}
                     
@@ -303,7 +307,7 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                 
                 {selectedAssignment.attachments && (
                   <div>
-                    <h4 className="font-medium mb-2">Attachments</h4>
+                    <h4 className="font-medium mb-2">{t('modal.attachments')}</h4>
                     <div className="space-y-2">
                       {selectedAssignment.attachments.map((file, index) => (
                         <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
@@ -319,7 +323,7 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
 
                 {selectedAssignment.feedback && (
                   <div>
-                    <h4 className="font-medium mb-2">Feedback</h4>
+                    <h4 className="font-medium mb-2">{t('modal.feedback')}</h4>
                     <p className="text-gray-600 bg-green-50 p-3 rounded">{selectedAssignment.feedback}</p>
                   </div>
                 )}
@@ -327,12 +331,12 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                 <div className="flex gap-4 pt-4">
                   {userRole === 'student' && ['assigned', 'in_progress'].includes(selectedAssignment.status) && (
                     <button className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
-                      Submit Assignment
+                      {t('modal.submitAssignment')}
                     </button>
                   )}
                   {userRole === 'tutor' && selectedAssignment.status === 'submitted' && (
                     <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                      Grade Assignment
+                      {t('modal.gradeAssignment')}
                     </button>
                   )}
                 </div>

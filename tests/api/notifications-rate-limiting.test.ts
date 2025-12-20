@@ -68,7 +68,8 @@ describe('Notification API Tests', () => {
     isVerified: true,
     lastLoginAt: null,
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
+    deletedAt: null // Added deletedAt field
   }
 
   beforeEach(() => {

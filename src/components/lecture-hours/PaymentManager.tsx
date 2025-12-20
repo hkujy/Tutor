@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { format, isAfter, isBefore, addDays } from 'date-fns'
+import { useTranslations } from 'next-intl'
 import { SkeletonList } from '../ui/Skeleton'
 import LoadingButton from '../ui/LoadingButton'
+import { PAYMENT_STATUS_MAP } from '../../constants'
 
 interface PaymentReminder {
   id: string
@@ -47,6 +49,8 @@ interface PaymentManagerProps {
 }
 
 export default function PaymentManager({ userRole, userId }: PaymentManagerProps) {
+  const t = useTranslations('PaymentManager')
+  const tEnums = useTranslations('Enums')
   const [payments, setPayments] = useState<PaymentReminder[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'pending' | 'overdue' | 'paid'>(
@@ -56,10 +60,27 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
   const [showAddPaymentForm, setShowAddPaymentForm] = useState(false)
   const [lectureHours, setLectureHours] = useState<any[]>([]) // For student/subject selection
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10) 
+  const [totalPayments, setTotalPayments] = useState(0)
+  const totalPages = Math.ceil(totalPayments / itemsPerPage)
+
   const fetchPayments = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/lecture-hours?userId=${userId}&role=${userRole}&payments=true`)
+      const queryParams = new URLSearchParams()
+      queryParams.append('page', currentPage.toString())
+      queryParams.append('limit', itemsPerPage.toString())
+      queryParams.append('userId', userId)
+      queryParams.append('role', userRole)
+      queryParams.append('payments', 'true') // Explicitly request payments included
+
+      if (filter !== 'all') { // Pass filter to API if it exists
+        queryParams.append('statusFilter', filter);
+      }
+
+      const response = await fetch(`/api/lecture-hours?${queryParams.toString()}`)
       if (!response.ok) throw new Error('Failed to fetch payments')
       
       const data = await response.json()
@@ -67,8 +88,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
       // Flatten payments from all lecture hours
       const allPayments: PaymentReminder[] = []
       if (data.lectureHours && Array.isArray(data.lectureHours)) {
-        // Store lecture hours for form options
-        setLectureHours(data.lectureHours)
+        setLectureHours(data.lectureHours) // Store lecture hours for form options
         
         data.lectureHours.forEach((lectureHour: any) => {
           if (lectureHour.payments && Array.isArray(lectureHour.payments)) {
@@ -89,7 +109,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                   student: lectureHour.student,
                   tutor: lectureHour.tutor
                 },
-                notifications: [] // TODO: Add notification fetching if needed
+                notifications: [] 
               })
             })
           }
@@ -97,12 +117,15 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
       }
       
       setPayments(allPayments)
+      setTotalPayments(data.total || 0)
     } catch (error) {
       console.error('Error fetching payments:', error)
+      setPayments([])
+      setTotalPayments(0)
     } finally {
       setLoading(false)
     }
-  }, [userId, userRole])
+  }, [userId, userRole, currentPage, itemsPerPage, filter])
 
   useEffect(() => {
     fetchPayments()
@@ -155,29 +178,17 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
       setShowAddPaymentForm(false)
     } catch (error) {
       console.error('Error adding payment:', error)
-      alert('Failed to add payment. Please try again.')
+      alert(t('addPaymentForm.failure'))
     }
   }
 
   const getFilteredPayments = () => {
+    // API is now handling filtering, so we just return the fetched payments
     if (userRole === 'student') {
-      // Students only see pending and overdue payments
-      return payments.filter(payment => 
-        payment.status === 'PENDING' || payment.status === 'OVERDUE'
-      )
+        // Students only see pending and overdue payments if API doesn't filter by default
+        return payments.filter(payment => payment.status === 'PENDING' || payment.status === 'OVERDUE');
     }
-    
-    // Tutors can see all payments based on filter
-    switch (filter) {
-      case 'pending':
-        return payments.filter(payment => payment.status === 'PENDING')
-      case 'overdue':
-        return payments.filter(payment => payment.status === 'OVERDUE')
-      case 'paid':
-        return payments.filter(payment => payment.status === 'PAID')
-      default:
-        return payments
-    }
+    return payments;
   }
 
   const getStatusColor = (status: string) => {
@@ -194,16 +205,16 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
   const getFilterButtons = () => {
     if (userRole === 'student') {
       return [
-        { key: 'pending', label: 'Pending', count: payments.filter(p => p.status === 'PENDING').length },
-        { key: 'overdue', label: 'Overdue', count: payments.filter(p => p.status === 'OVERDUE').length }
+        { key: 'pending', label: t('filters.pending'), count: payments.filter(p => p.status === 'PENDING').length },
+        { key: 'overdue', label: t('filters.overdue'), count: payments.filter(p => p.status === 'OVERDUE').length }
       ]
     }
     
     return [
-      { key: 'all', label: 'All', count: payments.length },
-      { key: 'pending', label: 'Pending', count: payments.filter(p => p.status === 'PENDING').length },
-      { key: 'overdue', label: 'Overdue', count: payments.filter(p => p.status === 'OVERDUE').length },
-      { key: 'paid', label: 'Paid', count: payments.filter(p => p.status === 'PAID').length }
+      { key: 'all', label: t('filters.all'), count: totalPayments }, // Use totalPayments for All
+      { key: 'pending', label: t('filters.pending'), count: payments.filter(p => p.status === 'PENDING').length },
+      { key: 'overdue', label: t('filters.overdue'), count: payments.filter(p => p.status === 'OVERDUE').length },
+      { key: 'paid', label: t('filters.paid'), count: payments.filter(p => p.status === 'PAID').length }
     ]
   }
 
@@ -219,13 +230,13 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
     if (userRole === 'student') {
       return [
         {
-          title: 'Pending Payments',
+          title: t('summary.pendingPayments'),
           amount: pendingAmount,
           count: payments.filter(p => p.status === 'PENDING').length,
           color: 'text-yellow-600'
         },
         {
-          title: 'Overdue Payments',
+          title: t('summary.overduePayments'),
           amount: overdueAmount,
           count: payments.filter(p => p.status === 'OVERDUE').length,
           color: 'text-red-600'
@@ -241,25 +252,25 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
 
     return [
       {
-        title: 'Total Revenue',
+        title: t('summary.totalRevenue'),
         amount: totalAmount,
         count: payments.length,
         color: 'text-blue-600'
       },
       {
-        title: 'Pending Payments',
+        title: t('summary.pendingPayments'),
         amount: pendingAmount,
         count: payments.filter(p => p.status === 'PENDING').length,
         color: 'text-yellow-600'
       },
       {
-        title: 'Overdue Payments',
+        title: t('summary.overduePayments'),
         amount: overdueAmount,
         count: payments.filter(p => p.status === 'OVERDUE').length,
         color: 'text-red-600'
       },
       {
-        title: 'Paid This Month',
+        title: t('summary.paidThisMonth'),
         amount: paidAmount,
         count: payments.filter(p => p.status === 'PAID').length,
         color: 'text-green-600'
@@ -276,9 +287,10 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
       }
       groups[studentName].push(payment)
       return groups
-    }, {} as Record<string, PaymentReminder[]>) : null
+    }, {} as Record<string, PaymentReminder[]>)
+  : null
 
-  const filteredPayments = getFilteredPayments()
+  const displayedPayments = getFilteredPayments()
 
   if (loading) {
     return <SkeletonList items={3} />
@@ -289,14 +301,14 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">
-          {userRole === 'student' ? 'My Payments' : 'Payment Management'}
+          {userRole === 'student' ? t('title.student') : t('title.tutor')}
         </h2>
         {userRole === 'tutor' && (
           <button
             onClick={() => setShowAddPaymentForm(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
           >
-            Add Payment
+            {t('actions.addPayment')}
           </button>
         )}
       </div>
@@ -311,7 +323,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                 <p className={`text-2xl font-bold ${card.color}`}>
                   ${card.amount.toFixed(2)}
                 </p>
-                <p className="text-sm text-gray-500">{card.count} payments</p>
+                <p className="text-sm text-gray-500">{t('summary.paymentsCount', { count: card.count })}</p>
               </div>
             </div>
           </div>
@@ -323,8 +335,8 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
         {getFilterButtons().map(({ key, label, count }) => (
           <button
             key={key}
-            onClick={() => setFilter(key as any)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            onClick={() => { setFilter(key as any); setCurrentPage(1); }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${ 
               filter === key
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -339,7 +351,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
       {showAddPaymentForm && userRole === 'tutor' && (
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Add New Payment</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('addPaymentForm.title')}</h3>
             <button
               onClick={() => setShowAddPaymentForm(false)}
               className="text-gray-400 hover:text-gray-600"
@@ -356,9 +368,9 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
       )}
 
       {/* Payment List */}
-      {filteredPayments.length === 0 ? (
+      {displayedPayments.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-500">No payments found</p>
+          <p className="text-gray-500">{t('empty.noPayments')}</p>
         </div>
       ) : userRole === 'tutor' && groupedPayments ? (
         // Tutor view: Group payments by student
@@ -369,13 +381,12 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                 <h3 className="text-lg font-semibold text-gray-900">{studentName}</h3>
                 <div className="mt-1 space-y-1">
                   <p className="text-sm text-gray-600">
-                    {studentPayments.length} payment{studentPayments.length !== 1 ? 's' : ''} • 
-                    Total: ${studentPayments.reduce((sum, p) => sum + p.amount, 0).toFixed(2)}
+                    {t('groupedPayments.countTotal', { count: studentPayments.length, total: studentPayments.reduce((sum, p) => sum + p.amount, 0).toFixed(2) })}
                   </p>
                   <div className="flex space-x-4 text-xs text-gray-500">
-                    <span>Paid: ${studentPayments.filter(p => p.status === 'PAID').reduce((sum, p) => sum + p.amount, 0).toFixed(2)}</span>
-                    <span>Pending: ${studentPayments.filter(p => p.status === 'PENDING').reduce((sum, p) => sum + p.amount, 0).toFixed(2)}</span>
-                    <span>Overdue: ${studentPayments.filter(p => p.status === 'OVERDUE').reduce((sum, p) => sum + p.amount, 0).toFixed(2)}</span>
+                    <span>{t('groupedPayments.paid')}: ${studentPayments.filter(p => p.status === 'PAID').reduce((sum, p) => sum + p.amount, 0).toFixed(2)}</span>
+                    <span>{t('groupedPayments.pending')}: ${studentPayments.filter(p => p.status === 'PENDING').reduce((sum, p) => sum + p.amount, 0).toFixed(2)}</span>
+                    <span>{t('groupedPayments.overdue')}: ${studentPayments.filter(p => p.status === 'OVERDUE').reduce((sum, p) => sum + p.amount, 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -392,21 +403,21 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                                   {payment.lectureHours.subject}
                                 </p>
                                 <p className="text-sm text-gray-500">
-                                  {payment.hoursIncluded} hours • Due {format(new Date(payment.dueDate), 'MMM d, yyyy')}
+                                  {t('paymentDetails.hoursDue', { hours: payment.hoursIncluded, dueDate: format(new Date(payment.dueDate), 'MMM d, yyyy') })}
                                 </p>
                                 <div className="mt-1 space-y-1">
                                   <p className="text-xs text-gray-400">
-                                    Created: {format(new Date(payment.createdAt), 'MMM d, yyyy \u2022 h:mm a')}
+                                    {t('paymentDetails.created')}: {format(new Date(payment.createdAt), 'MMM d, yyyy • h:mm a')}
                                   </p>
                                   {payment.status === 'PAID' && payment.paidDate && (
                                     <p className="text-xs text-green-600">
-                                      Paid: {format(new Date(payment.paidDate), 'MMM d, yyyy \u2022 h:mm a')}
-                                      {payment.paymentMethod && ` via ${payment.paymentMethod}`}
+                                      {t('paymentDetails.paid')}: {format(new Date(payment.paidDate), 'MMM d, yyyy • h:mm a')}
+                                      {payment.paymentMethod && t('paymentDetails.viaMethod', { method: payment.paymentMethod })}
                                     </p>
                                   )}
                                   {payment.notes && (
                                     <p className="text-xs text-gray-500">
-                                      Note: {payment.notes}
+                                      {t('paymentDetails.note')}: {payment.notes}
                                     </p>
                                   )}
                                 </div>
@@ -418,7 +429,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                       <div className="flex items-center space-x-4">
                         <div className="text-right">
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
-                            {payment.status}
+                            {tEnums(PAYMENT_STATUS_MAP[payment.status])}
                           </span>
                           <p className="text-lg font-semibold text-gray-900 mt-1">
                             ${payment.amount.toFixed(2)}
@@ -431,7 +442,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                             size="sm"
                             variant="secondary"
                           >
-                            Mark Paid
+                            {t('actions.markPaid')}
                           </LoadingButton>
                         )}
                       </div>
@@ -445,7 +456,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
       ) : (
         // Student view or tutor ungrouped view: Simple list
         <div className="bg-white rounded-lg shadow-sm border divide-y divide-gray-200">
-          {filteredPayments.map((payment) => (
+          {displayedPayments.map((payment) => (
             <div key={payment.id} className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
@@ -456,29 +467,29 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                       </p>
                       <p className="text-sm text-gray-500">
                         {userRole === 'student' 
-                          ? `Tutor: ${payment.lectureHours.tutor.user.firstName} ${payment.lectureHours.tutor.user.lastName}`
-                          : `Student: ${payment.lectureHours.student.user.firstName} ${payment.lectureHours.student.user.lastName}`
+                          ? t('paymentDetails.tutorName', { firstName: payment.lectureHours.tutor.user.firstName, lastName: payment.lectureHours.tutor.user.lastName })
+                          : t('paymentDetails.studentName', { firstName: payment.lectureHours.student.user.firstName, lastName: payment.lectureHours.student.user.lastName }) 
                         }
                       </p>
                       <p className="text-sm text-gray-500">
-                        {payment.hoursIncluded} hours • Due {format(new Date(payment.dueDate), 'MMM d, yyyy')}
+                        {t('paymentDetails.hoursDue', { hours: payment.hoursIncluded, dueDate: format(new Date(payment.dueDate), 'MMM d, yyyy') })}
                       </p>
                       
                       {/* Payment timing information */}
                       <div className="mt-2 space-y-1">
                         <p className="text-xs text-gray-400">
-                          Created: {format(new Date(payment.createdAt), 'MMM d, yyyy • h:mm a')}
+                          {t('paymentDetails.created')}: {format(new Date(payment.createdAt), 'MMM d, yyyy • h:mm a')}
                         </p>
                         {payment.status === 'PAID' && payment.paidDate && (
                           <p className="text-xs text-green-600">
-                            Paid: {format(new Date(payment.paidDate), 'MMM d, yyyy • h:mm a')}
-                            {payment.paymentMethod && ` via ${payment.paymentMethod}`}
-                            {payment.transactionId && ` (ID: ${payment.transactionId})`}
+                            {t('paymentDetails.paid')}: {format(new Date(payment.paidDate), 'MMM d, yyyy • h:mm a')}
+                            {payment.paymentMethod && t('paymentDetails.viaMethod', { method: payment.paymentMethod })}
+                            {payment.transactionId && t('paymentDetails.transactionId', { id: payment.transactionId })}
                           </p>
                         )}
                         {payment.notes && (
                           <p className="text-xs text-gray-500">
-                            Note: {payment.notes}
+                            {t('paymentDetails.note')}: {payment.notes}
                           </p>
                         )}
                       </div>
@@ -498,7 +509,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                       ))}
                       {payment.notifications.length > 2 && (
                         <p className="text-xs text-gray-500">
-                          +{payment.notifications.length - 2} more notifications
+                          {t('paymentDetails.moreNotifications', { count: payment.notifications.length - 2 })}
                         </p>
                       )}
                     </div>
@@ -506,10 +517,9 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                 </div>
                 
                 <div className="flex items-center space-x-4">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
-                    {payment.status}
-                  </span>
-                  <p className="text-lg font-semibold text-gray-900">
+                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
+                                              {tEnums(PAYMENT_STATUS_MAP[payment.status])}
+                                            </span>                  <p className="text-lg font-semibold text-gray-900 mt-1">
                     ${payment.amount.toFixed(2)}
                   </p>
                   {payment.status !== 'PAID' && userRole === 'tutor' && (
@@ -519,7 +529,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                       size="sm"
                       variant="secondary"
                     >
-                      Mark Paid
+                      {t('actions.markPaid')}
                     </LoadingButton>
                   )}
                 </div>
@@ -548,6 +558,7 @@ interface AddPaymentFormProps {
 }
 
 function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProps) {
+  const t = useTranslations('PaymentManager.addPaymentForm')
   const [formData, setFormData] = useState({
     lectureHoursId: '',
     amount: '',
@@ -562,7 +573,7 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
     e.preventDefault()
     
     if (!formData.lectureHoursId || !formData.amount || !formData.hoursIncluded || !formData.paymentMethod) {
-      alert('Please fill in all required fields')
+      alert(t('validation.requiredFields'))
       return
     }
 
@@ -583,7 +594,7 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
         {/* Student/Subject Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Student & Subject *
+            {t('studentSubject.label')} *
           </label>
           <select
             value={formData.lectureHoursId}
@@ -591,7 +602,7 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           >
-            <option value="">Select student and subject</option>
+            <option value="">{t('studentSubject.select')}</option>
             {lectureHours.map((lh) => (
               <option key={lh.id} value={lh.id}>
                 {lh.student.user.firstName} {lh.student.user.lastName} - {lh.subject}
@@ -603,7 +614,7 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
         {/* Amount */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Amount ($) *
+            {t('amount.label')} *
           </label>
           <input
             type="number"
@@ -620,7 +631,7 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
         {/* Hours Included */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Hours Included *
+            {t('hoursIncluded.label')} *
           </label>
           <input
             type="number"
@@ -637,7 +648,7 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
         {/* Payment Method */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Payment Method *
+            {t('paymentMethod.label')} *
           </label>
           <select
             value={formData.paymentMethod}
@@ -645,22 +656,22 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           >
-            <option value="">Select payment method</option>
-            <option value="Cash">Cash</option>
-            <option value="Credit Card">Credit Card</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="PayPal">PayPal</option>
-            <option value="Venmo">Venmo</option>
-            <option value="Zelle">Zelle</option>
-            <option value="Check">Check</option>
-            <option value="Other">Other</option>
+            <option value="">{t('paymentMethod.select')}</option>
+            <option value="Cash">{t('paymentMethod.cash')}</option>
+            <option value="Credit Card">{t('paymentMethod.creditCard')}</option>
+            <option value="Bank Transfer">{t('paymentMethod.bankTransfer')}</option>
+            <option value="PayPal">{t('paymentMethod.payPal')}</option>
+            <option value="Venmo">{t('paymentMethod.venmo')}</option>
+            <option value="Zelle">{t('paymentMethod.zelle')}</option>
+            <option value="Check">{t('paymentMethod.check')}</option>
+            <option value="Other">{t('paymentMethod.other')}</option>
           </select>
         </div>
 
         {/* Payment Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Payment Date & Time *
+            {t('paymentDate.label')} *
           </label>
           <input
             type="datetime-local"
@@ -674,14 +685,14 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
         {/* Transaction ID */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Transaction ID (optional)
+            {t('transactionId.label')}
           </label>
           <input
             type="text"
             value={formData.transactionId}
             onChange={(e) => setFormData(prev => ({ ...prev, transactionId: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Reference number, check #, etc."
+            placeholder={t('transactionId.placeholder')}
           />
         </div>
       </div>
@@ -689,14 +700,14 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
       {/* Notes */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Notes (optional)
+            {t('notes.label')}
         </label>
         <textarea
           value={formData.notes}
           onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           rows={3}
-          placeholder="Additional notes about this payment..."
+          placeholder={t('notes.placeholder')}
         />
       </div>
 
@@ -707,13 +718,13 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
           onClick={onCancel}
           className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
         >
-          Cancel
+          {t('actions.cancel')}
         </button>
         <button
           type="submit"
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
-          Add Payment
+          {t('actions.addPayment')}
         </button>
       </div>
     </form>

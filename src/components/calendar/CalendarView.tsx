@@ -137,7 +137,7 @@ export default function CalendarView() {
         </div>
       ) : (
         <div className="grid grid-cols-7 gap-1">
-          {calendarDays.map((date, index) => {
+          {calendarDays.map((date) => {
             const dayAppointments = getAppointmentsForDate(date)
             const isSelected = selectedDate && isSameDay(date, selectedDate)
             const isToday = isSameDay(date, new Date())
@@ -145,7 +145,7 @@ export default function CalendarView() {
 
             return (
               <div
-                key={index}
+                key={format(date, 'yyyy-MM-dd')}
                 onClick={() => handleDateClick(date)}
                 className={`
                   h-24 p-2 border cursor-pointer rounded-md transition-colors
@@ -163,9 +163,9 @@ export default function CalendarView() {
                 </div>
                 {dayAppointments.length > 0 && (
                   <div className="mt-1 space-y-1">
-                    {dayAppointments.slice(0, 2).map((apt, i) => (
+                    {dayAppointments.slice(0, 2).map((apt) => (
                       <div
-                        key={i}
+                        key={apt.id}
                         className="text-xs p-1 rounded bg-indigo-100 text-indigo-800 truncate"
                       >
                         {apt.subject}

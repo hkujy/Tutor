@@ -1,7 +1,11 @@
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enable typed routes
-  typedRoutes: true,
+  typedRoutes: false,
   
   // Enable React strict mode for better error detection
   reactStrictMode: true,
@@ -69,4 +73,4 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+export default withNextIntl(nextConfig);

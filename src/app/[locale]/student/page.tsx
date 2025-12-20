@@ -2,26 +2,30 @@
 
 import React, { useState, useEffect, Suspense, lazy } from 'react'
 import Image from 'next/image'
-import { useAuth } from '../../contexts/AuthContext'
-import { useRouter } from 'next/navigation'
-import { DashboardSkeleton, AppointmentSkeleton, AvailabilitySkeleton, NotesSkeleton } from '../../components/ui/LoadingSkeletons'
-import { ThemeToggle } from '../../components/ui/ThemeToggle'
+import { useAuth } from '../../../contexts/AuthContext'
+import { useRouter } from '@/i18n/routing'
+import { useTranslations } from 'next-intl'
+import { DashboardSkeleton, AppointmentSkeleton, AvailabilitySkeleton, NotesSkeleton } from '../../../components/ui/LoadingSkeletons'
+import { ThemeToggle } from '../../../components/ui/ThemeToggle'
+import ErrorBoundary from '../../../components/ErrorBoundary'
+import { WidgetError, SectionError } from '../../../components/ui/ErrorFallbacks'
 
 // Lazy load heavy components to reduce initial bundle size
-const CalendarView = lazy(() => import('../../components/calendar/CalendarView'))
-const EnhancedAppointmentForm = lazy(() => import('../../components/calendar/EnhancedAppointmentForm'))
-const AppointmentList = lazy(() => import('../../components/calendar/AppointmentList'))
-const AppointmentManager = lazy(() => import('../../components/calendar/AppointmentManager'))
-const StudentProgress = lazy(() => import('../../components/dashboard/StudentProgress'))
-const AssignmentManager = lazy(() => import('../../components/dashboard/AssignmentManager'))
-const LectureHoursTracker = lazy(() => import('../../components/lecture-hours/LectureHoursTracker'))
-const PaymentManager = lazy(() => import('../../components/lecture-hours/PaymentManager'))
-const NotificationManager = lazy(() => import('../../components/notifications/NotificationManager'))
-const NotificationPreferencesManager = lazy(() => import('../../components/notifications/NotificationPreferencesManager'))
+const CalendarView = lazy(() => import('../../../components/calendar/CalendarView'))
+const EnhancedAppointmentForm = lazy(() => import('../../../components/calendar/EnhancedAppointmentForm'))
+const AppointmentList = lazy(() => import('../../../components/calendar/AppointmentList'))
+const AppointmentManager = lazy(() => import('../../../components/calendar/AppointmentManager'))
+const StudentProgress = lazy(() => import('../../../components/dashboard/StudentProgress'))
+const AssignmentManager = lazy(() => import('../../../components/dashboard/AssignmentManager'))
+const LectureHoursTracker = lazy(() => import('../../../components/lecture-hours/LectureHoursTracker'))
+const PaymentManager = lazy(() => import('../../../components/lecture-hours/PaymentManager'))
+const NotificationManager = lazy(() => import('../../../components/notifications/NotificationManager'))
+const NotificationPreferencesManager = lazy(() => import('../../../components/notifications/NotificationPreferencesManager'))
 
 function StudentDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
+  const t = useTranslations('StudentDashboard')
   const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'assignments' | 'progress' | 'hours' | 'payments' | 'notifications' | 'settings'>('overview')
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
@@ -70,26 +74,26 @@ function StudentDashboard() {
   }
 
   const stats = dashboardStats?.stats ? [
-    { label: 'Total Sessions', value: dashboardStats.stats.totalAppointments.toString(), icon: '📚', color: 'bg-blue-500' },
-    { label: 'This Month', value: dashboardStats.stats.upcomingAppointments.toString(), icon: '📅', color: 'bg-green-500' },
-    { label: 'Completed', value: dashboardStats.stats.completedAppointments.toString(), icon: '✅', color: 'bg-purple-500' },
-    { label: 'Average Rating', value: dashboardStats.stats.avgRating.toString(), icon: '⭐', color: 'bg-yellow-500' }
+    { label: t('stats.totalSessions'), value: dashboardStats.stats.totalAppointments.toString(), icon: '📚', color: 'bg-blue-500' },
+    { label: t('stats.thisMonth'), value: dashboardStats.stats.upcomingAppointments.toString(), icon: '📅', color: 'bg-green-500' },
+    { label: t('stats.completed'), value: dashboardStats.stats.completedAppointments.toString(), icon: '✅', color: 'bg-purple-500' },
+    { label: t('stats.averageRating'), value: dashboardStats.stats.avgRating.toString(), icon: '⭐', color: 'bg-yellow-500' }
   ] : [
-    { label: 'Total Sessions', value: '0', icon: '📚', color: 'bg-blue-500' },
-    { label: 'This Month', value: '0', icon: '📅', color: 'bg-green-500' },
-    { label: 'Completed', value: '0', icon: '✅', color: 'bg-purple-500' },
-    { label: 'Average Rating', value: '0', icon: '⭐', color: 'bg-yellow-500' }
+    { label: t('stats.totalSessions'), value: '0', icon: '📚', color: 'bg-blue-500' },
+    { label: t('stats.thisMonth'), value: '0', icon: '📅', color: 'bg-green-500' },
+    { label: t('stats.completed'), value: '0', icon: '✅', color: 'bg-purple-500' },
+    { label: t('stats.averageRating'), value: '0', icon: '⭐', color: 'bg-yellow-500' }
   ]
 
   const tabs = [
-    { id: 'overview', name: 'Overview', icon: '🏠' },
-    { id: 'manage', name: 'Manage', icon: '⚙️' },
-    { id: 'assignments', name: 'Assignments', icon: '📝' },
-    { id: 'progress', name: 'Progress', icon: '📊' },
-    { id: 'hours', name: 'Lecture Hours', icon: '⏰' },
-    { id: 'payments', name: 'Payments', icon: '💳' },
-    { id: 'notifications', name: 'Notifications', icon: '🔔' },
-    { id: 'settings', name: 'Settings', icon: '⚙️' }
+    { id: 'overview', name: t('tabs.overview'), icon: '🏠' },
+    { id: 'manage', name: t('tabs.manage'), icon: '⚙️' },
+    { id: 'assignments', name: t('tabs.assignments'), icon: '📝' },
+    { id: 'progress', name: t('tabs.progress'), icon: '📊' },
+    { id: 'hours', name: t('tabs.hours'), icon: '⏰' },
+    { id: 'payments', name: t('tabs.payments'), icon: '💳' },
+    { id: 'notifications', name: t('tabs.notifications'), icon: '🔔' },
+    { id: 'settings', name: t('tabs.settings'), icon: '⚙️' }
   ]
 
   return (
@@ -108,8 +112,8 @@ function StudentDashboard() {
                   className="rounded-lg shadow-sm"
                 />
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground">Student Dashboard</h1>
-                  <p className="mt-1 text-muted-foreground">Book sessions, track progress, and manage your learning journey</p>
+                  <h1 className="text-3xl font-bold text-foreground">{t('title')}</h1>
+                  <p className="mt-1 text-muted-foreground">{t('subtitle')}</p>
                 </div>
               </div>
               <ThemeToggle />
@@ -174,23 +178,27 @@ function StudentDashboard() {
             </div>            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Calendar View - Takes up 2 columns on large screens */}
               <div className="lg:col-span-2">
-                <Suspense fallback={<DashboardSkeleton />}>
-                  <CalendarView />
-                </Suspense>
+                <ErrorBoundary fallback={<SectionError title="Calendar Error" message="Unable to load the calendar view." />}>
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <CalendarView />
+                  </Suspense>
+                </ErrorBoundary>
               </div>
 
               {/* Sidebar with Form */}
               <div className="space-y-6">
-                <Suspense fallback={<AvailabilitySkeleton />}>
-                  <EnhancedAppointmentForm
-                    initialDate={selectedDate}
-                    onAppointmentCreated={handleAppointmentCreated}
-                  />
-                </Suspense>
+                <ErrorBoundary fallback={<WidgetError title="Booking Error" message="Appointment form unavailable." />}>
+                  <Suspense fallback={<AvailabilitySkeleton />}>
+                    <EnhancedAppointmentForm
+                      initialDate={selectedDate}
+                      onAppointmentCreated={handleAppointmentCreated}
+                    />
+                  </Suspense>
+                </ErrorBoundary>
 
                 {/* Quick Actions */}
                 <div className="bg-card rounded-lg shadow p-6 border border-border transition-colors duration-300">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">{t('quickActions.title')}</h3>
                   <div className="space-y-3">
                     <button
                       onClick={() => setActiveTab('assignments')}
@@ -199,8 +207,8 @@ function StudentDashboard() {
                       <div className="flex items-center">
                         <span className="text-2xl mr-3">📋</span>
                         <div>
-                          <p className="font-medium text-foreground">View Assignments</p>
-                          <p className="text-sm text-muted-foreground">Check your homework and tasks</p>
+                          <p className="font-medium text-foreground">{t('quickActions.assignments')}</p>
+                          <p className="text-sm text-muted-foreground">{t('quickActions.assignmentsDesc')}</p>
                         </div>
                       </div>
                     </button>
@@ -211,8 +219,8 @@ function StudentDashboard() {
                       <div className="flex items-center">
                         <span className="text-2xl mr-3">📊</span>
                         <div>
-                          <p className="font-medium text-foreground">Progress Report</p>
-                          <p className="text-sm text-muted-foreground">See your learning progress</p>
+                          <p className="font-medium text-foreground">{t('quickActions.progress')}</p>
+                          <p className="text-sm text-muted-foreground">{t('quickActions.progressDesc')}</p>
                         </div>
                       </div>
                     </button>
@@ -220,8 +228,8 @@ function StudentDashboard() {
                       <div className="flex items-center">
                         <span className="text-2xl mr-3">💬</span>
                         <div>
-                          <p className="font-medium text-foreground">Messages</p>
-                          <p className="text-sm text-muted-foreground">Chat with your tutors</p>
+                          <p className="font-medium text-foreground">{t('quickActions.messages')}</p>
+                          <p className="text-sm text-muted-foreground">{t('quickActions.messagesDesc')}</p>
                         </div>
                       </div>
                     </button>
@@ -232,64 +240,81 @@ function StudentDashboard() {
 
             {/* Appointment List - Full width below calendar */}
             <div className="mt-8">
-              <AppointmentList refreshTrigger={refreshTrigger} />
+              <ErrorBoundary fallback={<SectionError title="Appointments Error" message="Could not load your appointments." />}>
+                <AppointmentList refreshTrigger={refreshTrigger} />
+              </ErrorBoundary>
             </div>
           </div>
         )}
 
+        {/* Other components... */}
         {activeTab === 'manage' && (
           <div>
-            <Suspense fallback={<AppointmentSkeleton />}>
-              <AppointmentManager userRole="student" userId={user?.id || ''} />
-            </Suspense>
+            <ErrorBoundary fallback={<SectionError title="Management Error" message="Appointment manager unavailable." />}>
+              <Suspense fallback={<AppointmentSkeleton />}>
+                <AppointmentManager userRole="student" userId={user?.id || ''} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
 
         {activeTab === 'assignments' && (
           <div>
-            <Suspense fallback={<DashboardSkeleton />}>
-              <AssignmentManager userRole="student" userId={user?.id || ''} />
-            </Suspense>
+            <ErrorBoundary fallback={<SectionError title="Assignments Error" message="Could not load assignments." />}>
+              <Suspense fallback={<DashboardSkeleton />}>
+                <AssignmentManager userRole="student" userId={user?.id || ''} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
 
         {activeTab === 'progress' && (
           <div>
-            <Suspense fallback={<DashboardSkeleton />}>
-              <StudentProgress studentId={user?.id || ''} />
-            </Suspense>
+            <ErrorBoundary fallback={<SectionError title="Progress Error" message="Could not load progress data." />}>
+              <Suspense fallback={<DashboardSkeleton />}>
+                <StudentProgress studentId={user?.id || ''} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
 
         {activeTab === 'hours' && (
           <div>
-            <Suspense fallback={<DashboardSkeleton />}>
-              <LectureHoursTracker userRole="student" userId={user?.id || ''} />
-            </Suspense>
+            <ErrorBoundary fallback={<SectionError title="Hours Error" message="Could not load lecture hours." />}>
+              <Suspense fallback={<DashboardSkeleton />}>
+                <LectureHoursTracker userRole="student" userId={user?.id || ''} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
 
         {activeTab === 'payments' && (
           <div>
-            <Suspense fallback={<DashboardSkeleton />}>
-              <PaymentManager userRole="student" userId={user?.id || ''} />
-            </Suspense>
+            <ErrorBoundary fallback={<SectionError title="Payments Error" message="Could not load payment history." />}>
+              <Suspense fallback={<DashboardSkeleton />}>
+                <PaymentManager userRole="student" userId={user?.id || ''} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
 
         {activeTab === 'notifications' && (
           <div>
-            <Suspense fallback={<NotesSkeleton />}>
-              <NotificationManager userId={user?.id || ''} userRole="student" />
-            </Suspense>
+            <ErrorBoundary fallback={<SectionError title="Notifications Error" message="Could not load notifications." />}>
+              <Suspense fallback={<NotesSkeleton />}>
+                <NotificationManager userId={user?.id || ''} userRole="student" />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
 
         {activeTab === 'settings' && (
           <div>
-            <Suspense fallback={<AvailabilitySkeleton />}>
-              <NotificationPreferencesManager userId={user?.id || ''} />
-            </Suspense>
+            <ErrorBoundary fallback={<SectionError title="Settings Error" message="Could not load settings." />}>
+              <Suspense fallback={<AvailabilitySkeleton />}>
+                <NotificationPreferencesManager userId={user?.id || ''} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
       </div>

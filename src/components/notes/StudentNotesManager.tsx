@@ -466,9 +466,9 @@ export default function StudentNotesManager({ studentId, tutorId }: StudentNotes
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {editingNote.tags.map((tag, index) => (
+                  {editingNote.tags.map((tag) => (
                     <span
-                      key={index}
+                      key={tag}
                       className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm flex items-center"
                     >
                       #{tag}
@@ -477,7 +477,7 @@ export default function StudentNotesManager({ studentId, tutorId }: StudentNotes
                         onClick={() => {
                           setEditingNote(prev => prev ? {
                             ...prev,
-                            tags: prev.tags.filter((_, i) => i !== index)
+                            tags: prev.tags.filter((t) => t !== tag)
                           } : null)
                         }}
                         className="ml-1 text-blue-600 hover:text-blue-800"
@@ -580,9 +580,9 @@ export default function StudentNotesManager({ studentId, tutorId }: StudentNotes
                 
                 {note.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {note.tags.map((tag, index) => (
+                    {note.tags.map((tag) => (
                       <span
-                        key={index}
+                        key={tag}
                         className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
                       >
                         #{tag}

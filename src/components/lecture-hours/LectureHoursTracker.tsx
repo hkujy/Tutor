@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
+import { useTranslations } from 'next-intl'
 import { SkeletonList } from '../ui/Skeleton'
 import LoadingButton from '../ui/LoadingButton'
+import { PAYMENT_STATUS_MAP } from '../../constants'
 
 // Helper function for safe date formatting
 const formatDateSafe = (dateValue: string | null | undefined, fallback: string = 'No date'): string => {
@@ -63,6 +65,7 @@ interface LectureHoursTrackerProps {
 }
 
 export default function LectureHoursTracker({ userRole, userId }: LectureHoursTrackerProps) {
+  const t = useTranslations('LectureHoursTracker')
   const [lectureHours, setLectureHours] = useState<LectureHours[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedRecord, setSelectedRecord] = useState<LectureHours | null>(null)
@@ -191,12 +194,12 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
-                {userRole === 'student' ? 'My Lecture Hours' : 'Student Lecture Hours'}
+                {userRole === 'student' ? t('title.student') : t('title.tutor')}
               </h2>
               <p className="text-gray-600 mt-1">
                 {userRole === 'student' 
-                  ? 'Track your lesson hours and payment status'
-                  : 'Record sessions and track student progress'
+                  ? t('subtitle.student')
+                  : t('subtitle.tutor')
                 }
               </p>
           </div>
@@ -205,7 +208,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
               onClick={() => setSelectedRecord(null)}
               className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
             >
-              Record Session
+              {t('actions.recordSession')}
             </button>
           )}
         </div>
@@ -214,11 +217,11 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
       {/* Session Recording Form (Tutors only) */}
       {userRole === 'tutor' && selectedRecord === null && (
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Record New Session</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('recordSessionForm.title')}</h3>
           <form onSubmit={recordSession} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Student/Subject
+                {t('recordSessionForm.studentSubject')}
               </label>
               <select
                 value={sessionForm.lectureHoursId}
@@ -226,7 +229,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               >
-                <option value="">Select student and subject</option>
+                <option value="">{t('recordSessionForm.selectStudentSubject')}</option>
                 {lectureHours.map((lh) => (
                   <option key={lh.id} value={lh.id}>
                     {lh.student.user.firstName} {lh.student.user.lastName} - {lh.subject}
@@ -237,7 +240,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Duration (hours)
+                {t('recordSessionForm.duration')}
               </label>
               <input
                 type="number"
@@ -253,7 +256,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Notes (optional)
+                {t('recordSessionForm.notes')}
               </label>
               <textarea
                 value={sessionForm.notes}
@@ -269,14 +272,14 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
                 loading={recordingSession}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
               >
-                Record Session
+                {t('actions.recordSession')}
               </LoadingButton>
               <button
                 type="button"
                 onClick={() => setSessionForm({ lectureHoursId: '', duration: '', notes: '' })}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
               >
-                Clear
+                {t('actions.clear')}
               </button>
             </div>
           </form>
@@ -292,8 +295,8 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
                 <h3 className="text-lg font-semibold text-gray-900">{lh.subject}</h3>
                 <p className="text-sm text-gray-600">
                   {userRole === 'student' 
-                    ? `Tutor: ${lh.tutor.user.firstName} ${lh.tutor.user.lastName}`
-                    : `Student: ${lh.student.user.firstName} ${lh.student.user.lastName}`
+                    ? t('overview.tutorName', { firstName: lh.tutor.user.firstName, lastName: lh.tutor.user.lastName })
+                    : t('overview.studentName', { firstName: lh.student.user.firstName, lastName: lh.student.user.lastName })
                   }
                 </p>
               </div>
@@ -309,19 +312,19 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
 
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Total Hours:</span>
+                <span className="text-sm text-gray-600">{t('overview.totalHours')}:</span>
                 <span className="font-medium">{lh.totalHours.toFixed(1)}h</span>
               </div>
               
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Unpaid Hours:</span>
+                <span className="text-sm text-gray-600">{t('overview.unpaidHours')}:</span>
                 <span className={`font-medium ${lh.unpaidHours > 0 ? 'text-red-600' : 'text-green-600'}`}>
                   {lh.unpaidHours.toFixed(1)}h
                 </span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Payment Frequency:</span>
+                <span className="text-sm text-gray-600">{t('overview.paymentFrequency')}:</span>
                 {userRole === 'tutor' && editingPaymentInterval === lh.id ? (
                   <div className="flex items-center gap-2">
                     <input
@@ -332,7 +335,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
                       onChange={(e) => setNewPaymentInterval(parseInt(e.target.value))}
                       className="w-16 px-2 py-1 text-sm border rounded"
                     />
-                    <span className="text-sm">hours</span>
+                    <span className="text-sm">{t('overview.hours')}</span>
                     <button
                       onClick={() => updatePaymentInterval(lh.id, newPaymentInterval)}
                       className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
@@ -348,7 +351,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">Every {lh.paymentInterval}h</span>
+                    <span className="font-medium">{t('overview.everyHours', { count: lh.paymentInterval })}</span>
                     {userRole === 'tutor' && (
                       <button
                         onClick={() => {
@@ -356,7 +359,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
                           setNewPaymentInterval(lh.paymentInterval)
                         }}
                         className="text-blue-500 hover:text-blue-700 text-sm"
-                        title="Edit payment frequency"
+                        title={t('overview.editPaymentFrequency')}
                       >
                         ✏️
                       </button>
@@ -369,9 +372,9 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
               {lh.payments.length > 0 && (
                 <div className="pt-3 border-t">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Latest Payment:</span>
+                    <span className="text-sm text-gray-600">{t('overview.latestPayment')}:</span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(lh.payments[0].status)}`}>
-                      {lh.payments[0].status}
+                      {t(`paymentStatus.${lh.payments[0].status}`)}
                     </span>
                   </div>
                 </div>
@@ -380,7 +383,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
               {/* Progress Bar */}
               <div className="pt-2">
                 <div className="flex justify-between text-xs text-gray-600 mb-1">
-                  <span>Progress to next payment</span>
+                  <span>{t('overview.progressToNextPayment')}</span>
                   <span>{(lh.unpaidHours % lh.paymentInterval).toFixed(1)}/{lh.paymentInterval}h</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -399,15 +402,15 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No lecture hours found</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {userRole === 'tutor' 
-              ? 'Start recording sessions to track lecture hours for your students.'
-              : 'Your tutor will record sessions to track your lecture hours and payments.'
-            }
-          </p>
-        </div>
+            </svg>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">{t('empty.title')}</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {userRole === 'tutor' 
+                ? t('empty.tutorMessage')
+                : t('empty.studentMessage')
+              }
+            </p>
+          </div>
       )}
 
       {/* Detailed View */}
@@ -415,7 +418,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-semibold">
-              {selectedRecord.subject} - Detailed View
+              {t('detailedView.title', { subject: selectedRecord.subject })}
             </h3>
             <button
               onClick={() => setSelectedRecord(null)}
@@ -430,7 +433,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Sessions */}
             <div>
-              <h4 className="text-lg font-medium mb-4">Recent Sessions</h4>
+              <h4 className="text-lg font-medium mb-4">{t('detailedView.recentSessions')}</h4>
               <div className="space-y-3 max-h-64 overflow-y-auto">
                 {selectedRecord.sessions.slice(0, 10).map((session) => (
                   <div key={session.id} className="border rounded-lg p-3">
@@ -439,7 +442,7 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
                         <p className="font-medium">
                           {formatDateSafe(session.date)}
                         </p>
-                        <p className="text-sm text-gray-600">{session.duration}h session</p>
+                        <p className="text-sm text-gray-600">{t('detailedView.sessionDuration', { duration: session.duration })}</p>
                         {session.notes && (
                           <p className="text-sm text-gray-500 mt-1 italic">{session.notes}</p>
                         )}
@@ -452,33 +455,33 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
 
             {/* Payment History */}
             <div>
-              <h4 className="text-lg font-medium mb-4">Payment History</h4>
+              <h4 className="text-lg font-medium mb-4">{t('detailedView.paymentHistory')}</h4>
               <div className="space-y-3 max-h-64 overflow-y-auto">
                 {selectedRecord.payments.map((payment) => (
                   <div key={payment.id} className="border rounded-lg p-3">
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium">${payment.amount.toFixed(2)}</p>
-                        <p className="text-sm text-gray-600">{payment.hoursIncluded}h payment</p>
+                        <p className="text-sm text-gray-600">{t('detailedView.hoursPayment', { hours: payment.hoursIncluded })}</p>
                         <p className="text-sm text-gray-500">
-                          Due: {formatDateSafe(payment.dueDate, 'No due date')}
+                          {t('detailedView.dueDate')}: {formatDateSafe(payment.dueDate, t('detailedView.noDueDate'))}
                         </p>
                         {payment.paidDate && (
                           <p className="text-sm text-green-600">
-                            Paid: {formatDateSafe(payment.paidDate)}
+                            {t('detailedView.paidDate')}: {formatDateSafe(payment.paidDate)}
                           </p>
                         )}
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(payment.status)}`}>
-                          {payment.status}
+                          {t(`paymentStatus.${payment.status}`)}
                         </span>
                         {payment.status === 'PENDING' && userRole === 'student' && (
                           <button
                             onClick={() => updatePaymentStatus(payment.id, 'PAID')}
                             className="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
                           >
-                            Mark Paid
+                            {t('detailedView.markPaid')}
                           </button>
                         )}
                       </div>
@@ -496,9 +499,9 @@ export default function LectureHoursTracker({ userRole, userId }: LectureHoursTr
     console.error('Error rendering LectureHoursTracker:', error)
     return (
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 className="text-xl font-semibold mb-4 text-red-600">Error Loading Data</h3>
+        <h3 className="text-xl font-semibold mb-4 text-red-600">{t('error.title')}</h3>
         <p className="text-gray-600">
-          Sorry, there was an error loading the lecture hours data. Please refresh the page or try again later.
+          {t('error.message')}
         </p>
       </div>
     )
