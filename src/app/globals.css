@@ -85,3 +85,24 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
+
+@layer utilities {
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mobile-friendly min-width breakpoint */
+  @media (min-width: 475px) {
+    .xs\:block {
+      display: block;
+    }
+    .xs\:inline {
+      display: inline;
+    }
+  }
+}

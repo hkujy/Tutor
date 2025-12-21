@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from '@/i18n/routing'
+import { useRouter, Link } from '@/i18n/routing'
 
 export const dynamic = 'force-dynamic'
 
 export default function SignUp() {
   const router = useRouter()
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -15,6 +15,7 @@ export default function SignUp() {
     lastName: '',
     role: 'STUDENT' as 'STUDENT' | 'TUTOR',
     phone: '',
+    confirmPassword: '',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,13 +25,20 @@ export default function SignUp() {
     setLoading(true)
     setError('')
 
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
+
     try {
+      const { confirmPassword, ...registerData } = formData
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(registerData),
       })
 
       const data = await response.json()
@@ -64,12 +72,12 @@ export default function SignUp() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
-            <a
+            <Link
               href="/login"
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
               sign in to existing account
-            </a>
+            </Link>
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -135,6 +143,20 @@ export default function SignUp() {
               onChange={handleChange}
               className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Minimum 8 characters"
+            />
+          </div>
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              required
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
           <div>

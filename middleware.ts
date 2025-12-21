@@ -43,15 +43,15 @@ export function middleware(request: NextRequest) {
     const key = getRateLimitKey(request)
 
     // Different limits for different endpoints
-    let limit = 100 // requests per minute (default)
+    let limit = 500 // requests per minute (increased from 100 for normal browsing)
     let windowMs = 60 * 1000 // 1 minute
 
     if (pathname.includes('/auth/')) {
-      limit = 20
+      limit = 100 // increased from 20
     } else if (pathname.includes('/appointments/book')) {
-      limit = 10
+      limit = 30 // increased from 10
     } else if (pathname.includes('/files/upload')) {
-      limit = 20
+      limit = 50 // increased from 20
       windowMs = 60 * 60 * 1000 // 1 hour
     }
 

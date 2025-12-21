@@ -10,9 +10,8 @@ const isValidId = (id: string): boolean => {
 }
 
 const isValidSubjects = (subjects: string[]): boolean => {
-  return Array.isArray(subjects) && 
-         subjects.length > 0 && 
-         subjects.every(s => typeof s === 'string' && s.trim().length > 0 && s.length <= 100)
+  return Array.isArray(subjects) &&
+    subjects.every(s => typeof s === 'string' && s.trim().length > 0 && s.length <= 100)
 }
 
 const isValidGradeLevel = (gradeLevel?: string): boolean => {
@@ -36,7 +35,7 @@ const sanitizeArray = (arr: string[]): string[] => {
 
 const handleDatabaseError = (error: any, operation: string): never => {
   console.error(`Database error in ${operation}:`, error)
-  
+
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     switch (error.code) {
       case 'P2002':
@@ -49,11 +48,11 @@ const handleDatabaseError = (error: any, operation: string): never => {
         throw new Error(`Database operation failed: ${error.message}`)
     }
   }
-  
+
   if (error instanceof Prisma.PrismaClientValidationError) {
     throw new Error('Invalid data provided')
   }
-  
+
   throw new Error('An unexpected database error occurred')
 }
 
@@ -73,23 +72,23 @@ export class StudentRepository {
     if (!data.userId || !isValidId(data.userId)) {
       throw new Error('Valid user ID is required')
     }
-    
+
     if (!data.subjects || !isValidSubjects(data.subjects)) {
       throw new Error('At least one valid subject is required')
     }
-    
+
     if (!isValidGradeLevel(data.gradeLevel)) {
       throw new Error('Invalid grade level')
     }
-    
+
     if (data.learningGoals && (data.learningGoals.length > 2000 || /[<>"'&]/.test(data.learningGoals))) {
       throw new Error('Invalid learning goals format')
     }
-    
+
     if (data.parentContact && !isValidEmail(data.parentContact)) {
       throw new Error('Valid parent contact email is required')
     }
-    
+
     try {
       const sanitizedData = {
         userId: data.userId,
@@ -141,7 +140,7 @@ export class StudentRepository {
     if (!id || !isValidId(id)) {
       throw new Error('Valid student ID is required')
     }
-    
+
     try {
       return await db.student.findUnique({
         where: { id },
@@ -202,7 +201,7 @@ export class StudentRepository {
     if (!userId || !isValidId(userId)) {
       throw new Error('Valid user ID is required')
     }
-    
+
     try {
       return await db.student.findUnique({
         where: { userId },
@@ -223,39 +222,39 @@ export class StudentRepository {
     if (!id || !isValidId(id)) {
       throw new Error('Valid student ID is required')
     }
-    
+
     // Validate individual fields
     if (data.subjects && !isValidSubjects(data.subjects)) {
       throw new Error('Valid subjects are required')
     }
-    
+
     if (!isValidGradeLevel(data.gradeLevel)) {
       throw new Error('Invalid grade level')
     }
-    
+
     if (data.learningGoals && (data.learningGoals.length > 2000 || /[<>"'&]/.test(data.learningGoals))) {
       throw new Error('Invalid learning goals format')
     }
-    
+
     if (data.parentContact && !isValidEmail(data.parentContact)) {
       throw new Error('Valid parent contact email is required')
     }
-    
+
     try {
       const updateData: any = {}
-      
+
       if (data.gradeLevel !== undefined) {
         updateData.gradeLevel = data.gradeLevel
       }
-      
+
       if (data.subjects) {
         updateData.subjects = sanitizeArray(data.subjects)
       }
-      
+
       if (data.learningGoals !== undefined) {
         updateData.learningGoals = data.learningGoals ? sanitizeString(data.learningGoals) : null
       }
-      
+
       if (data.parentContact !== undefined) {
         updateData.parentContact = data.parentContact ? data.parentContact.toLowerCase().trim() : null
       }
@@ -280,7 +279,7 @@ export class StudentRepository {
     if (!id || !isValidId(id)) {
       throw new Error('Valid student ID is required')
     }
-    
+
     try {
       return await db.student.delete({
         where: { id },
@@ -301,7 +300,7 @@ export class StudentRepository {
       if (params.skip !== undefined && (!Number.isInteger(params.skip) || params.skip < 0)) {
         throw new Error('Skip must be a non-negative integer')
       }
-      
+
       if (params.take !== undefined && (!Number.isInteger(params.take) || params.take < 1 || params.take > 100)) {
         throw new Error('Take must be between 1 and 100')
       }
@@ -340,11 +339,11 @@ export class StudentRepository {
     if (!studentId || !isValidId(studentId)) {
       throw new Error('Valid student ID is required')
     }
-    
+
     if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
       throw new Error('Limit must be between 1 and 50')
     }
-    
+
     try {
       return await db.appointment.findMany({
         where: {
@@ -381,11 +380,11 @@ export class StudentRepository {
     if (!studentId || !isValidId(studentId)) {
       throw new Error('Valid student ID is required')
     }
-    
+
     if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
       throw new Error('Limit must be between 1 and 50')
     }
-    
+
     try {
       return await db.assignment.findMany({
         where: {

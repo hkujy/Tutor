@@ -98,22 +98,22 @@ function StudentDashboard() {
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
-      {/* Header */}
+      {/* Header - Mobile Optimized */}
       <div className="bg-card shadow-sm border-b border-border transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="py-4 sm:py-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 sm:space-x-4">
                 <Image
                   src="/logo.svg"
                   alt="Tutoring Calendar Logo"
-                  width={48}
-                  height={48}
-                  className="rounded-lg shadow-sm"
+                  width={40}
+                  height={40}
+                  className="rounded-lg shadow-sm hidden xs:block sm:w-12 sm:h-12"
                 />
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground">{t('title')}</h1>
-                  <p className="mt-1 text-muted-foreground">{t('subtitle')}</p>
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">{t('title')}</h1>
+                  <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-muted-foreground">{t('subtitle')}</p>
                 </div>
               </div>
               <ThemeToggle />
@@ -122,21 +122,21 @@ function StudentDashboard() {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Navigation Tabs - Mobile Optimized */}
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <div className="border-b border-border">
-          <nav className="-mb-px flex space-x-8">
+          <nav className="-mb-px flex space-x-2 sm:space-x-4 md:space-x-8 overflow-x-auto pb-2 scrollbar-hide">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${activeTab === tab.id
+                className={`flex-shrink-0 py-3 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
                   }`}
               >
-                <span className="mr-2">{tab.icon}</span>
-                {tab.name}
+                <span className="mr-1 sm:mr-2">{tab.icon}</span>
+                <span className="hidden xs:inline">{tab.name}</span>
               </button>
             ))}
           </nav>

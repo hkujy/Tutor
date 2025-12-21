@@ -1,10 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useRouter } from '@/i18n/routing'
+import { useRouter, Link } from '@/i18n/routing'
 import { signIn } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import LoadingButton from '../../../components/ui/LoadingButton'
 
 export const dynamic = 'force-dynamic'
@@ -26,7 +25,7 @@ export default function LoginPage() {
       lastName: 'Johnson'
     },
     STUDENT: {
-      email: 'student@example.com', 
+      email: 'student@example.com',
       password: 'student123',
       firstName: 'Alex',
       lastName: 'Smith'
@@ -35,7 +34,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!email || !password) {
       setError('Please enter both email and password')
       return
@@ -57,7 +56,7 @@ export default function LoginPage() {
         // Get the user session to determine their actual role
         const session = await fetch('/api/auth/session').then(res => res.json())
         const userRole = session?.user?.role
-        
+
         // Redirect based on the actual user role from the database
         if (userRole === 'TUTOR') {
           router.push('/tutor')
@@ -131,10 +130,10 @@ export default function LoginPage() {
                   className="flex flex-col items-center p-4 border-2 border-blue-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                    <svg 
-                      className="w-6 h-6 text-blue-600" 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className="w-6 h-6 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                       suppressHydrationWarning={true}
                     >
@@ -151,10 +150,10 @@ export default function LoginPage() {
                   className="flex flex-col items-center p-4 border-2 border-green-200 rounded-lg hover:border-green-400 hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-2">
-                    <svg 
-                      className="w-6 h-6 text-green-600" 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className="w-6 h-6 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                       suppressHydrationWarning={true}
                     >

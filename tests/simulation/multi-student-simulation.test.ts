@@ -4,7 +4,9 @@ import { POST as AppointmentPOST } from '../../src/app/api/appointments/route'
 import { GET as AppointmentGET } from '../../src/app/api/appointments/route'
 import { getServerSession } from 'next-auth'
 
-// Mock NextResponse
+
+
+// Mock NextResponse and NextRequest
 jest.mock('next/server', () => ({
   NextResponse: {
     json: (data: any, init?: ResponseInit) => ({
@@ -14,10 +16,15 @@ jest.mock('next/server', () => ({
       headers: new Map()
     })
   },
-  NextRequest: class {
+  NextRequest: class NextRequest {
     url: string
-    constructor(url: string) {
-      this.url = url
+    method: string
+    headers: Map<string, string>
+
+    constructor(url: string | URL, init?: RequestInit) {
+      this.url = typeof url === 'string' ? url : url.toString()
+      this.method = init?.method || 'GET'
+      this.headers = new Map()
     }
   }
 }))
@@ -70,7 +77,7 @@ jest.mock('../../src/lib/db/client', () => ({
       findUnique: jest.fn(), // Added for lecture hour logic
     },
     lectureSession: {
-       create: jest.fn()
+      create: jest.fn()
     },
     payment: {
       create: jest.fn(),
@@ -189,10 +196,10 @@ describe('Multi-Student Activity Simulation', () => {
 
   const setupDatabaseMocks = () => {
     // Mock user lookups
-    ;(db.user.findUnique as jest.Mock).mockImplementation(({ where }) => {
+    ; (db.user.findUnique as jest.Mock).mockImplementation(({ where }) => {
       const student = students.find(s => s.userId === where.id || s.email === where.email)
       const tutor = tutors.find(t => t.userId === where.id || t.email === where.email)
-      
+
       if (student) {
         return Promise.resolve({
           id: student.userId,
@@ -203,7 +210,7 @@ describe('Multi-Student Activity Simulation', () => {
           isVerified: true
         })
       }
-      
+
       if (tutor) {
         return Promise.resolve({
           id: tutor.userId,
@@ -214,158 +221,158 @@ describe('Multi-Student Activity Simulation', () => {
           isVerified: true
         })
       }
-      
+
       return Promise.resolve(null)
     })
 
-    // Mock student lookups
-    ;(db.student.findUnique as jest.Mock).mockImplementation(({ where }) => {
-      const student = students.find(s => s.id === where.id || s.userId === where.userId)
-      if (student) {
-        return Promise.resolve({
-          id: student.id,
-          userId: student.userId,
-          lectureHours: student.lectureHours,
-          paymentStatus: student.paymentStatus,
-          user: {
-            id: student.userId,
-            firstName: student.firstName,
-            lastName: student.lastName,
-            email: student.email
-          }
+      // Mock student lookups
+      ; (db.student.findUnique as jest.Mock).mockImplementation(({ where }) => {
+        const student = students.find(s => s.id === where.id || s.userId === where.userId)
+        if (student) {
+          return Promise.resolve({
+            id: student.id,
+            userId: student.userId,
+            lectureHours: student.lectureHours,
+            paymentStatus: student.paymentStatus,
+            user: {
+              id: student.userId,
+              firstName: student.firstName,
+              lastName: student.lastName,
+              email: student.email
+            }
+          })
+        }
+        return Promise.resolve(null)
+      })
+
+      // Mock tutor lookups
+      ; (db.tutor.findUnique as jest.Mock).mockImplementation(({ where }) => {
+        const tutor = tutors.find(t => t.id === where.id || t.userId === where.userId)
+        if (tutor) {
+          return Promise.resolve({
+            id: tutor.id,
+            userId: tutor.userId,
+            subjects: tutor.subjects,
+            user: {
+              id: tutor.userId,
+              firstName: tutor.firstName,
+              lastName: tutor.lastName,
+              email: tutor.email
+            }
+          })
+        }
+        return Promise.resolve(null)
+      })
+
+      ; (db.appointment.findFirst as jest.Mock).mockResolvedValue(null) // No conflicts
+
+      // Mock appointment creation
+      ; (db.appointment.create as jest.Mock).mockImplementation(({ data }) => {
+        const appointment = {
+          id: `appointment-${appointmentCounter++}`,
+          ...data,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+
+        // Add to student's appointments
+        const student = students.find(s => s.id === data.studentId)
+        if (student) {
+          student.appointments.push(appointment)
+        }
+
+        return Promise.resolve(appointment)
+      })
+
+      // Mock appointment queries
+      ; (db.appointment.findMany as jest.Mock).mockImplementation(({ where }) => {
+        let appointments: any[] = []
+
+        students.forEach(student => {
+          appointments.push(...student.appointments)
         })
-      }
-      return Promise.resolve(null)
-    })
 
-    // Mock tutor lookups
-    ;(db.tutor.findUnique as jest.Mock).mockImplementation(({ where }) => {
-      const tutor = tutors.find(t => t.id === where.id || t.userId === where.userId)
-      if (tutor) {
-        return Promise.resolve({
-          id: tutor.id,
-          userId: tutor.userId,
-          subjects: tutor.subjects,
-          user: {
-            id: tutor.userId,
-            firstName: tutor.firstName,
-            lastName: tutor.lastName,
-            email: tutor.email
-          }
+        if (where?.studentId) {
+          appointments = appointments.filter(a => a.studentId === where.studentId)
+        }
+
+        if (where?.tutorId) {
+          appointments = appointments.filter(a => a.tutorId === where.tutorId)
+        }
+
+        return Promise.resolve(appointments)
+      })
+
+      // Mock notification creation
+      ; (db.notification.create as jest.Mock).mockImplementation(({ data }) => {
+        const notification = {
+          id: `notification-${notificationCounter++}`,
+          ...data,
+          createdAt: new Date(),
+          isRead: false
+        }
+
+        // Add to student's notifications
+        const student = students.find(s => s.userId === data.userId)
+        if (student) {
+          student.notifications.push(notification)
+        }
+
+        return Promise.resolve(notification)
+      })
+
+      // Mock notification queries
+      ; (db.notification.findMany as jest.Mock).mockImplementation(({ where }) => {
+        let notifications: any[] = []
+
+        students.forEach(student => {
+          notifications.push(...student.notifications)
         })
-      }
-      return Promise.resolve(null)
-    })
 
-    ;(db.appointment.findFirst as jest.Mock).mockResolvedValue(null) // No conflicts
+        if (where?.userId) {
+          notifications = notifications.filter(n => n.userId === where.userId)
+        }
 
-    // Mock appointment creation
-    ;(db.appointment.create as jest.Mock).mockImplementation(({ data }) => {
-      const appointment = {
-        id: `appointment-${appointmentCounter++}`,
-        ...data,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-      
-      // Add to student's appointments
-      const student = students.find(s => s.id === data.studentId)
-      if (student) {
-        student.appointments.push(appointment)
-      }
-      
-      return Promise.resolve(appointment)
-    })
-
-    // Mock appointment queries
-    ;(db.appointment.findMany as jest.Mock).mockImplementation(({ where }) => {
-      let appointments: any[] = []
-      
-      students.forEach(student => {
-        appointments.push(...student.appointments)
+        return Promise.resolve(notifications)
       })
-      
-      if (where?.studentId) {
-        appointments = appointments.filter(a => a.studentId === where.studentId)
-      }
-      
-      if (where?.tutorId) {
-        appointments = appointments.filter(a => a.tutorId === where.tutorId)
-      }
-      
-      return Promise.resolve(appointments)
-    })
 
-    // Mock notification creation
-    ;(db.notification.create as jest.Mock).mockImplementation(({ data }) => {
-      const notification = {
-        id: `notification-${notificationCounter++}`,
-        ...data,
-        createdAt: new Date(),
-        isRead: false
-      }
-      
-      // Add to student's notifications
-      const student = students.find(s => s.userId === data.userId)
-      if (student) {
-        student.notifications.push(notification)
-      }
-      
-      return Promise.resolve(notification)
-    })
+      // Mock availability queries
+      ; (db.availability.findMany as jest.Mock).mockResolvedValue([
+        {
+          id: 'avail-1',
+          tutorId: 'tutor-1',
+          dayOfWeek: 1, // Monday
+          startTime: '09:00',
+          endTime: '17:00',
+          isActive: true
+        },
+        {
+          id: 'avail-2',
+          tutorId: 'tutor-2',
+          dayOfWeek: 2, // Tuesday
+          startTime: '10:00',
+          endTime: '16:00',
+          isActive: true
+        }
+      ])
 
-    // Mock notification queries
-    ;(db.notification.findMany as jest.Mock).mockImplementation(({ where }) => {
-      let notifications: any[] = []
-      
-      students.forEach(student => {
-        notifications.push(...student.notifications)
+      // Mock lecture hour operations
+      ; (db.lectureHours.create as jest.Mock).mockImplementation(({ data }) => {
+        return Promise.resolve({
+          id: `lecture-${Date.now()}`,
+          ...data,
+          createdAt: new Date()
+        })
       })
-      
-      if (where?.userId) {
-        notifications = notifications.filter(n => n.userId === where.userId)
-      }
-      
-      return Promise.resolve(notifications)
-    })
 
-    // Mock availability queries
-    ;(db.availability.findMany as jest.Mock).mockResolvedValue([
-      {
-        id: 'avail-1',
-        tutorId: 'tutor-1',
-        dayOfWeek: 1, // Monday
-        startTime: '09:00',
-        endTime: '17:00',
-        isActive: true
-      },
-      {
-        id: 'avail-2',
-        tutorId: 'tutor-2',
-        dayOfWeek: 2, // Tuesday
-        startTime: '10:00',
-        endTime: '16:00',
-        isActive: true
-      }
-    ])
-
-    // Mock lecture hour operations
-    ;(db.lectureHours.create as jest.Mock).mockImplementation(({ data }) => {
-      return Promise.resolve({
-        id: `lecture-${Date.now()}`,
-        ...data,
-        createdAt: new Date()
+      // Mock payment operations
+      ; (db.payment.create as jest.Mock).mockImplementation(({ data }) => {
+        return Promise.resolve({
+          id: `payment-${Date.now()}`,
+          ...data,
+          createdAt: new Date()
+        })
       })
-    })
-
-    // Mock payment operations
-    ;(db.payment.create as jest.Mock).mockImplementation(({ data }) => {
-      return Promise.resolve({
-        id: `payment-${Date.now()}`,
-        ...data,
-        createdAt: new Date()
-      })
-    })
   }
 
   const simulateStudentLogin = async (student: SimulatedStudent) => {
@@ -398,15 +405,15 @@ describe('Multi-Student Activity Simulation', () => {
 
   const simulateAppointmentCreation = async (studentId: string, tutorId: string, subject: string) => {
     const student = students.find(s => s.id === studentId)
-    // Mock session for this student
-    ;(getServerSession as jest.Mock).mockResolvedValueOnce({
+      // Mock session for this student
+      ; (getServerSession as jest.Mock).mockResolvedValueOnce({
         user: {
-            id: student?.userId,
-            email: student?.email,
-            role: 'STUDENT',
-            studentId: studentId
+          id: student?.userId,
+          email: student?.email,
+          role: 'STUDENT',
+          studentId: studentId
         }
-    })
+      })
 
     const requestBody = {
       studentId,
@@ -427,32 +434,30 @@ describe('Multi-Student Activity Simulation', () => {
     })
 
     req.json = jest.fn().mockResolvedValue(requestBody)
-    
+
     const response = await AppointmentPOST(req as any)
     return response
   }
 
   const simulateAppointmentQuery = async (studentId: string) => {
     const student = students.find(s => s.id === studentId)
-    // Mock session
-    ;(getServerSession as jest.Mock).mockResolvedValueOnce({
-        user: {
-            id: student?.userId,
-            email: student?.email,
-            role: 'STUDENT',
-            studentId: studentId
-        }
-    })
 
-    // Mock the request to get appointments for a specific student
-    const mockAppointments = students.find(s => s.id === studentId)?.appointments || []
-    
-    // Override the mock to return student-specific appointments
-    ;(db.appointment.findMany as jest.Mock).mockResolvedValueOnce(mockAppointments)
-    
+      // Mock session with proper structure that matches API route expectations
+      ; (getServerSession as jest.Mock).mockResolvedValueOnce({
+        user: {
+          id: student?.userId,
+          email: student?.email,
+          role: 'STUDENT',
+          studentId: studentId  // This is the key field the route checks
+        }
+      })
+
+    // The existing mock in setupDatabaseMocks (lines 281-297) already handles filtering by studentId
+    // We just need to make sure it's called with the right parameters
+
     const { req } = createMocks({
       method: 'GET',
-      url: 'http://localhost:3000/api/appointments'
+      url: `http://localhost:3000/api/appointments?studentId=${studentId}`
     })
 
     const response = await AppointmentGET(req as any)
@@ -506,9 +511,16 @@ describe('Multi-Student Activity Simulation', () => {
     const queryResults = await Promise.all(queryPromises)
 
     expect(queryResults).toHaveLength(2)
-    queryResults.forEach(result => {
+
+    // Add detailed error logging
+    for (let i = 0; i < queryResults.length; i++) {
+      const result = queryResults[i]
+      if (result.status !== 200) {
+        const errorData = await result.json()
+        console.error(`Query ${i + 1} failed with status ${result.status}:`, errorData)
+      }
       expect(result.status).toBe(200)
-    })
+    }
   })
 
   it('should simulate mixed student activities in rapid succession', async () => {
@@ -599,7 +611,7 @@ describe('Multi-Student Activity Simulation', () => {
   it('should handle edge cases during simulation', async () => {
     // Test appointment booking with invalid data
     const invalidAppointment = simulateAppointmentCreation('nonexistent-student', 'tutor-1', 'Math')
-    
+
     // Test queries for non-existent data
     const invalidQuery = simulateAppointmentQuery('nonexistent-student')
 
@@ -616,10 +628,10 @@ describe('Multi-Student Activity Simulation', () => {
 
   it('should simulate notification system during high activity', async () => {
     // Create multiple appointments to trigger notifications
-    const appointmentPromises = students.map((student, index) => 
+    const appointmentPromises = students.map((student, index) =>
       simulateAppointmentCreation(
-        student.id, 
-        tutors[index % tutors.length].id, 
+        student.id,
+        tutors[index % tutors.length].id,
         'Test Subject'
       )
     )

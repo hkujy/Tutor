@@ -10,9 +10,8 @@ const isValidId = (id: string): boolean => {
 }
 
 const isValidSpecializations = (specializations: string[]): boolean => {
-  return Array.isArray(specializations) && 
-         specializations.length > 0 && 
-         specializations.every(s => typeof s === 'string' && s.trim().length > 0 && s.length <= 100)
+  return Array.isArray(specializations) &&
+    specializations.every(s => typeof s === 'string' && s.trim().length > 0 && s.length <= 100)
 }
 
 const isValidExperienceYears = (years?: number): boolean => {
@@ -29,9 +28,9 @@ const isValidCurrency = (currency?: string): boolean => {
 }
 
 const isValidLanguages = (languages?: string[]): boolean => {
-  return languages === undefined || 
-         (Array.isArray(languages) && 
-          languages.every(l => typeof l === 'string' && l.trim().length > 0 && l.length <= 50))
+  return languages === undefined ||
+    (Array.isArray(languages) &&
+      languages.every(l => typeof l === 'string' && l.trim().length > 0 && l.length <= 50))
 }
 
 const sanitizeString = (str: string): string => {
@@ -44,7 +43,7 @@ const sanitizeArray = (arr: string[]): string[] => {
 
 const handleDatabaseError = (error: any, operation: string): never => {
   console.error(`Database error in ${operation}:`, error)
-  
+
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     switch (error.code) {
       case 'P2002':
@@ -57,11 +56,11 @@ const handleDatabaseError = (error: any, operation: string): never => {
         throw new Error(`Database operation failed: ${error.message}`)
     }
   }
-  
+
   if (error instanceof Prisma.PrismaClientValidationError) {
     throw new Error('Invalid data provided')
   }
-  
+
   throw new Error('An unexpected database error occurred')
 }
 
@@ -85,35 +84,35 @@ export class TutorRepository {
     if (!data.userId || !isValidId(data.userId)) {
       throw new Error('Valid user ID is required')
     }
-    
+
     if (!data.specializations || !isValidSpecializations(data.specializations)) {
       throw new Error('At least one valid specialization is required')
     }
-    
+
     if (!isValidExperienceYears(data.experienceYears)) {
       throw new Error('Experience years must be between 0 and 100')
     }
-    
+
     if (!isValidHourlyRate(data.hourlyRate)) {
       throw new Error('Hourly rate must be between 0 and 10000')
     }
-    
+
     if (!isValidCurrency(data.currency)) {
       throw new Error('Invalid currency code')
     }
-    
+
     if (!isValidLanguages(data.languages)) {
       throw new Error('Invalid languages format')
     }
-    
+
     if (data.education && (data.education.length > 1000 || /[<>"'&]/.test(data.education))) {
       throw new Error('Invalid education format')
     }
-    
+
     if (data.bio && (data.bio.length > 2000 || /[<>"'&]/.test(data.bio))) {
       throw new Error('Invalid bio format')
     }
-    
+
     try {
       const sanitizedData = {
         userId: data.userId,
@@ -157,7 +156,7 @@ export class TutorRepository {
     if (!id || !isValidId(id)) {
       throw new Error('Valid tutor ID is required')
     }
-    
+
     try {
       return await db.tutor.findUnique({
         where: { id },
@@ -214,7 +213,7 @@ export class TutorRepository {
     if (!userId || !isValidId(userId)) {
       throw new Error('Valid user ID is required')
     }
-    
+
     try {
       return await db.tutor.findUnique({
         where: { userId },
@@ -236,67 +235,67 @@ export class TutorRepository {
     if (!id || !isValidId(id)) {
       throw new Error('Valid tutor ID is required')
     }
-    
+
     // Validate individual fields
     if (data.specializations && !isValidSpecializations(data.specializations)) {
       throw new Error('Valid specializations are required')
     }
-    
+
     if (!isValidExperienceYears(data.experienceYears)) {
       throw new Error('Experience years must be between 0 and 100')
     }
-    
+
     if (!isValidHourlyRate(data.hourlyRate)) {
       throw new Error('Hourly rate must be between 0 and 10000')
     }
-    
+
     if (!isValidCurrency(data.currency)) {
       throw new Error('Invalid currency code')
     }
-    
+
     if (!isValidLanguages(data.languages)) {
       throw new Error('Invalid languages format')
     }
-    
+
     if (data.education && (data.education.length > 1000 || /[<>"'&]/.test(data.education))) {
       throw new Error('Invalid education format')
     }
-    
+
     if (data.bio && (data.bio.length > 2000 || /[<>"'&]/.test(data.bio))) {
       throw new Error('Invalid bio format')
     }
-    
+
     try {
       const updateData: any = {}
-      
+
       if (data.specializations) {
         updateData.specializations = sanitizeArray(data.specializations)
       }
-      
+
       if (data.experienceYears !== undefined) {
         updateData.experienceYears = data.experienceYears
       }
-      
+
       if (data.education !== undefined) {
         updateData.education = data.education ? sanitizeString(data.education) : null
       }
-      
+
       if (data.certifications) {
         updateData.certifications = sanitizeArray(data.certifications)
       }
-      
+
       if (data.bio !== undefined) {
         updateData.bio = data.bio ? sanitizeString(data.bio) : null
       }
-      
+
       if (data.hourlyRate !== undefined) {
         updateData.hourlyRate = data.hourlyRate
       }
-      
+
       if (data.currency) {
         updateData.currency = data.currency
       }
-      
+
       if (data.languages) {
         updateData.languages = sanitizeArray(data.languages)
       }
@@ -322,7 +321,7 @@ export class TutorRepository {
     if (!id || !isValidId(id)) {
       throw new Error('Valid tutor ID is required')
     }
-    
+
     try {
       return await db.tutor.delete({
         where: { id },
@@ -343,7 +342,7 @@ export class TutorRepository {
       if (params.skip !== undefined && (!Number.isInteger(params.skip) || params.skip < 0)) {
         throw new Error('Skip must be a non-negative integer')
       }
-      
+
       if (params.take !== undefined && (!Number.isInteger(params.take) || params.take < 1 || params.take > 100)) {
         throw new Error('Take must be between 1 and 100')
       }
