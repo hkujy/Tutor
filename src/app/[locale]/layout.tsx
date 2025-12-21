@@ -20,7 +20,12 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Tutoring Calendar - Efficient Scheduling Platform',
   description: 'Professional tutoring appointment scheduling and management system with real-time booking and optimized performance',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 }
 
 export default async function RootLayout({
