@@ -45,7 +45,6 @@
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.0",
     "ioredis": "^5.8.2",
-    "localtunnel": "^2.0.2",
     "next": "^16.0.10",
     "next-auth": "^4.24.13",
     "next-intl": "^4.6.1",
