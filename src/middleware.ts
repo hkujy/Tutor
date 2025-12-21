@@ -16,7 +16,7 @@ const securityHeaders = {
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'X-XSS-Protection': '1; mode=block',
-  'Content-Security-Policy': 
+  'Content-Security-Policy':
     "default-src 'self'; " +
     "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " +
     "style-src 'self' 'unsafe-inline'; " +
@@ -27,17 +27,23 @@ const securityHeaders = {
 }
 
 const RATE_LIMIT_WINDOW = 60 // 1 minute window
-const RATE_LIMIT_MAX_REQUESTS = 3000 
+const RATE_LIMIT_MAX_REQUESTS = 3000
 
 const checkRateLimit = async (ip: string): Promise<boolean> => {
+  // If Redis is not available (e.g., during build), skip rate limiting
+  if (!redis) {
+    console.warn('Redis not available, skipping rate limit check')
+    return true // Fail open to allow requests when Redis is unavailable
+  }
+
   try {
     const key = `rate_limit:${ip}`
     const current = await redis.incr(key)
-    
+
     if (current === 1) {
       await redis.expire(key, RATE_LIMIT_WINDOW)
     }
-    
+
     return current <= RATE_LIMIT_MAX_REQUESTS
   } catch (error) {
     console.error('Redis rate limit error:', error)
@@ -57,11 +63,11 @@ export async function middleware(request: NextRequest) {
 
   // Generate or retrieve Correlation ID
   const correlationId = request.headers.get('x-correlation-id') || crypto.randomUUID()
-  
+
   // Clone request headers to pass correlation ID downstream
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-correlation-id', correlationId)
-  
+
   // ==========================================
   // 1. API Routes Handling (No localization)
   // ==========================================
@@ -71,10 +77,10 @@ export async function middleware(request: NextRequest) {
         headers: requestHeaders,
       },
     })
-    
+
     // Set Correlation ID on response
     response.headers.set('X-Correlation-ID', correlationId)
-    
+
     // Apply security headers
     Object.entries(securityHeaders).forEach(([key, value]) => {
       response.headers.set(key, value)
@@ -86,9 +92,9 @@ export async function middleware(request: NextRequest) {
       if (!isAllowed) {
         return new NextResponse(
           JSON.stringify({ error: 'Rate limit exceeded' }),
-          { 
-            status: 429, 
-            headers: { 
+          {
+            status: 429,
+            headers: {
               'Content-Type': 'application/json',
               ...securityHeaders
             }
@@ -99,11 +105,11 @@ export async function middleware(request: NextRequest) {
 
     // API Authentication Check
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
-    
+
     // Allow public API routes
     const isApiAuthRoute = pathname.startsWith('/api/auth')
     const isHealthRoute = pathname === '/api/health'
-    
+
     if (isApiAuthRoute || isHealthRoute) {
       return response
     }
@@ -140,15 +146,15 @@ export async function middleware(request: NextRequest) {
   if (pathname === '/') {
     return NextResponse.redirect(new URL('/en', request.url))
   }
-  
+
   // Normalize path by removing locale prefix for security checks
   const publicPathname = pathname.replace(/^\/(en|zh)/, '') || '/'
-  
+
   // Extract current locale for redirects
   const currentLocale = pathname.match(/^\/(en|zh)/)?.[1] || 'en'
 
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
-  
+
   const isAuthPage = publicPathname.startsWith('/auth') || publicPathname === '/login'
   const isPublicRoute = publicPathname.startsWith('/public') || publicPathname === '/favicon.ico'
 
@@ -164,7 +170,7 @@ export async function middleware(request: NextRequest) {
     if (publicPathname.startsWith('/tutor') && token.role !== 'TUTOR' && token.role !== 'ADMIN') {
       return NextResponse.redirect(new URL(`/${currentLocale}/unauthorized`, request.url))
     }
-    
+
     if (publicPathname.startsWith('/student') && token.role !== 'STUDENT' && token.role !== 'ADMIN') {
       return NextResponse.redirect(new URL(`/${currentLocale}/unauthorized`, request.url))
     }
