@@ -5,14 +5,12 @@ import { compare } from 'bcryptjs'
 import { db } from '../db/client'
 import { env } from '../config/env'
 
-import { redis, connectRedis } from '../db/redis'
-
-// Fallback in-memory rate limiting if Redis fails
+// In-memory rate limiting (Edge runtime compatible)
 const loginAttempts = new Map<string, { count: number; lastAttempt: number }>()
 
 const MAX_LOGIN_ATTEMPTS = 5 // Safe production limit
 const LOCKOUT_DURATION = 15 * 60 * 1000 // 15 minutes
-const ATTEMPT_WINDOW = 15 * 60 // 15 minutes in seconds for Redis
+const ATTEMPT_WINDOW = 15 * 60 * 1000 // 15 minutes in milliseconds
 
 // Security validation functions - kept these strict after previous XSS issues
 const isValidEmail = (email: string): boolean => {
@@ -28,61 +26,36 @@ const sanitizeEmail = (email: string): string => {
   return email.toLowerCase().trim()
 }
 
-const checkRateLimit = async (ip: string): Promise<boolean> => {
-  try {
-    await connectRedis()
-    const key = `login_attempts:${ip}`
-    const count = await redis.get(key)
+const checkRateLimit = (ip: string): boolean => {
+  const now = Date.now()
+  const attempts = loginAttempts.get(ip)
 
-    if (!count) {
-      await redis.set(key, 1, { EX: ATTEMPT_WINDOW })
-      return true
-    }
-
-    if (parseInt(count) >= MAX_LOGIN_ATTEMPTS) {
-      return false
-    }
-
-    await redis.incr(key)
-    return true
-  } catch (error) {
-    console.error('Redis rate limit error, using fallback:', error)
-    // Fallback to in-memory
-    const now = Date.now()
-    const attempts = loginAttempts.get(ip)
-
-    if (!attempts) {
-      loginAttempts.set(ip, { count: 1, lastAttempt: now })
-      return true
-    }
-
-    if (now - attempts.lastAttempt > ATTEMPT_WINDOW * 1000) {
-      loginAttempts.set(ip, { count: 1, lastAttempt: now })
-      return true
-    }
-
-    if (attempts.count >= MAX_LOGIN_ATTEMPTS) {
-      if (now - attempts.lastAttempt < LOCKOUT_DURATION) {
-        return false
-      } else {
-        loginAttempts.set(ip, { count: 1, lastAttempt: now })
-        return true
-      }
-    }
-
-    attempts.count++
-    attempts.lastAttempt = now
+  if (!attempts) {
+    loginAttempts.set(ip, { count: 1, lastAttempt: now })
     return true
   }
+
+  if (now - attempts.lastAttempt > ATTEMPT_WINDOW) {
+    loginAttempts.set(ip, { count: 1, lastAttempt: now })
+    return true
+  }
+
+  if (attempts.count >= MAX_LOGIN_ATTEMPTS) {
+    if (now - attempts.lastAttempt < LOCKOUT_DURATION) {
+      return false
+    } else {
+      loginAttempts.set(ip, { count: 1, lastAttempt: now })
+      return true
+    }
+  }
+
+  attempts.count++
+  attempts.lastAttempt = now
+  return true
 }
 
-const recordFailedAttempt = async (ip: string): Promise<void> => {
-  try {
-    // With Redis implementation, checks already increment. 
-    // This is primarily for fallback consistency or explicit logging.
-  } catch (e) {
-    // Ignore
-  }
+const recordFailedAttempt = (ip: string): void => {
+  // Attempts are already tracked in checkRateLimit
 }
 
 export const authOptions: NextAuthOptions = {
@@ -126,7 +99,7 @@ export const authOptions: NextAuthOptions = {
           const clientIP = req?.headers?.['x-forwarded-for'] || req?.headers?.['x-real-ip'] || 'unknown'
           const ip = Array.isArray(clientIP) ? clientIP[0] : clientIP
 
-          if (!await checkRateLimit(ip)) {
+          if (!checkRateLimit(ip)) {
             throw new Error('AUTH_ERROR_TOO_MANY_ATTEMPTS')
           }
 
@@ -163,7 +136,7 @@ export const authOptions: NextAuthOptions = {
           })
 
           if (!user || !user.password) {
-            await recordFailedAttempt(ip)
+            recordFailedAttempt(ip)
             throw new Error('AUTH_ERROR_INVALID_CREDENTIALS')
           }
 
@@ -171,7 +144,7 @@ export const authOptions: NextAuthOptions = {
           const isPasswordValid = await compare(credentials.password, user.password)
 
           if (!isPasswordValid) {
-            await recordFailedAttempt(ip)
+            recordFailedAttempt(ip)
             throw new Error('AUTH_ERROR_INVALID_CREDENTIALS')
           }
 
@@ -282,12 +255,12 @@ export const authOptions: NextAuthOptions = {
         // Validate relative URLs for safety, allowing for optional locale prefix
         // Matches: /tutor, /en/tutor, /zh/tutor, etc.
         const safeRelativePaths = ['/student', '/tutor', '/dashboard', '/profile', '/settings']
-        
+
         // Regex to check if path starts with optional locale (/en or /zh) followed by a safe path
         const isAllowedPath = safeRelativePaths.some(path => {
-           // Matches ^/en/tutor... or ^/tutor...
-           const regex = new RegExp(`^(\/(en|zh))?${path}`)
-           return regex.test(url)
+          // Matches ^/en/tutor... or ^/tutor...
+          const regex = new RegExp(`^(\/(en|zh))?${path}`)
+          return regex.test(url)
         })
 
         if (isAllowedPath) {

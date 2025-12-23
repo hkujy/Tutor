@@ -1,26 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { logger } from './src/lib/utils/logger'
+import { getToken } from 'next-auth/jwt'
+import createMiddleware from 'next-intl/middleware'
+import { routing } from './src/i18n/routing'
 
-// Rate limiting store (in production, use Redis)
-const rateLimit = new Map<string, { count: number; resetTime: number }>()
+const intlMiddleware = createMiddleware(routing)
 
-function getRateLimitKey(req: NextRequest): string {
-  // In production, use proper client IP detection
-  const forwarded = req.headers.get('x-forwarded-for')
-  const ip = forwarded ? forwarded.split(',')[0] : req.nextUrl.hostname || 'unknown'
-  return ip
+// In-memory rate limiting (Edge runtime compatible)
+// Note: This is per-instance. For production with multiple instances, use a different solution
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
+
+// Security headers
+const securityHeaders = {
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'X-XSS-Protection': '1; mode=block',
+  'Content-Security-Policy':
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: https:; " +
+    "font-src 'self'; " +
+    "connect-src 'self' ws: wss:; " +
+    "frame-ancestors 'none';",
 }
 
-function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
+const RATE_LIMIT_WINDOW = 60000 // 1 minute in milliseconds
+const RATE_LIMIT_MAX_REQUESTS = 3000
+
+const checkRateLimit = (ip: string): boolean => {
   const now = Date.now()
-  const record = rateLimit.get(key)
+  const record = rateLimitStore.get(ip)
 
   if (!record || now > record.resetTime) {
-    rateLimit.set(key, { count: 1, resetTime: now + windowMs })
+    rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW })
     return true
   }
 
-  if (record.count >= limit) {
+  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
     return false
   }
 
@@ -28,71 +45,147 @@ function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
   return true
 }
 
-export function middleware(request: NextRequest) {
+const getClientIP = (request: NextRequest): string => {
+  const forwarded = request.headers.get('x-forwarded-for')
+  const real = request.headers.get('x-real-ip')
+  return forwarded?.split(',')[0] || real || 'unknown'
+}
+
+export async function middleware(request: NextRequest) {
+  const clientIP = getClientIP(request)
   const pathname = request.nextUrl.pathname
-  const correlationId =
-    request.headers.get('x-correlation-id') ||
-    `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
-  // Add correlation ID to all responses
-  const response = NextResponse.next()
-  response.headers.set('X-Correlation-ID', correlationId)
+  // Generate or retrieve Correlation ID
+  const correlationId = request.headers.get('x-correlation-id') || crypto.randomUUID()
 
-  // Apply rate limiting to API routes
+  // Clone request headers to pass correlation ID downstream
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-correlation-id', correlationId)
+
+  // ==========================================
+  // 1. API Routes Handling (No localization)
+  // ==========================================
   if (pathname.startsWith('/api/')) {
-    const key = getRateLimitKey(request)
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
 
-    // Different limits for different endpoints
-    let limit = 500 // requests per minute (increased from 100 for normal browsing)
-    let windowMs = 60 * 1000 // 1 minute
+    // Set Correlation ID on response
+    response.headers.set('X-Correlation-ID', correlationId)
 
-    if (pathname.includes('/auth/')) {
-      limit = 100 // increased from 20
-    } else if (pathname.includes('/appointments/book')) {
-      limit = 30 // increased from 10
-    } else if (pathname.includes('/files/upload')) {
-      limit = 50 // increased from 20
-      windowMs = 60 * 60 * 1000 // 1 hour
+    // Apply security headers
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value)
+    })
+
+    // Skip rate limiting for auth endpoints (handled internally)
+    if (!pathname.startsWith('/api/auth/')) {
+      const isAllowed = checkRateLimit(clientIP)
+      if (!isAllowed) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Rate limit exceeded' }),
+          {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              ...securityHeaders
+            }
+          }
+        )
+      }
     }
 
-    if (!checkRateLimit(key, limit, windowMs)) {
-      logger.warn(
-        {
-          ip: key,
-          pathname,
-          correlationId,
-        },
-        'Rate limit exceeded'
-      )
+    // API Authentication Check
+    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
 
-      return new Response(
-        JSON.stringify({
-          error: {
-            code: 'RATE_LIMITED',
-            message: 'Too many requests',
-          },
-        }),
-        {
-          status: 429,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Correlation-ID': correlationId,
-            'Retry-After': '60',
-          },
-        }
+    // Allow public API routes
+    const isApiAuthRoute = pathname.startsWith('/api/auth')
+    const isHealthRoute = pathname === '/api/health'
+
+    if (isApiAuthRoute || isHealthRoute) {
+      return response
+    }
+
+    if (!token) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { 'Content-Type': 'application/json', ...securityHeaders } }
       )
+    }
+
+    if (token.expired) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Token expired' }),
+        { status: 401, headers: { 'Content-Type': 'application/json', ...securityHeaders } }
+      )
+    }
+
+    if (pathname.startsWith('/api/admin/') && token.role !== 'ADMIN') {
+      return new NextResponse(
+        JSON.stringify({ error: 'Admin access required' }),
+        { status: 403, headers: { 'Content-Type': 'application/json', ...securityHeaders } }
+      )
+    }
+
+    return response
+  }
+
+  // ==========================================
+  // 2. Page Routes Handling (With localization)
+  // ==========================================
+
+  // Explicitly redirect root to /en
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/en', request.url))
+  }
+
+  // Normalize path by removing locale prefix for security checks
+  const publicPathname = pathname.replace(/^\/(en|zh)/, '') || '/'
+
+  // Extract current locale for redirects
+  const currentLocale = pathname.match(/^\/(en|zh)/)?.[1] || 'en'
+
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+
+  const isAuthPage = publicPathname.startsWith('/auth') || publicPathname === '/login'
+  const isPublicRoute = publicPathname.startsWith('/public') || publicPathname === '/favicon.ico'
+
+  // If user is unauthenticated and trying to access protected page
+  if (!token && !isAuthPage && !isPublicRoute) {
+    const loginUrl = new URL(`/${currentLocale}/login`, request.url)
+    loginUrl.searchParams.set('callbackUrl', request.nextUrl.href)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // Role-based Access Control
+  if (token) {
+    if (publicPathname.startsWith('/tutor') && token.role !== 'TUTOR' && token.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL(`/${currentLocale}/unauthorized`, request.url))
+    }
+
+    if (publicPathname.startsWith('/student') && token.role !== 'STUDENT' && token.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL(`/${currentLocale}/unauthorized`, request.url))
     }
   }
 
-  // Security headers
-  response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('X-Frame-Options', 'DENY')
-  response.headers.set('X-XSS-Protection', '1; mode=block')
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  // Run next-intl middleware
+  const response = intlMiddleware(request)
+
+  // Set Correlation ID on response
+  response.headers.set('X-Correlation-ID', correlationId)
+
+  // Apply security headers
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value)
+  })
 
   return response
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|public/|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.gif$|.*\\.svg$|.*\\.webp$|.*\\.ico$).*)',
+  ],
 }

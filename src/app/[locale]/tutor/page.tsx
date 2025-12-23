@@ -111,7 +111,7 @@ function TutorDashboard() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <Image
-                  src="/logo.svg"
+                  src="/logo.png"
                   alt="Tutoring Calendar Logo"
                   width={48}
                   height={48}
@@ -137,8 +137,8 @@ function TutorDashboard() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
                 <span className="mr-2">{tab.icon}</span>
@@ -232,7 +232,7 @@ function TutorDashboard() {
                         </div>
                         <div className="ml-3">
                           <p className="text-sm font-medium text-gray-900">
-                            {t('recentActivity.sessionCompleted', {name: `${appointment.student?.user?.firstName} ${appointment.student?.user?.lastName}`})}
+                            {t('recentActivity.sessionCompleted', { name: `${appointment.student?.user?.firstName} ${appointment.student?.user?.lastName}` })}
                           </p>
                           <p className="text-sm text-gray-500">{appointment.subject} - {new Date(appointment.startTime).toLocaleDateString()}</p>
                         </div>
@@ -249,7 +249,7 @@ function TutorDashboard() {
                         <span className="text-green-600 font-semibold">✓</span>
                       </div>
                       <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">{t('recentActivity.sessionCompleted', {name: 'John Doe'})}</p>
+                        <p className="text-sm font-medium text-gray-900">{t('recentActivity.sessionCompleted', { name: 'John Doe' })}</p>
                         <p className="text-sm text-gray-500">Mathematics - 2 hours ago</p>
                       </div>
                     </div>

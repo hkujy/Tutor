@@ -1,60 +1,8 @@
 import { db } from '../db/client'
-import { Prisma } from '@prisma/client'
-
-// Input validation and sanitization functions
-const isValidId = (id: string): boolean => {
-  // Allow both UUIDs and CUIDs
-  // CUIDs start with 'c' and are around 25 chars. UUIDs are 36 chars.
-  // We'll just check for a non-empty string with alphanumeric characters and hyphens of reasonable length.
-  return typeof id === 'string' && id.length > 0 && id.length <= 50
-}
-
-const isValidSubjects = (subjects: string[]): boolean => {
-  return Array.isArray(subjects) &&
-    subjects.every(s => typeof s === 'string' && s.trim().length > 0 && s.length <= 100)
-}
-
-const isValidGradeLevel = (gradeLevel?: string): boolean => {
-  if (!gradeLevel) return true
-  const validGrades = ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'College', 'Graduate']
-  return validGrades.includes(gradeLevel)
-}
-
-const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email) && email.length <= 254
-}
-
-const sanitizeString = (str: string): string => {
-  return str.trim().replace(/[<>"'&]/g, '')
-}
-
-const sanitizeArray = (arr: string[]): string[] => {
-  return arr.map(item => sanitizeString(item)).filter(item => item.length > 0)
-}
-
-const handleDatabaseError = (error: any, operation: string): never => {
-  console.error(`Database error in ${operation}:`, error)
-
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    switch (error.code) {
-      case 'P2002':
-        throw new Error('A student profile for this user already exists')
-      case 'P2025':
-        throw new Error('Student not found')
-      case 'P2003':
-        throw new Error('Invalid reference to user data')
-      default:
-        throw new Error(`Database operation failed: ${error.message}`)
-    }
-  }
-
-  if (error instanceof Prisma.PrismaClientValidationError) {
-    throw new Error('Invalid data provided')
-  }
-
-  throw new Error('An unexpected database error occurred')
-}
+import { isValidId, isValidSubjects, isValidGradeLevel, isValidEmail, isValidTextContent } from '../utils/validation'
+import { sanitizeString, sanitizeArray, sanitizeEmail } from '../utils/sanitization'
+import { handleDatabaseError } from '../utils/database-errors'
+import { VALIDATION_LIMITS } from '../utils/constants'
 
 export type CreateStudentInput = {
   userId: string
@@ -81,7 +29,7 @@ export class StudentRepository {
       throw new Error('Invalid grade level')
     }
 
-    if (data.learningGoals && (data.learningGoals.length > 2000 || /[<>"'&]/.test(data.learningGoals))) {
+    if (data.learningGoals && !isValidTextContent(data.learningGoals, VALIDATION_LIMITS.LEARNING_GOALS_MAX_LENGTH)) {
       throw new Error('Invalid learning goals format')
     }
 
@@ -95,7 +43,7 @@ export class StudentRepository {
         gradeLevel: data.gradeLevel || null,
         subjects: sanitizeArray(data.subjects),
         learningGoals: data.learningGoals ? sanitizeString(data.learningGoals) : null,
-        parentContact: data.parentContact ? data.parentContact.toLowerCase().trim() : null,
+        parentContact: data.parentContact ? sanitizeEmail(data.parentContact) : null,
       }
 
       return await db.student.create({
@@ -132,7 +80,7 @@ export class StudentRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'create student')
+      handleDatabaseError(error, 'create student', 'student')
     }
   }
 
@@ -193,7 +141,7 @@ export class StudentRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'find student by ID')
+      handleDatabaseError(error, 'find student by ID', 'student')
     }
   }
 
@@ -214,7 +162,7 @@ export class StudentRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'find student by user ID')
+      handleDatabaseError(error, 'find student by user ID', 'student')
     }
   }
 
@@ -232,7 +180,7 @@ export class StudentRepository {
       throw new Error('Invalid grade level')
     }
 
-    if (data.learningGoals && (data.learningGoals.length > 2000 || /[<>"'&]/.test(data.learningGoals))) {
+    if (data.learningGoals && !isValidTextContent(data.learningGoals, VALIDATION_LIMITS.LEARNING_GOALS_MAX_LENGTH)) {
       throw new Error('Invalid learning goals format')
     }
 
@@ -256,7 +204,7 @@ export class StudentRepository {
       }
 
       if (data.parentContact !== undefined) {
-        updateData.parentContact = data.parentContact ? data.parentContact.toLowerCase().trim() : null
+        updateData.parentContact = data.parentContact ? sanitizeEmail(data.parentContact) : null
       }
 
       return await db.student.update({
@@ -271,7 +219,7 @@ export class StudentRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'update student')
+      handleDatabaseError(error, 'update student', 'student')
     }
   }
 
@@ -285,7 +233,7 @@ export class StudentRepository {
         where: { id },
       })
     } catch (error) {
-      handleDatabaseError(error, 'delete student')
+      handleDatabaseError(error, 'delete student', 'student')
     }
   }
 
@@ -301,8 +249,8 @@ export class StudentRepository {
         throw new Error('Skip must be a non-negative integer')
       }
 
-      if (params.take !== undefined && (!Number.isInteger(params.take) || params.take < 1 || params.take > 100)) {
-        throw new Error('Take must be between 1 and 100')
+      if (params.take !== undefined && (!Number.isInteger(params.take) || params.take < VALIDATION_LIMITS.PAGINATION_MIN_TAKE || params.take > VALIDATION_LIMITS.PAGINATION_MAX_TAKE)) {
+        throw new Error(`Take must be between ${VALIDATION_LIMITS.PAGINATION_MIN_TAKE} and ${VALIDATION_LIMITS.PAGINATION_MAX_TAKE}`)
       }
 
       return await db.student.findMany({
@@ -323,7 +271,7 @@ export class StudentRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'find many students')
+      handleDatabaseError(error, 'find many students', 'student')
     }
   }
 
@@ -331,7 +279,7 @@ export class StudentRepository {
     try {
       return await db.student.count({ where })
     } catch (error) {
-      handleDatabaseError(error, 'count students')
+      handleDatabaseError(error, 'count students', 'student')
     }
   }
 
@@ -372,7 +320,7 @@ export class StudentRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'get upcoming appointments')
+      handleDatabaseError(error, 'get upcoming appointments', 'student')
     }
   }
 
@@ -423,7 +371,7 @@ export class StudentRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'get pending assignments')
+      handleDatabaseError(error, 'get pending assignments', 'student')
     }
   }
 }

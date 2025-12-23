@@ -1,68 +1,8 @@
 import { db } from '../db/client'
-import { Prisma } from '@prisma/client'
-
-// Input validation and sanitization functions
-const isValidId = (id: string): boolean => {
-  // Allow both UUIDs and CUIDs
-  // CUIDs start with 'c' and are around 25 chars. UUIDs are 36 chars.
-  // We'll just check for a non-empty string with alphanumeric characters and hyphens of reasonable length.
-  return typeof id === 'string' && id.length > 0 && id.length <= 50
-}
-
-const isValidSpecializations = (specializations: string[]): boolean => {
-  return Array.isArray(specializations) &&
-    specializations.every(s => typeof s === 'string' && s.trim().length > 0 && s.length <= 100)
-}
-
-const isValidExperienceYears = (years?: number): boolean => {
-  return years === undefined || (Number.isInteger(years) && years >= 0 && years <= 100)
-}
-
-const isValidHourlyRate = (rate?: number): boolean => {
-  return rate === undefined || (typeof rate === 'number' && rate >= 0 && rate <= 10000)
-}
-
-const isValidCurrency = (currency?: string): boolean => {
-  const validCurrencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF']
-  return currency === undefined || validCurrencies.includes(currency)
-}
-
-const isValidLanguages = (languages?: string[]): boolean => {
-  return languages === undefined ||
-    (Array.isArray(languages) &&
-      languages.every(l => typeof l === 'string' && l.trim().length > 0 && l.length <= 50))
-}
-
-const sanitizeString = (str: string): string => {
-  return str.trim().replace(/[<>"'&]/g, '')
-}
-
-const sanitizeArray = (arr: string[]): string[] => {
-  return arr.map(item => sanitizeString(item)).filter(item => item.length > 0)
-}
-
-const handleDatabaseError = (error: any, operation: string): never => {
-  console.error(`Database error in ${operation}:`, error)
-
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    switch (error.code) {
-      case 'P2002':
-        throw new Error('A tutor profile for this user already exists')
-      case 'P2025':
-        throw new Error('Tutor not found')
-      case 'P2003':
-        throw new Error('Invalid reference to user data')
-      default:
-        throw new Error(`Database operation failed: ${error.message}`)
-    }
-  }
-
-  if (error instanceof Prisma.PrismaClientValidationError) {
-    throw new Error('Invalid data provided')
-  }
-
-  throw new Error('An unexpected database error occurred')
-}
+import { isValidId, isValidSpecializations, isValidExperienceYears, isValidHourlyRate, isValidCurrency, isValidLanguages, isValidTextContent } from '../utils/validation'
+import { sanitizeString, sanitizeArray } from '../utils/sanitization'
+import { handleDatabaseError } from '../utils/database-errors'
+import { VALIDATION_LIMITS } from '../utils/constants'
 
 export type CreateTutorInput = {
   userId: string
@@ -105,11 +45,11 @@ export class TutorRepository {
       throw new Error('Invalid languages format')
     }
 
-    if (data.education && (data.education.length > 1000 || /[<>"'&]/.test(data.education))) {
+    if (data.education && !isValidTextContent(data.education, VALIDATION_LIMITS.EDUCATION_MAX_LENGTH)) {
       throw new Error('Invalid education format')
     }
 
-    if (data.bio && (data.bio.length > 2000 || /[<>"'&]/.test(data.bio))) {
+    if (data.bio && !isValidTextContent(data.bio, VALIDATION_LIMITS.BIO_MAX_LENGTH)) {
       throw new Error('Invalid bio format')
     }
 
@@ -148,7 +88,7 @@ export class TutorRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'create tutor')
+      handleDatabaseError(error, 'create tutor', 'tutor')
     }
   }
 
@@ -205,7 +145,7 @@ export class TutorRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'find tutor by ID')
+      handleDatabaseError(error, 'find tutor by ID', 'tutor')
     }
   }
 
@@ -227,7 +167,7 @@ export class TutorRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'find tutor by user ID')
+      handleDatabaseError(error, 'find tutor by user ID', 'tutor')
     }
   }
 
@@ -257,11 +197,11 @@ export class TutorRepository {
       throw new Error('Invalid languages format')
     }
 
-    if (data.education && (data.education.length > 1000 || /[<>"'&]/.test(data.education))) {
+    if (data.education && !isValidTextContent(data.education, VALIDATION_LIMITS.EDUCATION_MAX_LENGTH)) {
       throw new Error('Invalid education format')
     }
 
-    if (data.bio && (data.bio.length > 2000 || /[<>"'&]/.test(data.bio))) {
+    if (data.bio && !isValidTextContent(data.bio, VALIDATION_LIMITS.BIO_MAX_LENGTH)) {
       throw new Error('Invalid bio format')
     }
 
@@ -313,7 +253,7 @@ export class TutorRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'update tutor')
+      handleDatabaseError(error, 'update tutor', 'tutor')
     }
   }
 
@@ -327,7 +267,7 @@ export class TutorRepository {
         where: { id },
       })
     } catch (error) {
-      handleDatabaseError(error, 'delete tutor')
+      handleDatabaseError(error, 'delete tutor', 'tutor')
     }
   }
 
@@ -343,8 +283,8 @@ export class TutorRepository {
         throw new Error('Skip must be a non-negative integer')
       }
 
-      if (params.take !== undefined && (!Number.isInteger(params.take) || params.take < 1 || params.take > 100)) {
-        throw new Error('Take must be between 1 and 100')
+      if (params.take !== undefined && (!Number.isInteger(params.take) || params.take < VALIDATION_LIMITS.PAGINATION_MIN_TAKE || params.take > VALIDATION_LIMITS.PAGINATION_MAX_TAKE)) {
+        throw new Error(`Take must be between ${VALIDATION_LIMITS.PAGINATION_MIN_TAKE} and ${VALIDATION_LIMITS.PAGINATION_MAX_TAKE}`)
       }
 
       return await db.tutor.findMany({
@@ -365,7 +305,7 @@ export class TutorRepository {
         },
       })
     } catch (error) {
-      handleDatabaseError(error, 'find many tutors')
+      handleDatabaseError(error, 'find many tutors', 'tutor')
     }
   }
 
@@ -373,7 +313,7 @@ export class TutorRepository {
     try {
       return await db.tutor.count({ where })
     } catch (error) {
-      handleDatabaseError(error, 'count tutors')
+      handleDatabaseError(error, 'count tutors', 'tutor')
     }
   }
 

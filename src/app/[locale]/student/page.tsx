@@ -105,7 +105,7 @@ function StudentDashboard() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 sm:space-x-4">
                 <Image
-                  src="/logo.svg"
+                  src="/logo.png"
                   alt="Tutoring Calendar Logo"
                   width={40}
                   height={40}
@@ -136,7 +136,7 @@ function StudentDashboard() {
                   }`}
               >
                 <span className="mr-1 sm:mr-2">{tab.icon}</span>
-                <span className="hidden xs:inline">{tab.name}</span>
+                {tab.name}
               </button>
             ))}
           </nav>
