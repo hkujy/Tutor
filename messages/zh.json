@@ -78,36 +78,10 @@
       "appointments": "查看预约",
       "appointmentsDesc": "检查即将到来的课程",
       "analytics": "查看分析",
-      "analyticsDesc": "跟踪您的表现"
-    },
-    "recentActivity": {
-      "title": "最近活动",
-      "sessionCompleted": "与 {name} 完成了课程",
-      "today": "今天",
-      "yesterday": "昨天"
-    },
-    "tabs": {
-      "dashboard": "仪表板",
-      "overview": "概览",
-      "students": "学生",
-      "availability": "空闲时间",
-      "appointments": "预约",
-      "create": "创建预约",
-      "analytics": "分析",
-      "assignments": "作业",
-      "hours": "授课时长",
-      "payments": "付款",
-      "billing": "账单",
-      "notifications": "通知",
-      "settings": "设置"
-    },
-    "analytics": {
-      "title": "分析"
-    },
-    "quickActions": {
+      "analyticsDesc": "跟踪您的表现",
       "students": "查看学生",
       "studentsDesc": "管理您的学生列表"
-    }
+    },
   },
   "StudentDashboard": {
     "title": "学生仪表板",

@@ -78,36 +78,10 @@
       "appointments": "View Appointments",
       "appointmentsDesc": "Check your upcoming sessions",
       "analytics": "View Analytics",
-      "analyticsDesc": "Track your performance"
-    },
-    "recentActivity": {
-      "title": "Recent Activity",
-      "sessionCompleted": "Session completed with {name}",
-      "today": "Today",
-      "yesterday": "Yesterday"
-    },
-    "tabs": {
-      "dashboard": "Dashboard",
-      "overview": "Overview",
-      "students": "Students",
-      "availability": "Availability",
-      "appointments": "Appointments",
-      "create": "Create Appointment",
-      "analytics": "Analytics",
-      "assignments": "Assignments",
-      "hours": "Lecture Hours",
-      "payments": "Payments",
-      "billing": "Billing",
-      "notifications": "Notifications",
-      "settings": "Settings"
-    },
-    "analytics": {
-      "title": "Analytics"
-    },
-    "quickActions": {
+      "analyticsDesc": "Track your performance",
       "students": "View Students",
       "studentsDesc": "Manage your student list"
-    }
+    },
   },
   "StudentDashboard": {
     "title": "Student Dashboard",
@@ -125,7 +99,11 @@
       "progress": "Progress Report",
       "progressDesc": "See your learning progress",
       "messages": "Messages",
-      "messagesDesc": "Chat with your tutors"
+      "messagesDesc": "Chat with your tutors",
+      "sessions": "Book Session",
+      "sessionsDesc": "Schedule your next tutoring session",
+      "billing": "View Billing",
+      "billingDesc": "Check your payment status"
     },
     "tabs": {
       "dashboard": "Dashboard",
@@ -139,12 +117,6 @@
       "billing": "Billing",
       "notifications": "Notifications",
       "settings": "Settings"
-    },
-    "quickActions": {
-      "sessions": "Book Session",
-      "sessionsDesc": "Schedule your next tutoring session",
-      "billing": "View Billing",
-      "billingDesc": "Check your payment status"
     }
   },
   "AppointmentManagement": {
