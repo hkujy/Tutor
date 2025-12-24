@@ -7,6 +7,11 @@ import { useRouter } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
 import { DashboardSkeleton, AppointmentSkeleton, AvailabilitySkeleton, NotesSkeleton } from '../../../components/ui/LoadingSkeletons'
 import { ThemeToggle } from '../../../components/ui/ThemeToggle'
+import { NotificationBell } from '../../../components/NotificationBell'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs'
+import { Button } from '../../../components/ui/button'
+import { Plus, Clock, CreditCard } from 'lucide-react'
+import { toast } from 'sonner'
 
 // Lazy load heavy components to reduce initial bundle size
 const TutorAvailability = lazy(() => import('../../../components/availability/TutorAvailability'))
@@ -24,9 +29,10 @@ function TutorDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
   const t = useTranslations('TutorDashboard')
-  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'availability' | 'appointments' | 'create' | 'analytics' | 'assignments' | 'hours' | 'payments' | 'notifications' | 'settings'>('overview')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'availability' | 'appointments' | 'assignments' | 'billing' | 'settings'>('dashboard')
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [showCreateForm, setShowCreateForm] = useState(false)
 
   // Handle authentication
   useEffect(() => {
@@ -66,16 +72,12 @@ function TutorDashboard() {
   }
 
   const tabs = [
-    { id: 'overview', name: t('tabs.overview'), icon: '📊' },
+    { id: 'dashboard', name: t('tabs.dashboard'), icon: '📊' },
     { id: 'students', name: t('tabs.students'), icon: '👥' },
     { id: 'availability', name: t('tabs.availability'), icon: '🗓️' },
     { id: 'appointments', name: t('tabs.appointments'), icon: '📅' },
-    { id: 'create', name: t('tabs.create'), icon: '➕' },
-    { id: 'analytics', name: t('tabs.analytics'), icon: '📈' },
     { id: 'assignments', name: t('tabs.assignments'), icon: '📝' },
-    { id: 'hours', name: t('tabs.hours'), icon: '⏰' },
-    { id: 'payments', name: t('tabs.payments'), icon: '💳' },
-    { id: 'notifications', name: t('tabs.notifications'), icon: '🔔' },
+    { id: 'billing', name: t('tabs.billing'), icon: '💳' },
     { id: 'settings', name: t('tabs.settings'), icon: '⚙️' }
   ]
 
@@ -122,7 +124,10 @@ function TutorDashboard() {
                   <p className="mt-1 text-muted-foreground">{t('subtitle')}</p>
                 </div>
               </div>
-              <ThemeToggle />
+              <div className="flex items-center gap-4">
+                <NotificationBell />
+                <ThemeToggle />
+              </div>
             </div>
           </div>
         </div>
@@ -151,7 +156,7 @@ function TutorDashboard() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'overview' && (
+        {activeTab === 'dashboard' && (
           <div className="space-y-8">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -168,6 +173,14 @@ function TutorDashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Analytics Section */}
+            <div className="bg-card rounded-lg shadow p-6 border border-border">
+              <h3 className="text-lg font-semibold text-foreground mb-4">{t('analytics.title')}</h3>
+              <Suspense fallback={<DashboardSkeleton />}>
+                <TutorAnalytics tutorId={user?.id || ''} />
+              </Suspense>
             </div>
 
             {/* Quick Actions */}
@@ -194,11 +207,14 @@ function TutorDashboard() {
                     <p className="text-sm text-muted-foreground">{t('quickActions.appointmentsDesc')}</p>
                   </div>
                 </button>
-                <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors">
+                <button
+                  onClick={() => setActiveTab('students')}
+                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
+                >
                   <div className="text-center">
-                    <span className="text-2xl mb-2 block">📊</span>
-                    <p className="font-medium text-foreground">{t('quickActions.analytics')}</p>
-                    <p className="text-sm text-muted-foreground">{t('quickActions.analyticsDesc')}</p>
+                    <span className="text-2xl mb-2 block">👥</span>
+                    <p className="font-medium text-foreground">{t('quickActions.students')}</p>
+                    <p className="text-sm text-muted-foreground">{t('quickActions.studentsDesc')}</p>
                   </div>
                 </button>
               </div>
@@ -280,28 +296,62 @@ function TutorDashboard() {
 
         {activeTab === 'appointments' && (
           <div>
+            {/* Header with Create Button */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-foreground">Appointments</h2>
+              <Button onClick={() => setShowCreateForm(!showCreateForm)}>
+                <Plus className="mr-2 h-4 w-4" />
+                {showCreateForm ? 'Cancel' : 'Create Appointment'}
+              </Button>
+            </div>
+
+            {/* Create Form (conditional) */}
+            {showCreateForm && (
+              <div className="mb-6 bg-card rounded-lg shadow p-6 border border-border">
+                <Suspense fallback={<AvailabilitySkeleton />}>
+                  <TutorAppointmentForm
+                    onAppointmentCreated={() => {
+                      setShowCreateForm(false);
+                      toast.success('Appointment created successfully!');
+                    }}
+                  />
+                </Suspense>
+              </div>
+            )}
+
+            {/* Appointment List */}
             <Suspense fallback={<AppointmentSkeleton />}>
               <AppointmentManagement userRole="tutor" userId={user?.id || ''} />
             </Suspense>
           </div>
         )}
 
-        {activeTab === 'create' && (
+        {activeTab === 'billing' && (
           <div>
-            <Suspense fallback={<AvailabilitySkeleton />}>
-              <TutorAppointmentForm onAppointmentCreated={() => {
-                // Optionally refresh appointments or show success message
-                console.log('Appointment created successfully!')
-              }} />
-            </Suspense>
-          </div>
-        )}
+            <Tabs defaultValue="hours" className="w-full">
+              <TabsList className="grid w-full max-w-md grid-cols-2">
+                <TabsTrigger value="hours">
+                  <Clock className="mr-2 h-4 w-4" />
+                  Lecture Hours
+                </TabsTrigger>
+                <TabsTrigger value="payments">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Payments
+                </TabsTrigger>
+              </TabsList>
 
-        {activeTab === 'analytics' && (
-          <div>
-            <Suspense fallback={<DashboardSkeleton />}>
-              <TutorAnalytics tutorId={user?.id || ''} />
-            </Suspense>
+              <TabsContent value="hours" className="mt-6">
+                <Suspense fallback={<DashboardSkeleton />}>
+                  <LectureHoursTracker userRole="tutor" userId={user?.id || ''} />
+                </Suspense>
+              </TabsContent>
+
+              <TabsContent value="payments" className="mt-6">
+                <Suspense fallback={<DashboardSkeleton />}>
+                  <PaymentManager userRole="tutor" userId={user?.id || ''} />
+                </Suspense>
+              </TabsContent>
+            </Tabs>
           </div>
         )}
 
@@ -309,30 +359,6 @@ function TutorDashboard() {
           <div>
             <Suspense fallback={<DashboardSkeleton />}>
               <AssignmentManager userRole="tutor" userId={user?.id || ''} />
-            </Suspense>
-          </div>
-        )}
-
-        {activeTab === 'hours' && (
-          <div>
-            <Suspense fallback={<DashboardSkeleton />}>
-              <LectureHoursTracker userRole="tutor" userId={user?.id || ''} />
-            </Suspense>
-          </div>
-        )}
-
-        {activeTab === 'payments' && (
-          <div>
-            <Suspense fallback={<DashboardSkeleton />}>
-              <PaymentManager userRole="tutor" userId={user?.id || ''} />
-            </Suspense>
-          </div>
-        )}
-
-        {activeTab === 'notifications' && (
-          <div>
-            <Suspense fallback={<NotesSkeleton />}>
-              <NotificationManager userId={user?.id || ''} userRole="tutor" />
             </Suspense>
           </div>
         )}

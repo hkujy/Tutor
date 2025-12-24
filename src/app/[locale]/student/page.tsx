@@ -9,6 +9,9 @@ import { DashboardSkeleton, AppointmentSkeleton, AvailabilitySkeleton, NotesSkel
 import { ThemeToggle } from '../../../components/ui/ThemeToggle'
 import ErrorBoundary from '../../../components/ErrorBoundary'
 import { WidgetError, SectionError } from '../../../components/ui/ErrorFallbacks'
+import { NotificationBell } from '../../../components/NotificationBell'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs'
+import { Clock, CreditCard } from 'lucide-react'
 
 // Lazy load heavy components to reduce initial bundle size
 const CalendarView = lazy(() => import('../../../components/calendar/CalendarView'))
@@ -26,7 +29,7 @@ function StudentDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
   const t = useTranslations('StudentDashboard')
-  const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'assignments' | 'progress' | 'hours' | 'payments' | 'notifications' | 'settings'>('overview')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'sessions' | 'assignments' | 'billing' | 'settings'>('dashboard')
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [dashboardStats, setDashboardStats] = useState<any>(null)
@@ -86,13 +89,10 @@ function StudentDashboard() {
   ]
 
   const tabs = [
-    { id: 'overview', name: t('tabs.overview'), icon: '🏠' },
-    { id: 'manage', name: t('tabs.manage'), icon: '⚙️' },
+    { id: 'dashboard', name: t('tabs.dashboard'), icon: '🏠' },
+    { id: 'sessions', name: t('tabs.sessions'), icon: '📅' },
     { id: 'assignments', name: t('tabs.assignments'), icon: '📝' },
-    { id: 'progress', name: t('tabs.progress'), icon: '📊' },
-    { id: 'hours', name: t('tabs.hours'), icon: '⏰' },
-    { id: 'payments', name: t('tabs.payments'), icon: '💳' },
-    { id: 'notifications', name: t('tabs.notifications'), icon: '🔔' },
+    { id: 'billing', name: t('tabs.billing'), icon: '💳' },
     { id: 'settings', name: t('tabs.settings'), icon: '⚙️' }
   ]
 
@@ -116,7 +116,10 @@ function StudentDashboard() {
                   <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-muted-foreground">{t('subtitle')}</p>
                 </div>
               </div>
-              <ThemeToggle />
+              <div className="flex items-center gap-4">
+                <NotificationBell />
+                <ThemeToggle />
+              </div>
             </div>
           </div>
         </div>
@@ -144,7 +147,7 @@ function StudentDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'overview' && (
+        {activeTab === 'dashboard' && (
           <div>
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -175,9 +178,12 @@ function StudentDashboard() {
                   </div>
                 ))
               )}
-            </div>            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Calendar View - Takes up 2 columns on large screens */}
-              <div className="lg:col-span-2">
+            </div>
+
+            {/* Two Column Layout: Calendar + Progress */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {/* Calendar View */}
+              <div>
                 <ErrorBoundary fallback={<SectionError title="Calendar Error" message="Unable to load the calendar view." />}>
                   <Suspense fallback={<DashboardSkeleton />}>
                     <CalendarView />
@@ -185,71 +191,83 @@ function StudentDashboard() {
                 </ErrorBoundary>
               </div>
 
-              {/* Sidebar with Form */}
-              <div className="space-y-6">
-                <ErrorBoundary fallback={<WidgetError title="Booking Error" message="Appointment form unavailable." />}>
-                  <Suspense fallback={<AvailabilitySkeleton />}>
-                    <EnhancedAppointmentForm
-                      initialDate={selectedDate}
-                      onAppointmentCreated={handleAppointmentCreated}
-                    />
+              {/* Progress Charts */}
+              <div>
+                <ErrorBoundary fallback={<SectionError title="Progress Error" message="Could not load progress data." />}>
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <StudentProgress studentId={user?.id || ''} />
                   </Suspense>
                 </ErrorBoundary>
-
-                {/* Quick Actions */}
-                <div className="bg-card rounded-lg shadow p-6 border border-border transition-colors duration-300">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">{t('quickActions.title')}</h3>
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => setActiveTab('assignments')}
-                      className="w-full p-3 text-left border border-border rounded-lg hover:bg-accent/50 transition-all duration-200 hover:shadow-md"
-                    >
-                      <div className="flex items-center">
-                        <span className="text-2xl mr-3">📋</span>
-                        <div>
-                          <p className="font-medium text-foreground">{t('quickActions.assignments')}</p>
-                          <p className="text-sm text-muted-foreground">{t('quickActions.assignmentsDesc')}</p>
-                        </div>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('progress')}
-                      className="w-full p-3 text-left border border-border rounded-lg hover:bg-accent/50 transition-all duration-200 hover:shadow-md"
-                    >
-                      <div className="flex items-center">
-                        <span className="text-2xl mr-3">📊</span>
-                        <div>
-                          <p className="font-medium text-foreground">{t('quickActions.progress')}</p>
-                          <p className="text-sm text-muted-foreground">{t('quickActions.progressDesc')}</p>
-                        </div>
-                      </div>
-                    </button>
-                    <button className="w-full p-3 text-left border border-border rounded-lg hover:bg-accent/50 transition-all duration-200 hover:shadow-md">
-                      <div className="flex items-center">
-                        <span className="text-2xl mr-3">💬</span>
-                        <div>
-                          <p className="font-medium text-foreground">{t('quickActions.messages')}</p>
-                          <p className="text-sm text-muted-foreground">{t('quickActions.messagesDesc')}</p>
-                        </div>
-                      </div>
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
 
-            {/* Appointment List - Full width below calendar */}
-            <div className="mt-8">
-              <ErrorBoundary fallback={<SectionError title="Appointments Error" message="Could not load your appointments." />}>
-                <AppointmentList refreshTrigger={refreshTrigger} />
-              </ErrorBoundary>
+            {/* Quick Actions */}
+            <div className="bg-card rounded-lg shadow p-6 border border-border transition-colors duration-300 mb-8">
+              <h3 className="text-lg font-semibold text-foreground mb-4">{t('quickActions.title')}</h3>
+              <div className="space-y-3">
+                <button
+                  onClick={() => setActiveTab('assignments')}
+                  className="w-full p-3 text-left border border-border rounded-lg hover:bg-accent/50 transition-all duration-200 hover:shadow-md"
+                >
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">📋</span>
+                    <div>
+                      <p className="font-medium text-foreground">{t('quickActions.assignments')}</p>
+                      <p className="text-sm text-muted-foreground">{t('quickActions.assignmentsDesc')}</p>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setActiveTab('sessions')}
+                  className="w-full p-3 text-left border border-border rounded-lg hover:bg-accent/50 transition-all duration-200 hover:shadow-md"
+                >
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">📅</span>
+                    <div>
+                      <p className="font-medium text-foreground">{t('quickActions.sessions')}</p>
+                      <p className="text-sm text-muted-foreground">{t('quickActions.sessionsDesc')}</p>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setActiveTab('billing')}
+                  className="w-full p-3 text-left border border-border rounded-lg hover:bg-accent/50 transition-all duration-200 hover:shadow-md"
+                >
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">💳</span>
+                    <div>
+                      <p className="font-medium text-foreground">{t('quickActions.billing')}</p>
+                      <p className="text-sm text-muted-foreground">{t('quickActions.billingDesc')}</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
             </div>
+
+            {/* Appointment List - Full width */}
+            <ErrorBoundary fallback={<SectionError title="Appointments Error" message="Could not load your appointments." />}>
+              <AppointmentList refreshTrigger={refreshTrigger} />
+            </ErrorBoundary>
           </div>
         )}
 
-        {/* Other components... */}
-        {activeTab === 'manage' && (
-          <div>
+        {/* Sessions Tab - Merged: Manage + Appointments */}
+        {activeTab === 'sessions' && (
+          <div className="space-y-6">
+            {/* Booking Form */}
+            <div className="bg-card rounded-lg shadow p-6 border border-border">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Book New Session</h3>
+              <ErrorBoundary fallback={<WidgetError title="Booking Error" message="Appointment form unavailable." />}>
+                <Suspense fallback={<AvailabilitySkeleton />}>
+                  <EnhancedAppointmentForm
+                    initialDate={selectedDate}
+                    onAppointmentCreated={handleAppointmentCreated}
+                  />
+                </Suspense>
+              </ErrorBoundary>
+            </div>
+
+            {/* Appointment Manager */}
             <ErrorBoundary fallback={<SectionError title="Management Error" message="Appointment manager unavailable." />}>
               <Suspense fallback={<AppointmentSkeleton />}>
                 <AppointmentManager userRole="student" userId={user?.id || ''} />
@@ -268,43 +286,37 @@ function StudentDashboard() {
           </div>
         )}
 
-        {activeTab === 'progress' && (
+        {/* Billing Tab - Merged: Hours + Payments */}
+        {activeTab === 'billing' && (
           <div>
-            <ErrorBoundary fallback={<SectionError title="Progress Error" message="Could not load progress data." />}>
-              <Suspense fallback={<DashboardSkeleton />}>
-                <StudentProgress studentId={user?.id || ''} />
-              </Suspense>
-            </ErrorBoundary>
-          </div>
-        )}
+            <Tabs defaultValue="hours" className="w-full">
+              <TabsList className="grid w-full max-w-md grid-cols-2">
+                <TabsTrigger value="hours">
+                  <Clock className="mr-2 h-4 w-4" />
+                  Lecture Hours
+                </TabsTrigger>
+                <TabsTrigger value="payments">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Payments
+                </TabsTrigger>
+              </TabsList>
 
-        {activeTab === 'hours' && (
-          <div>
-            <ErrorBoundary fallback={<SectionError title="Hours Error" message="Could not load lecture hours." />}>
-              <Suspense fallback={<DashboardSkeleton />}>
-                <LectureHoursTracker userRole="student" userId={user?.id || ''} />
-              </Suspense>
-            </ErrorBoundary>
-          </div>
-        )}
+              <TabsContent value="hours" className="mt-6">
+                <ErrorBoundary fallback={<SectionError title="Hours Error" message="Could not load lecture hours." />}>
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <LectureHoursTracker userRole="student" userId={user?.id || ''} />
+                  </Suspense>
+                </ErrorBoundary>
+              </TabsContent>
 
-        {activeTab === 'payments' && (
-          <div>
-            <ErrorBoundary fallback={<SectionError title="Payments Error" message="Could not load payment history." />}>
-              <Suspense fallback={<DashboardSkeleton />}>
-                <PaymentManager userRole="student" userId={user?.id || ''} />
-              </Suspense>
-            </ErrorBoundary>
-          </div>
-        )}
-
-        {activeTab === 'notifications' && (
-          <div>
-            <ErrorBoundary fallback={<SectionError title="Notifications Error" message="Could not load notifications." />}>
-              <Suspense fallback={<NotesSkeleton />}>
-                <NotificationManager userId={user?.id || ''} userRole="student" />
-              </Suspense>
-            </ErrorBoundary>
+              <TabsContent value="payments" className="mt-6">
+                <ErrorBoundary fallback={<SectionError title="Payments Error" message="Could not load payment history." />}>
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <PaymentManager userRole="student" userId={user?.id || ''} />
+                  </Suspense>
+                </ErrorBoundary>
+              </TabsContent>
+            </Tabs>
           </div>
         )}
 
