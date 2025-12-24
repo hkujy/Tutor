@@ -279,6 +279,10 @@ model Appointment {
   @@index([studentId, startTime])
   @@index([startTime])
   @@index([status])
+  @@index([tutorId, startTime, status], name: "tutor_appointments_idx")
+  @@index([studentId, startTime, status], name: "student_appointments_idx")
+  @@index([startTime, status], name: "reminder_jobs_idx")
+  @@index([createdAt], name: "recent_appointments_idx")
   @@map("appointments")
 }
 
@@ -298,6 +302,10 @@ model Assignment {
   files         AssignmentFile[]
   submissions   AssignmentSubmission[]
 
+  @@index([appointmentId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([dueDate, status], name: "due_assignments_idx")
   @@map("assignments")
 }
 
@@ -381,6 +389,10 @@ model Notification {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([userId, createdAt], name: "user_notifications_idx")
+  @@index([userId, readAt], name: "unread_notifications_idx")
+  @@index([scheduledFor, sentAt], name: "pending_notifications_idx")
   @@map("notifications")
 }
 
