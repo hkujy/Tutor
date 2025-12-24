@@ -87,6 +87,7 @@
       "yesterday": "昨天"
     },
     "tabs": {
+      "dashboard": "仪表板",
       "overview": "概览",
       "students": "学生",
       "availability": "空闲时间",
@@ -96,8 +97,16 @@
       "assignments": "作业",
       "hours": "授课时长",
       "payments": "付款",
+      "billing": "账单",
       "notifications": "通知",
       "settings": "设置"
+    },
+    "analytics": {
+      "title": "分析"
+    },
+    "quickActions": {
+      "students": "查看学生",
+      "studentsDesc": "管理您的学生列表"
     }
   },
   "StudentDashboard": {
@@ -119,14 +128,23 @@
       "messagesDesc": "与您的导师聊天"
     },
     "tabs": {
+      "dashboard": "仪表板",
       "overview": "概览",
       "manage": "管理",
+      "sessions": "课程",
       "assignments": "作业",
       "progress": "进度",
       "hours": "授课时长",
       "payments": "付款",
+      "billing": "账单",
       "notifications": "通知",
       "settings": "设置"
+    },
+    "quickActions": {
+      "sessions": "预约课程",
+      "sessionsDesc": "安排您的下一次辅导课程",
+      "billing": "查看账单",
+      "billingDesc": "检查您的付款状态"
     }
   },
   "AppointmentManagement": {
