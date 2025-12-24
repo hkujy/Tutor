@@ -96,16 +96,16 @@ function TutorDashboard() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+          <p className="mt-4 text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="bg-card shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
             <div className="flex items-center justify-between">
@@ -118,8 +118,8 @@ function TutorDashboard() {
                   className="rounded-lg shadow-sm"
                 />
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
-                  <p className="mt-1 text-gray-600">{t('subtitle')}</p>
+                  <h1 className="text-3xl font-bold text-foreground">{t('title')}</h1>
+                  <p className="mt-1 text-muted-foreground">{t('subtitle')}</p>
                 </div>
               </div>
               <ThemeToggle />
@@ -130,15 +130,15 @@ function TutorDashboard() {
 
       {/* Navigation Tabs */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="border-b border-gray-200">
+        <div className="border-b border-border">
           <nav className="-mb-px flex space-x-8 overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`whitespace-nowrap py-4 px-3 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
                   }`}
               >
                 <span className="mr-2">{tab.icon}</span>
@@ -156,14 +156,14 @@ function TutorDashboard() {
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map((stat, index) => (
-                <div key={index} className="bg-white rounded-lg shadow p-6">
+                <div key={index} className="bg-card rounded-lg shadow p-6 border border-border">
                   <div className="flex items-center">
                     <div className={`flex-shrink-0 p-3 rounded-md ${stat.color}`}>
                       <span className="text-white text-2xl">{stat.icon}</span>
                     </div>
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                      <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                      <p className="text-2xl font-bold text-foreground">{stat.value}</p>
                     </div>
                   </div>
                 </div>
@@ -171,17 +171,17 @@ function TutorDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('quickActions.title')}</h3>
+            <div className="bg-card rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-foreground mb-4">{t('quickActions.title')}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <button
                   onClick={() => setActiveTab('availability')}
-                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
+                  className="p-4 border-2 border-dashed border-border rounded-lg hover:border-primary hover:bg-primary/10 transition-colors"
                 >
                   <div className="text-center">
                     <span className="text-2xl mb-2 block">🗓️</span>
-                    <p className="font-medium text-gray-900">{t('quickActions.availability')}</p>
-                    <p className="text-sm text-gray-600">{t('quickActions.availabilityDesc')}</p>
+                    <p className="font-medium text-foreground">{t('quickActions.availability')}</p>
+                    <p className="text-sm text-muted-foreground">{t('quickActions.availabilityDesc')}</p>
                   </div>
                 </button>
                 <button
@@ -190,27 +190,27 @@ function TutorDashboard() {
                 >
                   <div className="text-center">
                     <span className="text-2xl mb-2 block">📅</span>
-                    <p className="font-medium text-gray-900">{t('quickActions.appointments')}</p>
-                    <p className="text-sm text-gray-600">{t('quickActions.appointmentsDesc')}</p>
+                    <p className="font-medium text-foreground">{t('quickActions.appointments')}</p>
+                    <p className="text-sm text-muted-foreground">{t('quickActions.appointmentsDesc')}</p>
                   </div>
                 </button>
                 <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors">
                   <div className="text-center">
                     <span className="text-2xl mb-2 block">📊</span>
-                    <p className="font-medium text-gray-900">{t('quickActions.analytics')}</p>
-                    <p className="text-sm text-gray-600">{t('quickActions.analyticsDesc')}</p>
+                    <p className="font-medium text-foreground">{t('quickActions.analytics')}</p>
+                    <p className="text-sm text-muted-foreground">{t('quickActions.analyticsDesc')}</p>
                   </div>
                 </button>
               </div>
             </div>
 
             {/* Recent Appointments */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('recentActivity.title')}</h3>
+            <div className="bg-card rounded-lg shadow p-6 border border-border">
+              <h3 className="text-lg font-semibold text-foreground mb-4">{t('recentActivity.title')}</h3>
               {loading ? (
                 <div className="space-y-4">
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="animate-pulse flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div key={i} className="animate-pulse flex items-center justify-between p-4 bg-muted rounded-lg">
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
                         <div className="ml-3">
@@ -225,35 +225,35 @@ function TutorDashboard() {
               ) : dashboardStats?.recentAppointments?.length > 0 ? (
                 <div className="space-y-4">
                   {dashboardStats.recentAppointments.slice(0, 5).map((appointment: any) => (
-                    <div key={appointment.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div key={appointment.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                           <span className="text-green-600 font-semibold">✓</span>
                         </div>
                         <div className="ml-3">
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-foreground">
                             {t('recentActivity.sessionCompleted', { name: `${appointment.student?.user?.firstName} ${appointment.student?.user?.lastName}` })}
                           </p>
-                          <p className="text-sm text-gray-500">{appointment.subject} - {new Date(appointment.startTime).toLocaleDateString()}</p>
+                          <p className="text-sm text-muted-foreground">{appointment.subject} - {new Date(appointment.startTime).toLocaleDateString()}</p>
                         </div>
                       </div>
-                      <span className="text-sm text-gray-400">{appointment.status}</span>
+                      <span className="text-sm text-muted-foreground">{appointment.status}</span>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                         <span className="text-green-600 font-semibold">✓</span>
                       </div>
                       <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">{t('recentActivity.sessionCompleted', { name: 'John Doe' })}</p>
-                        <p className="text-sm text-gray-500">Mathematics - 2 hours ago</p>
+                        <p className="text-sm font-medium text-foreground">{t('recentActivity.sessionCompleted', { name: 'John Doe' })}</p>
+                        <p className="text-sm text-muted-foreground">Mathematics - 2 hours ago</p>
                       </div>
                     </div>
-                    <span className="text-sm text-gray-400">{t('recentActivity.today')}</span>
+                    <span className="text-sm text-muted-foreground">{t('recentActivity.today')}</span>
                   </div>
                 </div>
               )}

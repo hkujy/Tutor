@@ -101,37 +101,37 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8">
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-card rounded-xl shadow-lg p-8 border border-border">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               Tutoring Calendar
             </h1>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               {t('loginTitle')}
             </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm">{error}</p>
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-destructive text-sm">{error}</p>
             </div>
           )}
 
           <div className="space-y-6">
             {/* Quick Demo Login Buttons */}
             <div className="space-y-3">
-              <p className="text-sm text-gray-600 text-center">Quick Demo Login:</p>
+              <p className="text-sm text-muted-foreground text-center">Quick Demo Login:</p>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleQuickLogin('TUTOR')}
                   disabled={loading}
-                  className="flex flex-col items-center p-4 border-2 border-blue-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex flex-col items-center p-4 border-2 border-primary/30 rounded-lg hover:border-primary hover:bg-primary/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                  <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
                     <svg
-                      className="w-6 h-6 text-blue-600"
+                      className="w-6 h-6 text-primary"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -140,18 +140,18 @@ export default function LoginPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
                   </div>
-                  <span className="font-medium text-gray-900">Tutor</span>
-                  <span className="text-xs text-gray-500">Sarah Johnson</span>
+                  <span className="font-medium text-foreground">Tutor</span>
+                  <span className="text-xs text-muted-foreground">Sarah Johnson</span>
                 </button>
 
                 <button
                   onClick={() => handleQuickLogin('STUDENT')}
                   disabled={loading}
-                  className="flex flex-col items-center p-4 border-2 border-green-200 rounded-lg hover:border-green-400 hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex flex-col items-center p-4 border-2 border-accent/30 rounded-lg hover:border-accent hover:bg-accent/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-2">
+                  <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center mb-2">
                     <svg
-                      className="w-6 h-6 text-green-600"
+                      className="w-6 h-6 text-accent-foreground"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -160,25 +160,25 @@ export default function LoginPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <span className="font-medium text-gray-900">Student</span>
-                  <span className="text-xs text-gray-500">Alex Smith</span>
+                  <span className="font-medium text-foreground">Student</span>
+                  <span className="text-xs text-muted-foreground">Alex Smith</span>
                 </button>
               </div>
             </div>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">{t('orManual')}</span>
+                <span className="px-2 bg-card text-muted-foreground">{t('orManual')}</span>
               </div>
             </div>
 
             {/* Manual Login Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
                   {t('emailLabel')}
                 </label>
                 <input
@@ -186,13 +186,13 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Enter your email"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
                   {t('passwordLabel')}
                 </label>
                 <input
@@ -200,7 +200,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Enter your password"
                 />
               </div>
@@ -216,9 +216,9 @@ export default function LoginPage() {
               </LoadingButton>
 
               <div className="text-center mt-4">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   {t('registerQuestion')}{' '}
-                  <Link href="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
+                  <Link href="/auth/signup" className="font-medium text-primary hover:text-primary/80">
                     {t('registerAction')}
                   </Link>
                 </p>
@@ -227,7 +227,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="text-center text-sm text-gray-600">
+        <div className="text-center text-sm text-muted-foreground">
           <p>Demo Credentials:</p>
           <p>Tutor: tutor@example.com / tutor123</p>
           <p>Student: student@example.com / student123</p>

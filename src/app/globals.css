@@ -38,7 +38,7 @@
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 215 20.2% 80%;
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
@@ -60,7 +60,7 @@
     --secondary: 195 30% 25%;
     --secondary-foreground: 180 20% 96%;
     --muted: 195 30% 25%;
-    --muted-foreground: 185 15% 70%;
+    --muted-foreground: 185 15% 85%;
     --accent: 175 70% 40%;
     --accent-foreground: 180 20% 96%;
     --destructive: 0 84% 50%;
@@ -87,11 +87,13 @@
 }
 
 @layer utilities {
+
   /* Hide scrollbar but keep functionality */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -101,6 +103,7 @@
     .xs\:block {
       display: block;
     }
+
     .xs\:inline {
       display: inline;
     }
