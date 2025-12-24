@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, subMonths, startOfMonth, endOfMonth } from 'date-fns'
 import { useTranslations } from 'next-intl'
-import { Skeleton } from '../ui/Skeleton'
+import { Skeleton } from '../ui/skeleton'
 import ErrorBoundary from '../ErrorBoundary'
 
 // Type guards for data validation
@@ -17,22 +17,22 @@ const isValidString = (value: any): value is string => {
 
 const sanitizeApiData = (data: any) => {
   if (!data || typeof data !== 'object') return null
-  
+
   // Sanitize metrics array
   if (Array.isArray(data.metrics)) {
-    data.metrics = data.metrics.filter((metric: any) => 
-      metric && 
-      isValidString(metric.label) && 
+    data.metrics = data.metrics.filter((metric: any) =>
+      metric &&
+      isValidString(metric.label) &&
       isValidString(metric.value) &&
       ['up', 'down', 'stable'].includes(metric.trend)
     )
   } else {
     data.metrics = []
   }
-  
+
   // Sanitize weekly data
   if (Array.isArray(data.weeklyActivity)) {
-    data.weeklyActivity = data.weeklyActivity.filter((day: any) => 
+    data.weeklyActivity = data.weeklyActivity.filter((day: any) =>
       day &&
       isValidString(day.day) &&
       isValidNumber(day.sessions) &&
@@ -45,7 +45,7 @@ const sanitizeApiData = (data: any) => {
   } else {
     data.weeklyActivity = []
   }
-  
+
   // Sanitize other arrays with similar validation
   const arrayFields = ['monthlyEarnings', 'studentProgress', 'timeDistribution', 'subjectPerformance']
   arrayFields.forEach(field => {
@@ -53,7 +53,7 @@ const sanitizeApiData = (data: any) => {
       data[field] = []
     }
   })
-  
+
   return data
 }
 
@@ -123,7 +123,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
   const [selectedPeriod, setSelectedPeriod] = useState('7d')
   const [analyticsData, setAnalyticsData] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'subjects' | 'schedule'>('overview')
-  
+
   // Performance optimization: abort controller for cleanup
   const abortControllerRef = useRef<AbortController | null>(null)
   const maxRetries = 3
@@ -136,35 +136,35 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       setLoading(false)
       return
     }
-    
+
     // Cancel previous request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
     }
-    
+
     // Create new abort controller
     abortControllerRef.current = new AbortController()
     const { signal } = abortControllerRef.current
-    
+
     if (!isRetry) {
       setLoading(true)
       setError(null)
     }
-    
+
     try {
       // Input validation
       const validPeriods = ['7d', '30d', '90d', '365d']
       const safePeriod = validPeriods.includes(selectedPeriod) ? selectedPeriod : '7d'
-      
+
       const url = `/api/analytics?tutorId=${encodeURIComponent(tutorId)}&period=${safePeriod}`
-      
+
       const response = await fetch(url, {
         signal,
         headers: {
           'Content-Type': 'application/json',
         }
       })
-      
+
       if (!response.ok) {
         if (response.status === 404) {
           throw new Error(t('errors.dataNotFound'))
@@ -176,14 +176,14 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
           throw new Error(t('errors.requestFailed', { status: response.status }))
         }
       }
-      
+
       const rawData = await response.json()
       const data = sanitizeApiData(rawData)
-      
+
       if (!data) {
         throw new Error(t('errors.invalidDataReceived'))
       }
-      
+
       // Update state with validated data
       setAnalyticsData(data)
       setMetrics(data.metrics || [])
@@ -194,14 +194,14 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       setSubjectPerformance(data.subjectPerformance || [])
       setError(null)
       setRetryCount(0)
-      
+
     } catch (err) {
       // Don't update state if request was aborted
       if (signal.aborted) return
-      
+
       const errorMessage = err instanceof Error ? err.message : t('errors.fetchFailedFallback')
       console.error('Analytics fetch error:', err)
-      
+
       // Retry logic with exponential backoff
       if (retryCount < maxRetries && !isRetry) {
         setRetryCount(prev => prev + 1)
@@ -210,7 +210,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
         }, retryDelay * Math.pow(2, retryCount))
         return
       }
-      
+
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -221,7 +221,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
     setIsHydrated(true)
     fetchAnalytics()
   }, [tutorId, selectedPeriod, fetchAnalytics])
-  
+
   // Cleanup effect
   useEffect(() => {
     return () => {
@@ -265,34 +265,34 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
 
   // Memoized calculations with NaN protection
   const chartData = useMemo(() => {
-    const validWeeklyData = weeklyData.filter(d => 
-      isValidNumber(d.sessions) && 
-      isValidNumber(d.hours) && 
+    const validWeeklyData = weeklyData.filter(d =>
+      isValidNumber(d.sessions) &&
+      isValidNumber(d.hours) &&
       isValidNumber(d.earnings)
     )
-    
+
     if (validWeeklyData.length === 0) {
       return { maxSessions: 1, maxHours: 1, maxEarnings: 1 }
     }
-    
+
     const sessions = validWeeklyData.map(d => d.sessions)
     const hours = validWeeklyData.map(d => d.hours)
     const earnings = validWeeklyData.map(d => d.earnings)
-    
+
     return {
       maxSessions: Math.max(...sessions, 1),
       maxHours: Math.max(...hours, 1),
       maxEarnings: Math.max(...earnings, 1)
     }
   }, [weeklyData])
-  
+
   // Safe currency formatter with error handling
   const formatCurrency = useCallback((amount: any): string => {
     if (!isValidNumber(amount)) return '$0'
-    
+
     try {
-      return new Intl.NumberFormat('en-US', { 
-        style: 'currency', 
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
@@ -302,7 +302,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       return `$${Math.round(Math.max(0, amount))}`
     }
   }, [])
-  
+
   // Safe percentage calculator
   const calculatePercentage = useCallback((value: number, max: number): number => {
     if (!isValidNumber(value) || !isValidNumber(max) || max === 0) return 0
@@ -392,7 +392,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       <div className="border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-semibold text-gray-900">{t('dashboardTitle')}</h3>
-          <select 
+          <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value as any)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -403,7 +403,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
             <option value="365d">{t('period.lastYear')}</option>
           </select>
         </div>
-        
+
         {/* Tab Navigation */}
         <div className="flex space-x-8">
           {[
@@ -415,11 +415,10 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center space-x-2 pb-2 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === tab.id
+              className={`flex items-center space-x-2 pb-2 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                   ? 'border-indigo-500 text-indigo-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+                }`}
             >
               <span>{tab.icon}</span>
               <span>{tab.label}</span>
@@ -457,12 +456,12 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                 {weeklyData.map((day) => (
                   <div key={day.day} className="text-center">
                     <div className="text-sm font-medium text-gray-600 mb-2">{day.day}</div>
-                    
+
                     {/* Sessions Bar */}
                     <div className="mb-3">
                       <div className="text-xs text-gray-500 mb-1">{t('weeklyActivity.sessions')}</div>
                       <div className="h-20 bg-gray-100 rounded relative">
-                        <div 
+                        <div
                           className="absolute bottom-0 w-full bg-blue-500 rounded"
                           style={{ height: `${calculatePercentage(day.sessions, chartData.maxSessions)}%` }}
                         />
@@ -476,7 +475,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                     <div className="mb-3">
                       <div className="text-xs text-gray-500 mb-1">{t('weeklyActivity.hours')}</div>
                       <div className="h-16 bg-gray-100 rounded relative">
-                        <div 
+                        <div
                           className="absolute bottom-0 w-full bg-green-500 rounded"
                           style={{ height: `${calculatePercentage(day.hours, chartData.maxHours)}%` }}
                         />
@@ -490,7 +489,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                     <div>
                       <div className="text-xs text-gray-500 mb-1">{t('weeklyActivity.earnings')}</div>
                       <div className="h-16 bg-gray-100 rounded relative">
-                        <div 
+                        <div
                           className="absolute bottom-0 w-full bg-purple-500 rounded"
                           style={{ height: `${calculatePercentage(day.earnings, chartData.maxEarnings)}%` }}
                         />
@@ -618,7 +617,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                     <div key={slot.timeSlot} className="flex items-center space-x-3">
                       <div className="w-20 text-sm font-medium text-gray-700">{slot.timeSlot}</div>
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className="bg-indigo-600 h-2 rounded-full"
                           style={{ width: `${slot.percentage}%` }}
                         />
@@ -637,7 +636,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="text-sm font-medium text-blue-900">{t('scheduleAnalysis.peakHours')}</div>
                     <div className="text-sm text-blue-700">
-                      {timeDistribution.length > 0 && isValidString(timeDistribution[0]?.timeSlot) 
+                      {timeDistribution.length > 0 && isValidString(timeDistribution[0]?.timeSlot)
                         ? t('scheduleAnalysis.peakHoursMessage', { time: timeDistribution[0].timeSlot })
                         : t('scheduleAnalysis.noTimeData')
                       }

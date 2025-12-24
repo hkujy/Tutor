@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { format, isAfter, isBefore, addDays } from 'date-fns'
 import { useTranslations } from 'next-intl'
-import { SkeletonList } from '../ui/Skeleton'
+import { SkeletonList } from '../ui/skeleton'
 import LoadingButton from '../ui/LoadingButton'
 import { PAYMENT_STATUS_MAP } from '../../constants'
 
@@ -62,7 +62,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(10) 
+  const [itemsPerPage, setItemsPerPage] = useState(10)
   const [totalPayments, setTotalPayments] = useState(0)
   const totalPages = Math.ceil(totalPayments / itemsPerPage)
 
@@ -82,14 +82,14 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
 
       const response = await fetch(`/api/lecture-hours?${queryParams.toString()}`)
       if (!response.ok) throw new Error('Failed to fetch payments')
-      
+
       const data = await response.json()
-      
+
       // Flatten payments from all lecture hours
       const allPayments: PaymentReminder[] = []
       if (data.lectureHours && Array.isArray(data.lectureHours)) {
         setLectureHours(data.lectureHours) // Store lecture hours for form options
-        
+
         data.lectureHours.forEach((lectureHour: any) => {
           if (lectureHour.payments && Array.isArray(lectureHour.payments)) {
             lectureHour.payments.forEach((payment: any) => {
@@ -109,13 +109,13 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                   student: lectureHour.student,
                   tutor: lectureHour.tutor
                 },
-                notifications: [] 
+                notifications: []
               })
             })
           }
         })
       }
-      
+
       setPayments(allPayments)
       setTotalPayments(data.total || 0)
     } catch (error) {
@@ -185,8 +185,8 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
   const getFilteredPayments = () => {
     // API is now handling filtering, so we just return the fetched payments
     if (userRole === 'student') {
-        // Students only see pending and overdue payments if API doesn't filter by default
-        return payments.filter(payment => payment.status === 'PENDING' || payment.status === 'OVERDUE');
+      // Students only see pending and overdue payments if API doesn't filter by default
+      return payments.filter(payment => payment.status === 'PENDING' || payment.status === 'OVERDUE');
     }
     return payments;
   }
@@ -209,7 +209,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
         { key: 'overdue', label: t('filters.overdue'), count: payments.filter(p => p.status === 'OVERDUE').length }
       ]
     }
-    
+
     return [
       { key: 'all', label: t('filters.all'), count: totalPayments }, // Use totalPayments for All
       { key: 'pending', label: t('filters.pending'), count: payments.filter(p => p.status === 'PENDING').length },
@@ -222,7 +222,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
     const pendingAmount = payments
       .filter(p => p.status === 'PENDING')
       .reduce((sum, p) => sum + p.amount, 0)
-    
+
     const overdueAmount = payments
       .filter(p => p.status === 'OVERDUE')
       .reduce((sum, p) => sum + p.amount, 0)
@@ -279,7 +279,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
   }
 
   // Group payments by student for tutor view
-  const groupedPayments = userRole === 'tutor' ? 
+  const groupedPayments = userRole === 'tutor' ?
     getFilteredPayments().reduce((groups, payment) => {
       const studentName = `${payment.lectureHours.student.user.firstName} ${payment.lectureHours.student.user.lastName}`
       if (!groups[studentName]) {
@@ -288,7 +288,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
       groups[studentName].push(payment)
       return groups
     }, {} as Record<string, PaymentReminder[]>)
-  : null
+    : null
 
   const displayedPayments = getFilteredPayments()
 
@@ -336,11 +336,10 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
           <button
             key={key}
             onClick={() => { setFilter(key as any); setCurrentPage(1); }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${ 
-              filter === key
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === key
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+              }`}
           >
             {label} ({count})
           </button>
@@ -466,15 +465,15 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                         {payment.lectureHours.subject}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {userRole === 'student' 
+                        {userRole === 'student'
                           ? t('paymentDetails.tutorName', { firstName: payment.lectureHours.tutor.user.firstName, lastName: payment.lectureHours.tutor.user.lastName })
-                          : t('paymentDetails.studentName', { firstName: payment.lectureHours.student.user.firstName, lastName: payment.lectureHours.student.user.lastName }) 
+                          : t('paymentDetails.studentName', { firstName: payment.lectureHours.student.user.firstName, lastName: payment.lectureHours.student.user.lastName })
                         }
                       </p>
                       <p className="text-sm text-gray-500">
                         {t('paymentDetails.hoursDue', { hours: payment.hoursIncluded, dueDate: format(new Date(payment.dueDate), 'MMM d, yyyy') })}
                       </p>
-                      
+
                       {/* Payment timing information */}
                       <div className="mt-2 space-y-1">
                         <p className="text-xs text-gray-400">
@@ -495,7 +494,7 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Notifications */}
                   {payment.notifications.length > 0 && (
                     <div className="mt-3 space-y-1">
@@ -515,11 +514,11 @@ export default function PaymentManager({ userRole, userId }: PaymentManagerProps
                     </div>
                   )}
                 </div>
-                
+
                 <div className="flex items-center space-x-4">
-                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
-                                              {tEnums(PAYMENT_STATUS_MAP[payment.status])}
-                                            </span>                  <p className="text-lg font-semibold text-gray-900 mt-1">
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
+                    {tEnums(PAYMENT_STATUS_MAP[payment.status])}
+                  </span>                  <p className="text-lg font-semibold text-gray-900 mt-1">
                     ${payment.amount.toFixed(2)}
                   </p>
                   {payment.status !== 'PAID' && userRole === 'tutor' && (
@@ -571,7 +570,7 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.lectureHoursId || !formData.amount || !formData.hoursIncluded || !formData.paymentMethod) {
       alert(t('validation.requiredFields'))
       return
@@ -700,7 +699,7 @@ function AddPaymentForm({ lectureHours, onSubmit, onCancel }: AddPaymentFormProp
       {/* Notes */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t('notes.label')}
+          {t('notes.label')}
         </label>
         <textarea
           value={formData.notes}

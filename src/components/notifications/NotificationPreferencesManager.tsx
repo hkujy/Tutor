@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { notificationService, type NotificationPreferences } from '../../lib/services/notification.service'
-import { Skeleton } from '../ui/Skeleton'
+import { Skeleton } from '../ui/skeleton'
 import LoadingButton from '../ui/LoadingButton'
 import { useToast } from '../Toast'
 

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { useTranslations } from 'next-intl'
 import { notificationService, type Notification, type NotificationsResponse } from '../../lib/services/notification.service'
-import { Skeleton } from '../ui/Skeleton'
+import { Skeleton } from '../ui/skeleton'
 import LoadingButton from '../ui/LoadingButton'
 
 interface NotificationManagerProps {
@@ -25,7 +25,7 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
 
   useEffect(() => {
     let isMounted = true
-    
+
     const fetchNotifications = async () => {
       try {
         setLoading(true)
@@ -41,7 +41,7 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
         }
 
         const response: NotificationsResponse = await notificationService.getNotifications(params)
-        
+
         if (isMounted) {
           setNotifications(response.notifications)
           setUnreadCount(response.unreadCount)
@@ -60,9 +60,9 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
         }
       }
     }
-    
+
     fetchNotifications()
-    
+
     return () => {
       isMounted = false
     }
@@ -71,9 +71,9 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
   const handleMarkAsRead = async (notificationId: string) => {
     try {
       await notificationService.markAsRead(notificationId)
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId 
+      setNotifications(prev =>
+        prev.map(n =>
+          n.id === notificationId
             ? { ...n, readAt: new Date().toISOString() }
             : n
         )
@@ -88,40 +88,40 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
     if (selectedNotifications.size === 0) {
       return // No notifications selected
     }
-    
+
     try {
       setBulkActionLoading(true)
-      
+
       const notificationIds = Array.from(selectedNotifications)
-      
+
       // Validate all IDs are valid
-      const validIds = notificationIds.filter(id => 
+      const validIds = notificationIds.filter(id =>
         typeof id === 'string' && id.length > 0
       )
-      
+
       if (validIds.length === 0) {
         throw new Error('No valid notification IDs selected')
       }
-      
+
       await notificationService.bulkMarkAsRead(validIds)
-      
+
       // Update local state optimistically
-      setNotifications(prev => 
-        prev.map(notification => 
-          validIds.includes(notification.id) 
+      setNotifications(prev =>
+        prev.map(notification =>
+          validIds.includes(notification.id)
             ? { ...notification, readAt: new Date().toISOString() }
             : notification
         )
       )
-      
+
       // Update unread count more accurately
-      const markedCount = notifications.filter(n => 
+      const markedCount = notifications.filter(n =>
         validIds.includes(n.id) && !n.readAt
       ).length
-      
+
       setUnreadCount(prev => Math.max(0, prev - markedCount))
       setSelectedNotifications(new Set())
-      
+
     } catch (error) {
       console.error('Failed to mark notifications as read:', error)
       // Show error feedback to user
@@ -134,8 +134,8 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
     try {
       setBulkActionLoading(true)
       await notificationService.bulkMarkAsRead(undefined, true)
-      
-      setNotifications(prev => 
+
+      setNotifications(prev =>
         prev.map(n => ({ ...n, readAt: new Date().toISOString() }))
       )
       setUnreadCount(0)
@@ -225,7 +225,7 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
               </span>
             )}
           </div>
-          
+
           {/* Bulk Actions */}
           <div className="flex items-center space-x-2">
             {selectedNotifications.size > 0 && (
@@ -249,7 +249,7 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
                 </button>
               </>
             )}
-            
+
             {unreadCount > 0 && (
               <LoadingButton
                 onClick={handleMarkAllAsRead}
@@ -260,7 +260,7 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
                 {t('actions.markAllRead')}
               </LoadingButton>
             )}
-            
+
             {selectedNotifications.size === 0 && unreadCount > 0 && (
               <button
                 onClick={handleSelectAll}
@@ -282,20 +282,18 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
                 setCurrentPage(1)
                 setSelectedNotifications(new Set())
               }}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${
-                activeFilter === option.key
+              className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${activeFilter === option.key
                   ? 'bg-indigo-100 text-indigo-700'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-              }`}
+                }`}
             >
               {option.icon && <span>{option.icon}</span>}
               <span>{option.label}</span>
               {option.count !== undefined && (
-                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs ${
-                  activeFilter === option.key
+                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs ${activeFilter === option.key
                     ? 'bg-indigo-200 text-indigo-800'
                     : 'bg-gray-200 text-gray-600'
-                }`}>
+                  }`}>
                   {option.count}
                 </span>
               )}
@@ -311,7 +309,7 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
             <div className="text-4xl mb-4">🔔</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">{t('empty.title')}</h3>
             <p className="text-gray-500">
-              {activeFilter === 'unread' 
+              {activeFilter === 'unread'
                 ? t('empty.unread')
                 : t('empty.none')
               }
@@ -399,11 +397,11 @@ function NotificationItem({ notification, isSelected, onSelect, onMarkAsRead }: 
               <p className={`mt-1 text-sm ${isUnread ? 'text-gray-700' : 'text-gray-500'}`}>
                 {notification.message}
               </p>
-              
+
               {/* Notification metadata */}
               <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
                 <span>{timeAgo}</span>
-                
+
                 {notification.channels && notification.channels.length > 0 && (
                   <span className="flex items-center space-x-1">
                     <span>{t('via')}</span>
@@ -418,7 +416,7 @@ function NotificationItem({ notification, isSelected, onSelect, onMarkAsRead }: 
                     ))}
                   </span>
                 )}
-                
+
                 {notification.scheduledFor && (
                   <span>{t('scheduledFor', { date: format(new Date(notification.scheduledFor), 'MMM d, h:mm a') })}</span>
                 )}

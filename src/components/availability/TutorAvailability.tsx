@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { SkeletonTable, Skeleton } from '../ui/Skeleton'
+import { SkeletonTable, Skeleton } from '../ui/skeleton'
 import LoadingButton from '../ui/LoadingButton'
 import { format, getDay, isSameDay } from 'date-fns'
 import { useTranslations } from 'next-intl'

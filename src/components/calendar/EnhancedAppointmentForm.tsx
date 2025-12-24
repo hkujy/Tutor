@@ -1,15 +1,15 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { 
-  format, 
-  addDays, 
-  startOfWeek, 
+import {
+  format,
+  addDays,
+  startOfWeek,
   endOfWeek,
-  addWeeks, 
-  isAfter, 
-  isBefore, 
-  isEqual, 
+  addWeeks,
+  isAfter,
+  isBefore,
+  isEqual,
   parseISO,
   startOfMonth,
   endOfMonth,
@@ -21,7 +21,7 @@ import {
   isSameDay
 } from 'date-fns'
 import { useAuth } from '../../contexts/AuthContext'
-import { SkeletonList, Skeleton } from '../ui/Skeleton'
+import { SkeletonList, Skeleton } from '../ui/skeleton'
 import LoadingButton from '../ui/LoadingButton'
 
 interface TimeSlot {
@@ -57,7 +57,7 @@ interface EnhancedAppointmentFormProps {
 export default function EnhancedAppointmentForm({ onAppointmentCreated, initialDate }: EnhancedAppointmentFormProps) {
   const { user } = useAuth()
   const [step, setStep] = useState(1) // 1: Select Tutor & Subject, 2: Select Date & Time, 3: Confirm
-  
+
   // Form state
   const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null)
   const [selectedSubject, setSelectedSubject] = useState('')
@@ -65,22 +65,22 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
   const [selectedTime, setSelectedTime] = useState('')
   const [duration, setDuration] = useState(60)
   const [notes, setNotes] = useState('')
-  
+
   // Calendar navigation state
   const [currentMonth, setCurrentMonth] = useState<Date | null>(null)
   const [isHydrated, setIsHydrated] = useState(false)
-  
+
   // Initialize date after hydration to avoid SSR mismatch
   useEffect(() => {
     setCurrentMonth(new Date())
     setIsHydrated(true)
   }, [])
-  
+
   // Data state
   const [tutors, setTutors] = useState<Tutor[]>([])
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
   const [existingAppointments, setExistingAppointments] = useState<any[]>([])
-  
+
   // UI state
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -131,14 +131,14 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
 
       const slots: TimeSlot[] = []
       const dayOfWeek = selectedDate.getDay()
-      
+
       // Generate time slots from 8 AM to 6 PM
       for (let hour = 8; hour < 18; hour++) {
         for (let minute = 0; minute < 60; minute += 30) {
           const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
           const slotDateTime = new Date(selectedDate)
           slotDateTime.setHours(hour, minute, 0, 0)
-          
+
           // Check if slot is in the past
           if (slotDateTime < new Date()) {
             continue
@@ -149,12 +149,12 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
             const aptStart = new Date(apt.startTime)
             const aptEnd = new Date(apt.endTime)
             const slotEnd = new Date(slotDateTime.getTime() + duration * 60 * 1000)
-            
+
             return apt.tutorId === selectedTutor.id &&
-                   apt.status !== 'CANCELLED' &&
-                   ((slotDateTime >= aptStart && slotDateTime < aptEnd) ||
-                    (slotEnd > aptStart && slotEnd <= aptEnd) ||
-                    (slotDateTime <= aptStart && slotEnd >= aptEnd))
+              apt.status !== 'CANCELLED' &&
+              ((slotDateTime >= aptStart && slotDateTime < aptEnd) ||
+                (slotEnd > aptStart && slotEnd <= aptEnd) ||
+                (slotDateTime <= aptStart && slotEnd >= aptEnd))
           })
 
           slots.push({
@@ -289,11 +289,11 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
   const generateCalendarDates = (month: Date) => {
     const monthStart = startOfMonth(month)
     const monthEnd = endOfMonth(month)
-    
+
     // Include dates from the beginning of the first week to the end of the last week
     const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 }) // Sunday
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 })
-    
+
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd })
   }
 
@@ -318,7 +318,7 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Book an Appointment - Step 1</h3>
-        
+
         {!selectedTutor ? (
           <div>
             <h4 className="font-medium text-gray-700 mb-3">Select a Tutor:</h4>
@@ -354,7 +354,7 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
               <h4 className="font-medium text-indigo-900">Selected Tutor:</h4>
               <p className="text-indigo-700">{selectedTutor.user.firstName} {selectedTutor.user.lastName}</p>
             </div>
-            
+
             <h4 className="font-medium text-gray-700 mb-3">Select a Subject:</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {selectedTutor.subjects.map((subject) => (
@@ -367,7 +367,7 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
                 </button>
               ))}
             </div>
-            
+
             <button
               onClick={() => setSelectedTutor(null)}
               className="mt-4 text-sm text-indigo-600 hover:text-indigo-500"
@@ -385,17 +385,17 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Book an Appointment - Step 2</h3>
-        
+
         <div className="mb-4 p-3 bg-indigo-50 rounded-lg">
           <p className="text-indigo-700">
-            <strong>Tutor:</strong> {selectedTutor?.user.firstName} {selectedTutor?.user.lastName} | 
+            <strong>Tutor:</strong> {selectedTutor?.user.firstName} {selectedTutor?.user.lastName} |
             <strong> Subject:</strong> {selectedSubject}
           </p>
         </div>
 
         <div className="mb-6">
           <h4 className="font-medium text-gray-700 mb-3">Select Date:</h4>
-          
+
           {/* Calendar Header */}
           <div className="flex items-center justify-between mb-4">
             <button
@@ -406,11 +406,11 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            
+
             <h5 className="text-lg font-medium text-gray-900">
               {currentMonth ? format(currentMonth, 'MMMM yyyy') : 'Loading...'}
             </h5>
-            
+
             <button
               onClick={goToNextMonth}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -438,23 +438,22 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
               const isSelected = selectedDate && isSameDay(date, selectedDate)
               // Avoid hydration mismatch by only calculating isPast after hydration
               const isPast = isHydrated && (date < new Date() && !isToday_)
-              
+
               return (
                 <button
                   key={date.toISOString()}
                   onClick={() => !isPast && handleDateSelect(date)}
                   disabled={isPast}
-                  className={`p-3 text-center rounded-lg border transition-colors min-h-[48px] ${
-                    isPast
+                  className={`p-3 text-center rounded-lg border transition-colors min-h-[48px] ${isPast
                       ? 'border-gray-100 text-gray-300 cursor-not-allowed'
                       : isSelected
-                      ? 'border-indigo-500 bg-indigo-100 text-indigo-700'
-                      : isToday_
-                      ? 'border-indigo-300 bg-indigo-50 text-indigo-600 font-medium'
-                      : isCurrentMonth
-                      ? 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-900'
-                      : 'border-gray-100 text-gray-400 hover:border-gray-200'
-                  }`}
+                        ? 'border-indigo-500 bg-indigo-100 text-indigo-700'
+                        : isToday_
+                          ? 'border-indigo-300 bg-indigo-50 text-indigo-600 font-medium'
+                          : isCurrentMonth
+                            ? 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-900'
+                            : 'border-gray-100 text-gray-400 hover:border-gray-200'
+                    }`}
                 >
                   <div className="text-sm">{format(date, 'd')}</div>
                 </button>
@@ -472,13 +471,12 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
                   key={slot.time}
                   onClick={() => slot.available && handleTimeSelect(slot.time)}
                   disabled={!slot.available}
-                  className={`p-2 text-sm rounded border transition-colors ${
-                    slot.available
+                  className={`p-2 text-sm rounded border transition-colors ${slot.available
                       ? selectedTime === slot.time
                         ? 'border-indigo-500 bg-indigo-100 text-indigo-700'
                         : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50'
                       : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                  }`}
+                    }`}
                   title={slot.conflictReason}
                 >
                   {slot.time}
@@ -526,7 +524,7 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Book an Appointment - Confirm</h3>
-      
+
       <div className="bg-gray-50 rounded-lg p-4 mb-6">
         <h4 className="font-medium text-gray-900 mb-3">Appointment Details:</h4>
         <div className="space-y-2 text-sm">
@@ -551,9 +549,8 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
       </div>
 
       {message && (
-        <div className={`mb-4 p-3 rounded ${
-          messageType === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-        }`}>
+        <div className={`mb-4 p-3 rounded ${messageType === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+          }`}>
           {message}
         </div>
       )}

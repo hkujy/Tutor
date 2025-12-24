@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { format, isAfter, isBefore, addDays } from 'date-fns'
 import { useTranslations } from 'next-intl'
-import { SkeletonList, Skeleton } from '../ui/Skeleton'
+import { SkeletonList, Skeleton } from '../ui/skeleton'
 import LoadingButton from '../ui/LoadingButton'
 import { ASSIGNMENT_STATUS_MAP, DIFFICULTY_LEVEL_MAP } from '../../constants'
 
@@ -152,7 +152,7 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
           {userRole === 'tutor' ? t('tutorTitle') : t('studentTitle')}
         </h3>
         <div className="flex items-center gap-3">
-          <select 
+          <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as any)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -195,8 +195,8 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
         </div>
         <div className="p-4 bg-purple-50 rounded-lg">
           <div className="text-2xl font-bold text-purple-600">
-            {assignments.filter(a => a.grade).reduce((acc, a) => acc + (a.grade || 0), 0) / 
-             assignments.filter(a => a.grade).length || 0}%
+            {assignments.filter(a => a.grade).reduce((acc, a) => acc + (a.grade || 0), 0) /
+              assignments.filter(a => a.grade).length || 0}%
           </div>
           <div className="text-sm text-purple-700">{t('stats.avgGrade')}</div>
         </div>
@@ -217,9 +217,9 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
         ) : (
           filteredAssignments.map((assignment) => {
             const daysUntilDue = getDaysUntilDue(assignment.dueDate)
-            
+
             return (
-              <div 
+              <div
                 key={assignment.id}
                 className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => setSelectedAssignment(assignment)}
@@ -235,9 +235,9 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                         {tEnums(DIFFICULTY_LEVEL_MAP[assignment.difficulty.toUpperCase()])}
                       </span>
                     </div>
-                    
+
                     <p className="text-gray-600 text-sm mb-3">{assignment.description}</p>
-                    
+
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <span className="flex items-center gap-1">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,7 +245,7 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                         </svg>
                         {assignment.subject}
                       </span>
-                      
+
                       <span className="flex items-center gap-1">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -254,9 +254,8 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                       </span>
 
                       {assignment.status !== 'overdue' && daysUntilDue >= 0 && (
-                        <span className={`flex items-center gap-1 ${
-                          daysUntilDue <= 1 ? 'text-red-600' : daysUntilDue <= 3 ? 'text-yellow-600' : 'text-green-600'
-                        }`}>
+                        <span className={`flex items-center gap-1 ${daysUntilDue <= 1 ? 'text-red-600' : daysUntilDue <= 3 ? 'text-yellow-600' : 'text-green-600'
+                          }`}>
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
@@ -265,7 +264,7 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     {assignment.grade && (
                       <div className="text-center">
@@ -273,7 +272,7 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                         <div className="text-xs text-gray-500">{t('labels.grade')}</div>
                       </div>
                     )}
-                    
+
                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
@@ -301,10 +300,10 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
                   </svg>
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <p className="text-gray-600">{selectedAssignment.description}</p>
-                
+
                 {selectedAssignment.attachments && (
                   <div>
                     <h4 className="font-medium mb-2">{t('modal.attachments')}</h4>

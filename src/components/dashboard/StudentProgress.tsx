@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { useTranslations } from 'next-intl'
-import { SkeletonCard, Skeleton } from '../ui/Skeleton'
+import { SkeletonCard, Skeleton } from '../ui/skeleton'
 
 interface Subject {
   name: string
@@ -52,7 +52,7 @@ export default function StudentProgress({ studentId }: StudentProgressProps) {
         nextSession: '2025-10-03T16:00:00Z'
       }
     ]
-    
+
     setTimeout(() => {
       setSubjects(mockSubjects)
       setLoading(false)
@@ -89,7 +89,7 @@ export default function StudentProgress({ studentId }: StudentProgressProps) {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-6">{t('title')}</h3>
-      
+
       <div className="space-y-6">
         {subjects.map((subject) => (
           <div key={subject.name} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -99,7 +99,7 @@ export default function StudentProgress({ studentId }: StudentProgressProps) {
                 {t('progressComplete', { progress: subject.progress })}
               </span>
             </div>
-            
+
             {/* Progress Bar */}
             <div className="mb-4">
               <div className="flex justify-between text-sm text-gray-600 mb-1">
@@ -107,7 +107,7 @@ export default function StudentProgress({ studentId }: StudentProgressProps) {
                 <span>{t('remainingSessions', { remaining: subject.totalSessions - subject.sessionsCompleted })}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
+                <div
                   className={`h-3 rounded-full transition-all duration-300 ${getProgressColor(subject.progress)}`}
                   style={{ width: `${subject.progress}%` }}
                 ></div>
@@ -133,7 +133,7 @@ export default function StudentProgress({ studentId }: StudentProgressProps) {
             </div>
 
             {/* Expand for details */}
-            <button 
+            <button
               onClick={() => setSelectedSubject(selectedSubject === subject.name ? null : subject.name)}
               className="mt-3 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
             >
@@ -157,7 +157,7 @@ export default function StudentProgress({ studentId }: StudentProgressProps) {
                     <span className="text-gray-500">Sep 22</span>
                   </div>
                 </div>
-                
+
                 <div className="mt-4">
                   <h6 className="font-medium text-gray-900 mb-2">{t('details.upcomingGoals')}</h6>
                   <ul className="text-sm text-gray-600 space-y-1">
