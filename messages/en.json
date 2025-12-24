@@ -82,641 +82,641 @@
       "students": "View Students",
       "studentsDesc": "Manage your student list"
     },
-  },
-  "StudentDashboard": {
-    "title": "Student Dashboard",
-    "subtitle": "Book sessions, track progress, and manage your learning journey",
-    "stats": {
-      "totalSessions": "Total Sessions",
-      "thisMonth": "This Month",
-      "completed": "Completed",
-      "averageRating": "Average Rating"
-    },
-    "quickActions": {
-      "title": "Quick Actions",
-      "assignments": "View Assignments",
-      "assignmentsDesc": "Check your homework and tasks",
-      "progress": "Progress Report",
-      "progressDesc": "See your learning progress",
-      "messages": "Messages",
-      "messagesDesc": "Chat with your tutors",
-      "sessions": "Book Session",
-      "sessionsDesc": "Schedule your next tutoring session",
-      "billing": "View Billing",
-      "billingDesc": "Check your payment status"
-    },
-    "tabs": {
-      "dashboard": "Dashboard",
-      "overview": "Overview",
-      "manage": "Manage",
-      "sessions": "Sessions",
-      "assignments": "Assignments",
-      "progress": "Progress",
-      "hours": "Lecture Hours",
-      "payments": "Payments",
-      "billing": "Billing",
-      "notifications": "Notifications",
-      "settings": "Settings"
-    }
-  },
-  "AppointmentManagement": {
-    "title": "Appointment Management",
-    "showingCount": "{current} of {total} appointments",
-    "filters": {
-      "time": {
-        "all": "All Time",
-        "upcoming": "Upcoming",
-        "today": "Today",
-        "past": "Past"
+    "recentActivity": {
+      "StudentDashboard": {
+        "title": "Student Dashboard",
+        "subtitle": "Book sessions, track progress, and manage your learning journey",
+        "stats": {
+          "totalSessions": "Total Sessions",
+          "thisMonth": "This Month",
+          "completed": "Completed",
+          "averageRating": "Average Rating"
+        },
+        "quickActions": {
+          "title": "Quick Actions",
+          "assignments": "View Assignments",
+          "assignmentsDesc": "Check your homework and tasks",
+          "progress": "Progress Report",
+          "progressDesc": "See your learning progress",
+          "messages": "Messages",
+          "messagesDesc": "Chat with your tutors",
+          "sessions": "Book Session",
+          "sessionsDesc": "Schedule your next tutoring session",
+          "billing": "View Billing",
+          "billingDesc": "Check your payment status"
+        },
+        "tabs": {
+          "dashboard": "Dashboard",
+          "overview": "Overview",
+          "manage": "Manage",
+          "sessions": "Sessions",
+          "assignments": "Assignments",
+          "progress": "Progress",
+          "hours": "Lecture Hours",
+          "payments": "Payments",
+          "billing": "Billing",
+          "notifications": "Notifications",
+          "settings": "Settings"
+        }
       },
-      "status": {
-        "all": "All Status"
+      "AppointmentManagement": {
+        "title": "Appointment Management",
+        "showingCount": "{current} of {total} appointments",
+        "filters": {
+          "time": {
+            "all": "All Time",
+            "upcoming": "Upcoming",
+            "today": "Today",
+            "past": "Past"
+          },
+          "status": {
+            "all": "All Status"
+          }
+        },
+        "sort": {
+          "date": "Sort by Date",
+          "subject": "Sort by Subject",
+          "status": "Sort by Status"
+        },
+        "view": {
+          "list": "List",
+          "grid": "Grid"
+        },
+        "empty": {
+          "title": "No appointments found",
+          "filter": "Try adjusting your filters to see more appointments.",
+          "start": "Get started by creating your first appointment."
+        },
+        "status": {
+          "SCHEDULED": "Scheduled",
+          "CONFIRMED": "Confirmed",
+          "IN_PROGRESS": "In Progress",
+          "COMPLETED": "Completed",
+          "CANCELLED": "Cancelled",
+          "NO_SHOW": "No Show"
+        },
+        "actions": {
+          "reschedule": "Reschedule",
+          "complete": "Complete",
+          "cancel": "Cancel"
+        },
+        "labels": {
+          "student": "Student:",
+          "tutor": "Tutor:",
+          "date": "Date:",
+          "time": "Time:",
+          "notes": "Notes:"
+        },
+        "modals": {
+          "reschedule": {
+            "title": "Reschedule Appointment",
+            "date": "Date",
+            "time": "Time",
+            "subject": "Subject",
+            "notes": "Notes",
+            "notesPlaceholder": "Add any notes about the reschedule..."
+          },
+          "cancel": {
+            "title": "Cancel Appointment",
+            "confirm": "Are you sure you want to cancel this appointment with {name} on {date} at {time}?",
+            "keep": "Keep Appointment",
+            "confirmBtn": "Cancel Appointment"
+          }
+        }
+      },
+      "TutorAvailability": {
+        "title": "Weekly Availability",
+        "actions": {
+          "addSlot": "Add Time Slot",
+          "cancel": "Cancel",
+          "adding": "Adding...",
+          "markAvailable": "Mark Available",
+          "markUnavailable": "Mark Unavailable",
+          "delete": "Delete",
+          "enable": "Enable",
+          "disable": "Disable"
+        },
+        "form": {
+          "title": "Add New Availability Slot",
+          "slotType": "Slot Type",
+          "dayOfWeek": "Day of Week",
+          "date": "Date",
+          "startTime": "Start Time",
+          "endTime": "End Time",
+          "recurringDuration": "Recurring Duration",
+          "numberOfWeeks": "Number of weeks",
+          "endDate": "End date",
+          "startDate": "Start Date",
+          "createWeeksInfo": "Will create {weeks} weekly slots",
+          "untilDateInfo": "Until {date}",
+          "selectEndDate": "Select an end date"
+        },
+        "slotType": {
+          "repeating": "Repeating (weekly)",
+          "individual": "Individual slot"
+        },
+        "weeks": "weeks",
+        "week": "week",
+        "individualSlots": {
+          "title": "Individual Slots"
+        },
+        "recurringSlots": {
+          "title": "Weekly Recurring Slots",
+          "empty": "No availability set for this day"
+        },
+        "status": {
+          "available": "Available",
+          "unavailable": "Unavailable",
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "days": {
+          "Sunday": "Sunday",
+          "Monday": "Monday",
+          "Tuesday": "Tuesday",
+          "Wednesday": "Wednesday",
+          "Thursday": "Thursday",
+          "Friday": "Friday",
+          "Saturday": "Saturday"
+        },
+        "messages": {
+          "addSuccess": "{type} availability slot added successfully!",
+          "addError": "Failed to add availability slot",
+          "deleteSuccess": "Availability slot deleted successfully!",
+          "deleteError": "Failed to delete availability slot",
+          "deleteIndividualSuccess": "Individual slot deleted successfully!",
+          "deleteIndividualError": "Failed to delete individual slot"
+        },
+        "confirmDelete": "Are you sure you want to delete this availability slot?",
+        "confirmDeleteIndividual": "Are you sure you want to delete this individual slot?"
+      },
+      "AppointmentList": {
+        "title": "Appointments",
+        "filters": {
+          "all": "All Appointments",
+          "upcoming": "Upcoming",
+          "today": "Today",
+          "past": "Past"
+        },
+        "sort": {
+          "date": "Sort by Date",
+          "subject": "Sort by Subject",
+          "status": "Sort by Status"
+        },
+        "empty": {
+          "title": "No appointments",
+          "all": "No appointments found.",
+          "upcoming": "No upcoming appointments found.",
+          "today": "No appointments scheduled for today.",
+          "past": "No past appointments found."
+        },
+        "status": {
+          "SCHEDULED": "Scheduled",
+          "CONFIRMED": "Confirmed",
+          "IN_PROGRESS": "In Progress",
+          "COMPLETED": "Completed",
+          "CANCELLED": "Cancelled",
+          "NO_SHOW": "No Show"
+        },
+        "min": "min",
+        "pagination": {
+          "previous": "Previous",
+          "next": "Next",
+          "pageInfo": "Page {current} of {total}"
+        }
+      },
+      "StudentSummaryList": {
+        "title": "Student Summary",
+        "empty": "No students found",
+        "confirmPayment": "Mark all unpaid hours as paid? This action cannot be undone.",
+        "status": {
+          "upToDate": "Up to Date",
+          "paymentDue": "Payment Due",
+          "overdue": "Overdue",
+          "unknown": "Unknown"
+        },
+        "actions": {
+          "edit": "Edit student data",
+          "addHours": "Add lecture hours",
+          "notes": "View/Add notes",
+          "markPaid": "Mark payment received"
+        },
+        "stats": {
+          "totalHours": "Total Hours:",
+          "unpaidHours": "Unpaid Hours:",
+          "totalEarnings": "Total Earnings:",
+          "unpaidEarnings": "Unpaid Earnings:",
+          "lastSession": "Last Session:"
+        },
+        "progress": {
+          "nextPayment": "Progress to next payment"
+        }
+      },
+      "StudentProgress": {
+        "title": "Learning Progress",
+        "progressComplete": "{progress}% Complete",
+        "sessionsInfo": "{completed} of {total} sessions",
+        "remainingSessions": "{remaining} remaining",
+        "lastSession": "Last",
+        "nextSession": "Next",
+        "actions": {
+          "hideDetails": "Hide details",
+          "viewDetails": "View details"
+        },
+        "details": {
+          "recentActivities": "Recent Activities",
+          "activity1": "Completed quadratic equations worksheet",
+          "activity2": "Homework: Chapter 5 problems 1-15",
+          "activity3": "Achieved 90% on practice test",
+          "upcomingGoals": "Upcoming Goals",
+          "goal1": "Master polynomial factoring",
+          "goal2": "Complete practice exam",
+          "goal3": "Review trigonometric functions"
+        },
+        "overall": {
+          "title": "Overall Performance",
+          "averageProgress": "Average Progress",
+          "totalSessions": "Total Sessions",
+          "averageRating": "Average Rating"
+        }
+      },
+      "AssignmentManager": {
+        "tutorTitle": "Assignment Management",
+        "studentTitle": "My Assignments",
+        "filters": {
+          "all": "All Assignments",
+          "pending": "Pending",
+          "completed": "Completed",
+          "overdue": "Overdue"
+        },
+        "actions": {
+          "create": "Create Assignment"
+        },
+        "stats": {
+          "pending": "Pending",
+          "completed": "Completed",
+          "overdue": "Overdue",
+          "avgGrade": "Avg Grade"
+        },
+        "empty": {
+          "title": "No assignments",
+          "all": "No assignments found.",
+          "filter": "No {filter} assignments found."
+        },
+        "status": {
+          "assigned": "Assigned",
+          "in_progress": "In Progress",
+          "submitted": "Submitted",
+          "graded": "Graded",
+          "overdue": "Overdue"
+        },
+        "difficulty": {
+          "beginner": "Beginner",
+          "intermediate": "Intermediate",
+          "advanced": "Advanced"
+        },
+        "labels": {
+          "dueDate": "Due",
+          "dueToday": "Due today",
+          "daysLeft": "{count} days left",
+          "grade": "Grade"
+        },
+        "modal": {
+          "attachments": "Attachments",
+          "feedback": "Feedback",
+          "submitAssignment": "Submit Assignment",
+          "gradeAssignment": "Grade Assignment"
+        }
+      },
+      "LectureHoursTracker": {
+        "title": {
+          "student": "My Lecture Hours",
+          "tutor": "Student Lecture Hours"
+        },
+        "subtitle": {
+          "student": "Track your lesson hours and payment status",
+          "tutor": "Record sessions and track student progress"
+        },
+        "actions": {
+          "recordSession": "Record Session",
+          "clear": "Clear"
+        },
+        "recordSessionForm": {
+          "title": "Record New Session",
+          "studentSubject": "Student/Subject",
+          "selectStudentSubject": "Select student and subject",
+          "duration": "Duration (hours)",
+          "notes": "Notes (optional)"
+        },
+        "overview": {
+          "tutorName": "Tutor: {firstName} {lastName}",
+          "studentName": "Student: {firstName} {lastName}",
+          "totalHours": "Total Hours:",
+          "unpaidHours": "Unpaid Hours:",
+          "paymentFrequency": "Payment Frequency:",
+          "hours": "hours",
+          "everyHours": "Every {count}h",
+          "editPaymentFrequency": "Edit payment frequency",
+          "latestPayment": "Latest Payment:",
+          "progressToNextPayment": "Progress to next payment"
+        },
+        "paymentStatus": {
+          "PAID": "PAID",
+          "OVERDUE": "OVERDUE",
+          "PENDING": "PENDING"
+        },
+        "empty": {
+          "title": "No lecture hours found",
+          "tutorMessage": "Start recording sessions to track lecture hours for your students.",
+          "studentMessage": "Your tutor will record sessions to track your lecture hours and payments."
+        },
+        "detailedView": {
+          "title": "{subject} - Detailed View",
+          "recentSessions": "Recent Sessions",
+          "sessionDuration": "{duration}h session",
+          "paymentHistory": "Payment History",
+          "hoursPayment": "{hours}h payment",
+          "dueDate": "Due",
+          "noDueDate": "No due date",
+          "paidDate": "Paid",
+          "markPaid": "Mark Paid"
+        },
+        "error": {
+          "title": "Error Loading Data",
+          "message": "Sorry, there was an error loading the lecture hours data. Please refresh the page or try again later."
+        }
+      },
+      "PaymentManager": {
+        "title": {
+          "student": "My Payments",
+          "tutor": "Payment Management"
+        },
+        "actions": {
+          "addPayment": "Add Payment",
+          "markPaid": "Mark Paid"
+        },
+        "filters": {
+          "all": "All",
+          "pending": "Pending",
+          "overdue": "Overdue",
+          "paid": "Paid"
+        },
+        "summary": {
+          "pendingPayments": "Pending Payments",
+          "overduePayments": "Overdue Payments",
+          "totalRevenue": "Total Revenue",
+          "paidThisMonth": "Paid This Month",
+          "paymentsCount": "{count} payments"
+        },
+        "groupedPayments": {
+          "countTotal": "{count} payments • Total: ${total}",
+          "paid": "Paid",
+          "pending": "Pending",
+          "overdue": "Overdue"
+        },
+        "paymentDetails": {
+          "hoursDue": "{hours} hours • Due {dueDate}",
+          "created": "Created",
+          "paid": "Paid",
+          "viaMethod": " via {method}",
+          "transactionId": " (ID: {id})",
+          "note": "Note",
+          "tutorName": "Tutor: {firstName} {lastName}",
+          "studentName": "Student: {firstName} {lastName}",
+          "moreNotifications": "+{count} more notifications"
+        },
+        "paymentStatus": {
+          "PAID": "PAID",
+          "OVERDUE": "OVERDUE",
+          "PENDING": "PENDING"
+        },
+        "empty": {
+          "noPayments": "No payments found"
+        },
+        "addPaymentForm": {
+          "title": "Add New Payment",
+          "validation": {
+            "requiredFields": "Please fill in all required fields"
+          },
+          "studentSubject": {
+            "label": "Student & Subject *",
+            "select": "Select student and subject"
+          },
+          "amount": {
+            "label": "Amount ($) *"
+          },
+          "hoursIncluded": {
+            "label": "Hours Included *"
+          },
+          "paymentMethod": {
+            "label": "Payment Method *",
+            "select": "Select payment method",
+            "cash": "Cash",
+            "creditCard": "Credit Card",
+            "bankTransfer": "Bank Transfer",
+            "payPal": "PayPal",
+            "venmo": "Venmo",
+            "zelle": "Zelle",
+            "check": "Check",
+            "other": "Other"
+          },
+          "paymentDate": {
+            "label": "Payment Date & Time *"
+          },
+          "transactionId": {
+            "label": "Transaction ID (optional)",
+            "placeholder": "Reference number, check #, etc."
+          },
+          "notes": {
+            "label": "Notes (optional)",
+            "placeholder": "Additional notes about this payment..."
+          },
+          "actions": {
+            "cancel": "Cancel",
+            "addPayment": "Add Payment"
+          }
+        }
+      },
+      "NotificationManager": {
+        "title": "Notifications",
+        "unreadCount": "{count} unread",
+        "selectedCount": "{count} selected",
+        "filters": {
+          "all": "All Notifications",
+          "unread": "Unread",
+          "appointmentReminder": "Appointment Reminders",
+          "assignmentDue": "Assignment Due",
+          "paymentReminder": "Payment Reminders",
+          "systemAnnouncement": "System Announcements",
+          "paymentReceived": "Payment Received"
+        },
+        "actions": {
+          "markSelectedRead": "Mark Selected as Read",
+          "clearSelection": "Clear",
+          "markAllRead": "Mark All as Read",
+          "selectAllUnread": "Select All Unread"
+        },
+        "empty": {
+          "title": "No notifications",
+          "unread": "You're all caught up! No unread notifications.",
+          "none": "You don't have any notifications yet."
+        },
+        "pagination": {
+          "page": "Page {current} of {total}",
+          "previous": "Previous",
+          "next": "Next"
+        },
+        "NotificationItem": {
+          "via": "via",
+          "channels": {
+            "email": "email",
+            "sms": "SMS",
+            "in_app": "In-App"
+          },
+          "scheduledFor": "Scheduled for {date}",
+          "markAsRead": "Mark as read"
+        }
+      },
+      "NotificationPreferencesManager": {
+        "title": "Notification Preferences",
+        "saveChanges": "Save Changes",
+        "emailNotifications": {
+          "title": "Email Notifications",
+          "description": "Receive notifications via email for important updates"
+        },
+        "smsNotifications": {
+          "title": "SMS Notifications",
+          "description": "Receive text messages for urgent notifications"
+        },
+        "assignmentReminders": {
+          "title": "Assignment Reminders",
+          "description": "Get notified about assignment due dates and submissions"
+        },
+        "marketingEmails": {
+          "title": "Marketing Emails",
+          "description": "Receive promotional content and platform updates"
+        },
+        "reminderTiming": {
+          "title": "Reminder Timing",
+          "description": "How far in advance should we remind you about appointments?"
+        },
+        "reminderTimingOptions": {
+          "noReminder": "No reminder",
+          "1hour": "1 hour before",
+          "2hours": "2 hours before",
+          "4hours": "4 hours before",
+          "8hours": "8 hours before",
+          "1day": "1 day before",
+          "2days": "2 days before",
+          "3days": "3 days before",
+          "1week": "1 week before"
+        },
+        "channelsInfo": {
+          "title": "Notification Channels",
+          "emailChannel": "Email",
+          "emailDesc": "Full notification details with action buttons",
+          "smsChannel": "SMS",
+          "smsDesc": "Brief alerts for urgent notifications only",
+          "inAppChannel": "In-App",
+          "inAppDesc": "Always enabled for real-time notifications"
+        },
+        "privacyNotice": {
+          "title": "Privacy & Data",
+          "description": "We respect your privacy. You can change these preferences at any time. We only send notifications related to your tutoring activities and never share your contact information with third parties."
+        },
+        "saveNotificationPreferences": "Save Notification Preferences",
+        "empty": {
+          "message": "Failed to load notification preferences",
+          "retry": "Retry"
+        },
+        "messages": {
+          "loadError": "Failed to load notification preferences",
+          "saveSuccess": "Notification preferences saved successfully!",
+          "saveError": "Failed to save preferences. Please try again."
+        }
+      },
+      "TutorAnalytics": {
+        "dashboardTitle": "Analytics Dashboard",
+        "period": {
+          "last7Days": "Last 7 Days",
+          "last30Days": "Last 30 Days",
+          "last3Months": "Last 3 Months",
+          "lastYear": "Last Year"
+        },
+        "tabs": {
+          "overview": "Overview",
+          "students": "Students",
+          "subjects": "Subjects",
+          "schedule": "Schedule"
+        },
+        "weeklyActivity": {
+          "title": "Weekly Activity",
+          "sessions": "Sessions",
+          "hours": "Hours",
+          "earnings": "Earnings"
+        },
+        "monthlyEarnings": {
+          "title": "Monthly Earnings Trend",
+          "hoursSessions": "{hours}h • {sessions} sessions"
+        },
+        "studentProgressOverview": {
+          "title": "Student Progress Overview",
+          "trend": {
+            "improving": "Improving",
+            "stable": "Stable",
+            "declining": "Declining"
+          },
+          "totalHours": "Total Hours",
+          "recentSessions": "Recent Sessions",
+          "avgRating": "Avg Rating"
+        },
+        "subjectPerformance": {
+          "title": "Subject Performance Analysis",
+          "table": {
+            "subject": "Subject",
+            "students": "Students",
+            "sessions": "Sessions",
+            "totalHours": "Total Hours",
+            "avgSession": "Avg Session",
+            "earnings": "Earnings"
+          }
+        },
+        "scheduleAnalysis": {
+          "title": "Schedule Analysis",
+          "activeTimeSlots": "Most Active Time Slots",
+          "percentage": "{percentage}%",
+          "insightsTitle": "Schedule Insights",
+          "peakHours": "Peak Hours",
+          "peakHoursMessage": "{time} is your busiest time slot",
+          "noTimeData": "No time distribution data available",
+          "availabilityOptimization": "Availability Optimization",
+          "optimizationMessage": "Consider adding more slots during high-demand periods",
+          "workLifeBalance": "Work-Life Balance",
+          "hoursThisWeek": "{hours} hours this week"
+        },
+        "empty": {
+          "title": "No Analytics Data",
+          "message": "You don't have any analytics data yet. Complete some tutoring sessions to see your analytics.",
+          "refreshData": "Refresh Data"
+        },
+        "errors": {
+          "invalidTutorId": "Invalid tutor ID provided",
+          "dataNotFound": "Analytics data not found. Please check if you have any appointments recorded.",
+          "accessDenied": "Access denied. Please check your permissions.",
+          "serverError": "Server error occurred. Please try again later.",
+          "requestFailed": "Request failed with status {status}",
+          "fetchFailedFallback": "Failed to fetch analytics data",
+          "loadFailedTitle": "Failed to Load Analytics",
+          "contactSupport": "Please refresh the page or contact support if the problem persists."
+        },
+        "actions": {
+          "retrying": "Retrying...",
+          "tryAgain": "Try Again"
+        }
+      },
+      "GlobalError": {
+        "title": "Something went wrong!",
+        "description": "We apologize for the inconvenience. Please try again later.",
+        "tryAgainButton": "Try again"
       }
-    },
-    "sort": {
-      "date": "Sort by Date",
-      "subject": "Sort by Subject",
-      "status": "Sort by Status"
-    },
-    "view": {
-      "list": "List",
-      "grid": "Grid"
-    },
-    "empty": {
-      "title": "No appointments found",
-      "filter": "Try adjusting your filters to see more appointments.",
-      "start": "Get started by creating your first appointment."
-    },
-    "status": {
-      "SCHEDULED": "Scheduled",
-      "CONFIRMED": "Confirmed",
-      "IN_PROGRESS": "In Progress",
-      "COMPLETED": "Completed",
-      "CANCELLED": "Cancelled",
-      "NO_SHOW": "No Show"
-    },
-    "actions": {
-      "reschedule": "Reschedule",
-      "complete": "Complete",
-      "cancel": "Cancel"
-    },
-    "labels": {
-      "student": "Student:",
-      "tutor": "Tutor:",
-      "date": "Date:",
-      "time": "Time:",
-      "notes": "Notes:"
-    },
-    "modals": {
-      "reschedule": {
-        "title": "Reschedule Appointment",
-        "date": "Date",
-        "time": "Time",
-        "subject": "Subject",
-        "notes": "Notes",
-        "notesPlaceholder": "Add any notes about the reschedule..."
-      },
-      "cancel": {
-        "title": "Cancel Appointment",
-        "confirm": "Are you sure you want to cancel this appointment with {name} on {date} at {time}?",
-        "keep": "Keep Appointment",
-        "confirmBtn": "Cancel Appointment"
-      }
     }
-  },
-  "TutorAvailability": {
-    "title": "Weekly Availability",
-    "actions": {
-      "addSlot": "Add Time Slot",
-      "cancel": "Cancel",
-      "adding": "Adding...",
-      "markAvailable": "Mark Available",
-      "markUnavailable": "Mark Unavailable",
-      "delete": "Delete",
-      "enable": "Enable",
-      "disable": "Disable"
-    },
-    "form": {
-      "title": "Add New Availability Slot",
-      "slotType": "Slot Type",
-      "dayOfWeek": "Day of Week",
-      "date": "Date",
-      "startTime": "Start Time",
-      "endTime": "End Time",
-      "recurringDuration": "Recurring Duration",
-      "numberOfWeeks": "Number of weeks",
-      "endDate": "End date",
-      "startDate": "Start Date",
-      "createWeeksInfo": "Will create {weeks} weekly slots",
-      "untilDateInfo": "Until {date}",
-      "selectEndDate": "Select an end date"
-    },
-    "slotType": {
-      "repeating": "Repeating (weekly)",
-      "individual": "Individual slot"
-    },
-    "weeks": "weeks",
-    "week": "week",
-    "individualSlots": {
-      "title": "Individual Slots"
-    },
-    "recurringSlots": {
-      "title": "Weekly Recurring Slots",
-      "empty": "No availability set for this day"
-    },
-    "status": {
-      "available": "Available",
-      "unavailable": "Unavailable",
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "days": {
-      "Sunday": "Sunday",
-      "Monday": "Monday",
-      "Tuesday": "Tuesday",
-      "Wednesday": "Wednesday",
-      "Thursday": "Thursday",
-      "Friday": "Friday",
-      "Saturday": "Saturday"
-    },
-    "messages": {
-      "addSuccess": "{type} availability slot added successfully!",
-      "addError": "Failed to add availability slot",
-      "deleteSuccess": "Availability slot deleted successfully!",
-      "deleteError": "Failed to delete availability slot",
-      "deleteIndividualSuccess": "Individual slot deleted successfully!",
-      "deleteIndividualError": "Failed to delete individual slot"
-    },
-    "confirmDelete": "Are you sure you want to delete this availability slot?",
-    "confirmDeleteIndividual": "Are you sure you want to delete this individual slot?"
-  },
-  "AppointmentList": {
-    "title": "Appointments",
-    "filters": {
-      "all": "All Appointments",
-      "upcoming": "Upcoming",
-      "today": "Today",
-      "past": "Past"
-    },
-    "sort": {
-      "date": "Sort by Date",
-      "subject": "Sort by Subject",
-      "status": "Sort by Status"
-    },
-    "empty": {
-      "title": "No appointments",
-      "all": "No appointments found.",
-      "upcoming": "No upcoming appointments found.",
-      "today": "No appointments scheduled for today.",
-      "past": "No past appointments found."
-    },
-    "status": {
-      "SCHEDULED": "Scheduled",
-      "CONFIRMED": "Confirmed",
-      "IN_PROGRESS": "In Progress",
-      "COMPLETED": "Completed",
-      "CANCELLED": "Cancelled",
-      "NO_SHOW": "No Show"
-    },
-    "min": "min",
-    "pagination": {
-      "previous": "Previous",
-      "next": "Next",
-      "pageInfo": "Page {current} of {total}"
-    }
-  },
-  "StudentSummaryList": {
-    "title": "Student Summary",
-    "empty": "No students found",
-    "confirmPayment": "Mark all unpaid hours as paid? This action cannot be undone.",
-    "status": {
-      "upToDate": "Up to Date",
-      "paymentDue": "Payment Due",
-      "overdue": "Overdue",
-      "unknown": "Unknown"
-    },
-    "actions": {
-      "edit": "Edit student data",
-      "addHours": "Add lecture hours",
-      "notes": "View/Add notes",
-      "markPaid": "Mark payment received"
-    },
-    "stats": {
-      "totalHours": "Total Hours:",
-      "unpaidHours": "Unpaid Hours:",
-      "totalEarnings": "Total Earnings:",
-      "unpaidEarnings": "Unpaid Earnings:",
-      "lastSession": "Last Session:"
-    },
-    "progress": {
-      "nextPayment": "Progress to next payment"
-    }
-  },
-  "StudentProgress": {
-    "title": "Learning Progress",
-    "progressComplete": "{progress}% Complete",
-    "sessionsInfo": "{completed} of {total} sessions",
-    "remainingSessions": "{remaining} remaining",
-    "lastSession": "Last",
-    "nextSession": "Next",
-    "actions": {
-      "hideDetails": "Hide details",
-      "viewDetails": "View details"
-    },
-    "details": {
-      "recentActivities": "Recent Activities",
-      "activity1": "Completed quadratic equations worksheet",
-      "activity2": "Homework: Chapter 5 problems 1-15",
-      "activity3": "Achieved 90% on practice test",
-      "upcomingGoals": "Upcoming Goals",
-      "goal1": "Master polynomial factoring",
-      "goal2": "Complete practice exam",
-      "goal3": "Review trigonometric functions"
-    },
-    "overall": {
-      "title": "Overall Performance",
-      "averageProgress": "Average Progress",
-      "totalSessions": "Total Sessions",
-      "averageRating": "Average Rating"
-    }
-  },
-  "AssignmentManager": {
-    "tutorTitle": "Assignment Management",
-    "studentTitle": "My Assignments",
-    "filters": {
-      "all": "All Assignments",
-      "pending": "Pending",
-      "completed": "Completed",
-      "overdue": "Overdue"
-    },
-    "actions": {
-      "create": "Create Assignment"
-    },
-    "stats": {
-      "pending": "Pending",
-      "completed": "Completed",
-      "overdue": "Overdue",
-      "avgGrade": "Avg Grade"
-    },
-    "empty": {
-      "title": "No assignments",
-      "all": "No assignments found.",
-      "filter": "No {filter} assignments found."
-    },
-    "status": {
-      "assigned": "Assigned",
-      "in_progress": "In Progress",
-      "submitted": "Submitted",
-      "graded": "Graded",
-      "overdue": "Overdue"
-    },
-    "difficulty": {
-      "beginner": "Beginner",
-      "intermediate": "Intermediate",
-      "advanced": "Advanced"
-    },
-    "labels": {
-      "dueDate": "Due",
-      "dueToday": "Due today",
-      "daysLeft": "{count} days left",
-      "grade": "Grade"
-    },
-    "modal": {
-      "attachments": "Attachments",
-      "feedback": "Feedback",
-      "submitAssignment": "Submit Assignment",
-      "gradeAssignment": "Grade Assignment"
-    }
-  },
-  "LectureHoursTracker": {
-    "title": {
-      "student": "My Lecture Hours",
-      "tutor": "Student Lecture Hours"
-    },
-    "subtitle": {
-      "student": "Track your lesson hours and payment status",
-      "tutor": "Record sessions and track student progress"
-    },
-    "actions": {
-      "recordSession": "Record Session",
-      "clear": "Clear"
-    },
-    "recordSessionForm": {
-      "title": "Record New Session",
-      "studentSubject": "Student/Subject",
-      "selectStudentSubject": "Select student and subject",
-      "duration": "Duration (hours)",
-      "notes": "Notes (optional)"
-    },
-    "overview": {
-      "tutorName": "Tutor: {firstName} {lastName}",
-      "studentName": "Student: {firstName} {lastName}",
-      "totalHours": "Total Hours:",
-      "unpaidHours": "Unpaid Hours:",
-      "paymentFrequency": "Payment Frequency:",
-      "hours": "hours",
-      "everyHours": "Every {count}h",
-      "editPaymentFrequency": "Edit payment frequency",
-      "latestPayment": "Latest Payment:",
-      "progressToNextPayment": "Progress to next payment"
-    },
-    "paymentStatus": {
-      "PAID": "PAID",
-      "OVERDUE": "OVERDUE",
-      "PENDING": "PENDING"
-    },
-    "empty": {
-      "title": "No lecture hours found",
-      "tutorMessage": "Start recording sessions to track lecture hours for your students.",
-      "studentMessage": "Your tutor will record sessions to track your lecture hours and payments."
-    },
-    "detailedView": {
-      "title": "{subject} - Detailed View",
-      "recentSessions": "Recent Sessions",
-      "sessionDuration": "{duration}h session",
-      "paymentHistory": "Payment History",
-      "hoursPayment": "{hours}h payment",
-      "dueDate": "Due",
-      "noDueDate": "No due date",
-      "paidDate": "Paid",
-      "markPaid": "Mark Paid"
-    },
-    "error": {
-      "title": "Error Loading Data",
-      "message": "Sorry, there was an error loading the lecture hours data. Please refresh the page or try again later."
-    }
-  },
-  "PaymentManager": {
-    "title": {
-      "student": "My Payments",
-      "tutor": "Payment Management"
-    },
-    "actions": {
-      "addPayment": "Add Payment",
-      "markPaid": "Mark Paid"
-    },
-    "filters": {
-      "all": "All",
-      "pending": "Pending",
-      "overdue": "Overdue",
-      "paid": "Paid"
-    },
-    "summary": {
-      "pendingPayments": "Pending Payments",
-      "overduePayments": "Overdue Payments",
-      "totalRevenue": "Total Revenue",
-      "paidThisMonth": "Paid This Month",
-      "paymentsCount": "{count} payments"
-    },
-    "groupedPayments": {
-      "countTotal": "{count} payments • Total: ${total}",
-      "paid": "Paid",
-      "pending": "Pending",
-      "overdue": "Overdue"
-    },
-    "paymentDetails": {
-      "hoursDue": "{hours} hours • Due {dueDate}",
-      "created": "Created",
-      "paid": "Paid",
-      "viaMethod": " via {method}",
-      "transactionId": " (ID: {id})",
-      "note": "Note",
-      "tutorName": "Tutor: {firstName} {lastName}",
-      "studentName": "Student: {firstName} {lastName}",
-      "moreNotifications": "+{count} more notifications"
-    },
-    "paymentStatus": {
-      "PAID": "PAID",
-      "OVERDUE": "OVERDUE",
-      "PENDING": "PENDING"
-    },
-    "empty": {
-      "noPayments": "No payments found"
-    },
-    "addPaymentForm": {
-      "title": "Add New Payment",
-      "validation": {
-        "requiredFields": "Please fill in all required fields"
-      },
-      "studentSubject": {
-        "label": "Student & Subject *",
-        "select": "Select student and subject"
-      },
-      "amount": {
-        "label": "Amount ($) *"
-      },
-      "hoursIncluded": {
-        "label": "Hours Included *"
-      },
-      "paymentMethod": {
-        "label": "Payment Method *",
-        "select": "Select payment method",
-        "cash": "Cash",
-        "creditCard": "Credit Card",
-        "bankTransfer": "Bank Transfer",
-        "payPal": "PayPal",
-        "venmo": "Venmo",
-        "zelle": "Zelle",
-        "check": "Check",
-        "other": "Other"
-      },
-      "paymentDate": {
-        "label": "Payment Date & Time *"
-      },
-      "transactionId": {
-        "label": "Transaction ID (optional)",
-        "placeholder": "Reference number, check #, etc."
-      },
-      "notes": {
-        "label": "Notes (optional)",
-        "placeholder": "Additional notes about this payment..."
-      },
-      "actions": {
-        "cancel": "Cancel",
-        "addPayment": "Add Payment"
-      }
-    }
-  },
-  "NotificationManager": {
-    "title": "Notifications",
-    "unreadCount": "{count} unread",
-    "selectedCount": "{count} selected",
-    "filters": {
-      "all": "All Notifications",
-      "unread": "Unread",
-      "appointmentReminder": "Appointment Reminders",
-      "assignmentDue": "Assignment Due",
-      "paymentReminder": "Payment Reminders",
-      "systemAnnouncement": "System Announcements",
-      "paymentReceived": "Payment Received"
-    },
-    "actions": {
-      "markSelectedRead": "Mark Selected as Read",
-      "clearSelection": "Clear",
-      "markAllRead": "Mark All as Read",
-      "selectAllUnread": "Select All Unread"
-    },
-    "empty": {
-      "title": "No notifications",
-      "unread": "You're all caught up! No unread notifications.",
-      "none": "You don't have any notifications yet."
-    },
-    "pagination": {
-      "page": "Page {current} of {total}",
-      "previous": "Previous",
-      "next": "Next"
-    },
-    "NotificationItem": {
-      "via": "via",
-      "channels": {
-        "email": "email",
-        "sms": "SMS",
-        "in_app": "In-App"
-      },
-      "scheduledFor": "Scheduled for {date}",
-      "markAsRead": "Mark as read"
-    }
-  },
-  "NotificationPreferencesManager": {
-    "title": "Notification Preferences",
-    "saveChanges": "Save Changes",
-    "emailNotifications": {
-      "title": "Email Notifications",
-      "description": "Receive notifications via email for important updates"
-    },
-    "smsNotifications": {
-      "title": "SMS Notifications",
-      "description": "Receive text messages for urgent notifications"
-    },
-    "assignmentReminders": {
-      "title": "Assignment Reminders",
-      "description": "Get notified about assignment due dates and submissions"
-    },
-    "marketingEmails": {
-      "title": "Marketing Emails",
-      "description": "Receive promotional content and platform updates"
-    },
-    "reminderTiming": {
-      "title": "Reminder Timing",
-      "description": "How far in advance should we remind you about appointments?"
-    },
-    "reminderTimingOptions": {
-      "noReminder": "No reminder",
-      "1hour": "1 hour before",
-      "2hours": "2 hours before",
-      "4hours": "4 hours before",
-      "8hours": "8 hours before",
-      "1day": "1 day before",
-      "2days": "2 days before",
-      "3days": "3 days before",
-      "1week": "1 week before"
-    },
-    "channelsInfo": {
-      "title": "Notification Channels",
-      "emailChannel": "Email",
-      "emailDesc": "Full notification details with action buttons",
-      "smsChannel": "SMS",
-      "smsDesc": "Brief alerts for urgent notifications only",
-      "inAppChannel": "In-App",
-      "inAppDesc": "Always enabled for real-time notifications"
-    },
-    "privacyNotice": {
-      "title": "Privacy & Data",
-      "description": "We respect your privacy. You can change these preferences at any time. We only send notifications related to your tutoring activities and never share your contact information with third parties."
-    },
-    "saveNotificationPreferences": "Save Notification Preferences",
-    "empty": {
-      "message": "Failed to load notification preferences",
-      "retry": "Retry"
-    },
-    "messages": {
-      "loadError": "Failed to load notification preferences",
-      "saveSuccess": "Notification preferences saved successfully!",
-      "saveError": "Failed to save preferences. Please try again."
-    }
-  },
-  "TutorAnalytics": {
-    "dashboardTitle": "Analytics Dashboard",
-    "period": {
-      "last7Days": "Last 7 Days",
-      "last30Days": "Last 30 Days",
-      "last3Months": "Last 3 Months",
-      "lastYear": "Last Year"
-    },
-    "tabs": {
-      "overview": "Overview",
-      "students": "Students",
-      "subjects": "Subjects",
-      "schedule": "Schedule"
-    },
-    "weeklyActivity": {
-      "title": "Weekly Activity",
-      "sessions": "Sessions",
-      "hours": "Hours",
-      "earnings": "Earnings"
-    },
-    "monthlyEarnings": {
-      "title": "Monthly Earnings Trend",
-      "hoursSessions": "{hours}h • {sessions} sessions"
-    },
-    "studentProgressOverview": {
-      "title": "Student Progress Overview",
-      "trend": {
-        "improving": "Improving",
-        "stable": "Stable",
-        "declining": "Declining"
-      },
-      "totalHours": "Total Hours",
-      "recentSessions": "Recent Sessions",
-      "avgRating": "Avg Rating"
-    },
-    "subjectPerformance": {
-      "title": "Subject Performance Analysis",
-      "table": {
-        "subject": "Subject",
-        "students": "Students",
-        "sessions": "Sessions",
-        "totalHours": "Total Hours",
-        "avgSession": "Avg Session",
-        "earnings": "Earnings"
-      }
-    },
-    "scheduleAnalysis": {
-      "title": "Schedule Analysis",
-      "activeTimeSlots": "Most Active Time Slots",
-      "percentage": "{percentage}%",
-      "insightsTitle": "Schedule Insights",
-      "peakHours": "Peak Hours",
-      "peakHoursMessage": "{time} is your busiest time slot",
-      "noTimeData": "No time distribution data available",
-      "availabilityOptimization": "Availability Optimization",
-      "optimizationMessage": "Consider adding more slots during high-demand periods",
-      "workLifeBalance": "Work-Life Balance",
-      "hoursThisWeek": "{hours} hours this week"
-    },
-    "empty": {
-      "title": "No Analytics Data",
-      "message": "You don't have any analytics data yet. Complete some tutoring sessions to see your analytics.",
-      "refreshData": "Refresh Data"
-    },
-    "errors": {
-      "invalidTutorId": "Invalid tutor ID provided",
-      "dataNotFound": "Analytics data not found. Please check if you have any appointments recorded.",
-      "accessDenied": "Access denied. Please check your permissions.",
-      "serverError": "Server error occurred. Please try again later.",
-      "requestFailed": "Request failed with status {status}",
-      "fetchFailedFallback": "Failed to fetch analytics data",
-      "loadFailedTitle": "Failed to Load Analytics",
-      "contactSupport": "Please refresh the page or contact support if the problem persists."
-    },
-    "actions": {
-      "retrying": "Retrying...",
-      "tryAgain": "Try Again"
-    }
-  },
-  "GlobalError": {
-    "title": "Something went wrong!",
-    "description": "We apologize for the inconvenience. Please try again later.",
-    "tryAgainButton": "Try again"
-  }
-}
