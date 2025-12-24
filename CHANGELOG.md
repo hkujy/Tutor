@@ -13,6 +13,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved empty states
 - Enhanced loading indicators
 
+## [1.1.1] - 2025-12-24
+
+### 🐛 Fixed
+- **Logo 404 Error**: Updated middleware matcher to properly exclude logo files
+  - Logo now serves correctly at `/logo.png` (HTTP 200)
+  - Fixed middleware pattern: explicitly exclude `logo.png`, `logo.svg`, `Logo.png`
+  - Logo displays correctly on tutor and student dashboards
+- **Chinese Tab Layout**: Fixed vertical text stacking on tutor dashboard
+  - Added `whitespace-nowrap` to tab buttons
+  - Increased padding from `px-1` to `px-3` for better spacing
+  - Added `overflow-x-auto` for horizontal scrolling on small screens
+  - Chinese tabs now display horizontally: "概览", "学生", "空闲时间", etc.
+
+### ✅ Verified
+- Production build successful (28 pages generated)
+- Comprehensive browser testing passed
+- All dashboard tabs functional in English and Chinese
+- No console errors
+- Performance: <100ms response time
+
+### 📦 Deployment
+- Status: ✅ Online and stable
+- Process: PM2 (ID: 14)
+- Memory: 60MB
+- URL: https://americans-processors-andrews-alternatives.trycloudflare.com
+
 ## [1.1.0] - 2025-12-23
 
 ### ✨ Added
