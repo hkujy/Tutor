@@ -4,6 +4,8 @@ import { authOptions } from '../../../lib/auth/config'
 import { db } from '../../../lib/db/client'
 import { z } from 'zod'
 import { checkIdempotency, clearIdempotencyKey } from '../../../lib/redis'
+import { emitToUsers } from '../../../lib/socket/socket-server'
+import { SOCKET_EVENTS } from '../../../lib/socket/socket-events'
 
 const appointmentSchema = z.object({
   tutorId: z.string(),
@@ -194,6 +196,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Emit real-time event to tutor and student
+    try {
+      emitToUsers(
+        [appointment.tutorId, appointment.studentId],
+        SOCKET_EVENTS.APPOINTMENT_CREATED,
+        {
+          id: appointment.id,
+          tutorId: appointment.tutorId,
+          studentId: appointment.studentId,
+          startTime: startTime.toISOString(),
+          endTime: endTime.toISOString(),
+          subject: data.subject,
+          status: 'SCHEDULED',
+          updatedBy: session.user.id,
+          timestamp: Date.now()
+        }
+      )
+    } catch (socketError) {
+      console.error('Failed to emit socket event:', socketError)
+      // Don't fail the appointment creation if socket emission fails
+    }
+
     return NextResponse.json({ appointment }, { status: 201 })
   } catch (error) {
     if (idempotencyKey) {
@@ -220,16 +244,16 @@ export async function PUT(request: NextRequest) {
 
     // Build update data object
     const updateData: any = {}
-    
+
     if (data.date && data.time) {
       const startTime = new Date(`${data.date}T${data.time}:00Z`)
       updateData.startTime = startTime
-      
+
       if (data.duration) {
         updateData.endTime = new Date(startTime.getTime() + data.duration * 60 * 1000)
       }
     }
-    
+
     if (data.subject) updateData.subject = data.subject
     if (data.status) updateData.status = data.status
     if (data.notes !== undefined) updateData.notes = data.notes
@@ -271,6 +295,28 @@ export async function PUT(request: NextRequest) {
 
       return appointment
     })
+
+    // Emit real-time event to tutor and student
+    try {
+      emitToUsers(
+        [result.tutorId, result.studentId],
+        SOCKET_EVENTS.APPOINTMENT_UPDATED,
+        {
+          id: result.id,
+          tutorId: result.tutorId,
+          studentId: result.studentId,
+          startTime: result.startTime.toISOString(),
+          endTime: result.endTime.toISOString(),
+          subject: result.subject,
+          status: result.status,
+          updatedBy: session.user.id,
+          timestamp: Date.now()
+        }
+      )
+    } catch (socketError) {
+      console.error('Failed to emit socket event:', socketError)
+      // Don't fail the update if socket emission fails
+    }
 
     return NextResponse.json({ appointment: result })
   } catch (error) {
@@ -344,6 +390,28 @@ export async function DELETE(request: NextRequest) {
         }
       }
     })
+
+    // Emit real-time event to tutor and student
+    try {
+      emitToUsers(
+        [appointment.tutorId, appointment.studentId],
+        SOCKET_EVENTS.APPOINTMENT_CANCELLED,
+        {
+          id: appointment.id,
+          tutorId: appointment.tutorId,
+          studentId: appointment.studentId,
+          startTime: appointment.startTime.toISOString(),
+          endTime: appointment.endTime.toISOString(),
+          subject: appointment.subject,
+          status: 'CANCELLED',
+          updatedBy: session.user.id,
+          timestamp: Date.now()
+        }
+      )
+    } catch (socketError) {
+      console.error('Failed to emit socket event:', socketError)
+      // Don't fail the cancellation if socket emission fails
+    }
 
     return NextResponse.json({ appointment })
   } catch (error) {
