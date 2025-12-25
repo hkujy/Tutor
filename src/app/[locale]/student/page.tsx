@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect, Suspense, lazy } from 'react'
-import Image from 'next/image'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useRouter } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
