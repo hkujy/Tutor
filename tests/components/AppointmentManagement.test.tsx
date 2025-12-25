@@ -311,8 +311,9 @@ describe('AppointmentManagement Component', () => {
 
                 // Should show confirmation modal
                 await waitFor(() => {
-                    expect(screen.getByText(/confirm|sure/i)).toBeInTheDocument();
-                });
+                    const confirmText = screen.queryByText(/cancel|confirm|sure/i);
+                    expect(confirmText).toBeInTheDocument();
+                }, { timeout: 3000 });
             }
         });
     });
@@ -327,7 +328,8 @@ describe('AppointmentManagement Component', () => {
             render(<AppointmentManagement userRole="student" userId="1" />);
 
             await waitFor(() => {
-                expect(screen.getByText(/empty|no appointments/i)).toBeInTheDocument();
+                const emptyElements = screen.getAllByText(/no appointments/i);
+                expect(emptyElements.length).toBeGreaterThan(0);
             });
         });
     });

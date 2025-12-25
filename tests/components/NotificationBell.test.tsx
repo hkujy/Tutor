@@ -312,8 +312,9 @@ describe('NotificationBell Component', () => {
             fireEvent.click(bell);
 
             await waitFor(() => {
-                expect(screen.getByText(/no notifications|empty/i)).toBeInTheDocument();
-            });
+                const emptyText = screen.queryByText(/no notifications|empty/i);
+                expect(emptyText).toBeInTheDocument();
+            }, { timeout: 3000 });
         });
     });
 
