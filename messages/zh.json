@@ -746,5 +746,10 @@
       "retrying": "重试中...",
       "tryAgain": "重试"
     }
+  },
+  "GlobalError": {
+    "title": "出了些问题！",
+    "description": "我们对造成的不便深表歉意。请稍后再试。",
+    "tryAgainButton": "重试"
   }
 }
