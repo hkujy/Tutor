@@ -25,7 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
-  
+
   const user: User | null = session?.user ? {
     id: session.user.id,
     email: session.user.email || '',
@@ -39,7 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isLoading = status === 'loading'
 
   const logout = async () => {
-    await signOut({ callbackUrl: '/login' })
+    await signOut({ redirect: false })
+    window.location.href = '/login'
   }
 
   return (
