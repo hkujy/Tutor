@@ -129,7 +129,19 @@
       "billing": "查看账单",
       "billingDesc": "检查您的付款状态"
     },
-    "tabs": {},
+    "tabs": {
+      "dashboard": "仪表板",
+      "overview": "概览",
+      "manage": "管理",
+      "sessions": "课程",
+      "assignments": "作业",
+      "progress": "进度",
+      "hours": "授课时长",
+      "payments": "付款",
+      "billing": "账单",
+      "notifications": "通知",
+      "settings": "设置"
+    },
     "AppointmentManagement": {
       "title": "预约管理",
       "showingCount": "显示 {current} / {total} 个预约",

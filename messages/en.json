@@ -129,7 +129,19 @@
       "billing": "View Billing",
       "billingDesc": "Check your payment status"
     },
-    "tabs": {},
+    "tabs": {
+      "dashboard": "Dashboard",
+      "overview": "Overview",
+      "manage": "Manage",
+      "sessions": "Sessions",
+      "assignments": "Assignments",
+      "progress": "Progress",
+      "hours": "Lecture Hours",
+      "payments": "Payments",
+      "billing": "Billing",
+      "notifications": "Notifications",
+      "settings": "Settings"
+    },
     "AppointmentManagement": {
       "title": "Appointment Management",
       "showingCount": "{current} of {total} appointments",
