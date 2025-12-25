@@ -111,13 +111,6 @@ function TutorDashboard() {
           <div className="py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <img
-                  src="/logo.svg"
-                  alt="Tutoring Calendar Logo"
-                  width={48}
-                  height={48}
-                  className="rounded-lg shadow-sm"
-                />
                 <div>
                   <h1 className="text-3xl font-bold text-foreground">{t('title')}</h1>
                   <p className="mt-1 text-muted-foreground">{t('subtitle')}</p>

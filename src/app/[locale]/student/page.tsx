@@ -103,13 +103,6 @@ function StudentDashboard() {
           <div className="py-4 sm:py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 sm:space-x-4">
-                <img
-                  src="/logo.svg"
-                  alt="Tutoring Calendar Logo"
-                  width={40}
-                  height={40}
-                  className="rounded-lg shadow-sm hidden xs:block sm:w-12 sm:h-12"
-                />
                 <div>
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">{t('title')}</h1>
                   <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-muted-foreground">{t('subtitle')}</p>
