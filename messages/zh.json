@@ -1281,5 +1281,71 @@
       "saveSuccess": "通知偏好设置保存成功！",
       "saveError": "保存偏好设置失败。请重试。"
     }
+  },
+  "TutorAvailability": {
+    "title": "每周空闲时间",
+    "actions": {
+      "addSlot": "添加时间段",
+      "cancel": "取消",
+      "adding": "添加中...",
+      "markAvailable": "标记为有空",
+      "markUnavailable": "标记为无空",
+      "delete": "删除",
+      "enable": "启用",
+      "disable": "禁用"
+    },
+    "form": {
+      "title": "添加新的空闲时间段",
+      "slotType": "时间段类型",
+      "dayOfWeek": "星期几",
+      "date": "日期",
+      "startTime": "开始时间",
+      "endTime": "结束时间",
+      "recurringDuration": "重复持续时间",
+      "numberOfWeeks": "周数",
+      "endDate": "结束日期",
+      "startDate": "开始日期",
+      "createWeeksInfo": "将创建 {weeks} 个每周时间段",
+      "untilDateInfo": "直到 {date}",
+      "selectEndDate": "选择结束日期"
+    },
+    "slotType": {
+      "repeating": "重复（每周）",
+      "individual": "单个时间段"
+    },
+    "weeks": "周",
+    "week": "周",
+    "individualSlots": {
+      "title": "单个时间段"
+    },
+    "recurringSlots": {
+      "title": "每周重复时间段",
+      "empty": "这天没有设置空闲时间"
+    },
+    "status": {
+      "available": "有空",
+      "unavailable": "无空",
+      "active": "启用",
+      "inactive": "禁用"
+    },
+    "days": {
+      "Sunday": "星期日",
+      "Monday": "星期一",
+      "Tuesday": "星期二",
+      "Wednesday": "星期三",
+      "Thursday": "星期四",
+      "Friday": "星期五",
+      "Saturday": "星期六"
+    },
+    "messages": {
+      "addSuccess": "{type} 空闲时间段添加成功！",
+      "addError": "添加空闲时间段失败",
+      "deleteSuccess": "空闲时间段删除成功！",
+      "deleteError": "删除空闲时间段失败",
+      "deleteIndividualSuccess": "单个时间段删除成功！",
+      "deleteIndividualError": "删除单个时间段失败"
+    },
+    "confirmDelete": "您确定要删除此空闲时间段吗？",
+    "confirmDeleteIndividual": "您确定要删除此单个时间段吗？"
   }
 }

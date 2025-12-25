@@ -1271,5 +1271,71 @@
       "saveSuccess": "Notification preferences saved successfully!",
       "saveError": "Failed to save preferences. Please try again."
     }
+  },
+  "TutorAvailability": {
+    "title": "Weekly Availability",
+    "actions": {
+      "addSlot": "Add Time Slot",
+      "cancel": "Cancel",
+      "adding": "Adding...",
+      "markAvailable": "Mark Available",
+      "markUnavailable": "Mark Unavailable",
+      "delete": "Delete",
+      "enable": "Enable",
+      "disable": "Disable"
+    },
+    "form": {
+      "title": "Add New Availability Slot",
+      "slotType": "Slot Type",
+      "dayOfWeek": "Day of Week",
+      "date": "Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "recurringDuration": "Recurring Duration",
+      "numberOfWeeks": "Number of weeks",
+      "endDate": "End date",
+      "startDate": "Start Date",
+      "createWeeksInfo": "Will create {weeks} weekly slots",
+      "untilDateInfo": "Until {date}",
+      "selectEndDate": "Select an end date"
+    },
+    "slotType": {
+      "repeating": "Repeating (weekly)",
+      "individual": "Individual slot"
+    },
+    "weeks": "weeks",
+    "week": "week",
+    "individualSlots": {
+      "title": "Individual Slots"
+    },
+    "recurringSlots": {
+      "title": "Weekly Recurring Slots",
+      "empty": "No availability set for this day"
+    },
+    "status": {
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "days": {
+      "Sunday": "Sunday",
+      "Monday": "Monday",
+      "Tuesday": "Tuesday",
+      "Wednesday": "Wednesday",
+      "Thursday": "Thursday",
+      "Friday": "Friday",
+      "Saturday": "Saturday"
+    },
+    "messages": {
+      "addSuccess": "{type} availability slot added successfully!",
+      "addError": "Failed to add availability slot",
+      "deleteSuccess": "Availability slot deleted successfully!",
+      "deleteError": "Failed to delete availability slot",
+      "deleteIndividualSuccess": "Individual slot deleted successfully!",
+      "deleteIndividualError": "Failed to delete individual slot"
+    },
+    "confirmDelete": "Are you sure you want to delete this availability slot?",
+    "confirmDeleteIndividual": "Are you sure you want to delete this individual slot?"
   }
 }
