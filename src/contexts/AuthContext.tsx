@@ -40,7 +40,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     await signOut({ redirect: false })
-    window.location.href = '/login'
+    // Use current origin to avoid cached old tunnel URLs
+    window.location.href = `${window.location.origin}/login`
   }
 
   return (
