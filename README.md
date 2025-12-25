@@ -172,29 +172,42 @@ Built with NextAuth.js supporting:
 
 ---
 
-## 📊 Features
+### Tutoring Calendar
 
-### For Students (8 Dashboard Tabs)
+**Version**: 1.2.0  
+**Last Updated**: 2025-12-25
 
-- 🏠 **Overview**: Dashboard summary and quick actions
-- ⚙️ **Manage**: Book and manage tutoring sessions
-- 📝 **Assignments**: View and submit assignments
-- 📊 **Progress**: Track learning progress with charts
-- ⏰ **Lecture Hours**: View session history and hours
-- 💳 **Payments**: Payment history and invoices
-- 🔔 **Notifications**: Alerts and reminders
-- ⚙️ **Settings**: Account preferences
+A comprehensive tutoring management platform with real-time updates, built with Next.js 16, TypeScript, Prisma, and Socket.IO.
 
-### For Tutors (11 Dashboard Tabs)
+## ✨ Features
 
-- 📊 **Overview**: Dashboard summary and analytics
-- 👥 **Students**: Student list and management
+### Core Functionality
+- 📅 **Appointment Scheduling**: Book, reschedule, and manage tutoring sessions
+- 👥 **User Management**: Separate dashboards for tutors and students
+- 📊 **Analytics Dashboard**: Track hours, earnings, and session statistics
+- 💰 **Payment Tracking**: Monitor lecture hours and payment intervals
+- 📝 **Assignment Management**: Create and track homework assignments
+- 🔔 **Notification System**: In-app and email notifications
+
+### Real-Time Features (NEW in v1.2.0)
+- ⚡ **Live Appointment Updates**: Instant synchronization across all connected users
+- 🔄 **WebSocket Integration**: Socket.IO for reliable real-time communication
+- ✨ **Visual Indicators**: Pulse animations for real-time changes
+- 🔌 **Auto-Reconnection**: Resilient connections with automatic retry
+- 🎯 **Targeted Broadcasting**: Events sent only to affected users
+
+### Technical Features
+- 🌐 **Internationalization**: Full English and Chinese language support
+- 🎨 **Theme System**: Light and dark mode with smooth transitions
+- 🔐 **Authentication**: Secure NextAuth.js integration
+- 📱 **Responsive Design**: Mobile-first, works on all devices
+- ⚡ **Performance**: Optimized with Redis caching and database indexes
+- 🧪 **Testing**: Comprehensive unit and integration tests
 - 🗓️ **Availability**: Set available time slots
 - 📅 **Appointments**: View and manage bookings
 - ➕ **Create**: Create new appointments
 - 📈 **Analytics**: Performance insights and trends
 - 📝 **Assignments**: Create and grade assignments
-- ⏰ **Lecture Hours**: Track teaching hours
 - 💳 **Payments**: Payment tracking and history
 - 🔔 **Notifications**: Alerts and reminders
 - ⚙️ **Settings**: Account preferences
