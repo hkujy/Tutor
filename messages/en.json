@@ -78,7 +78,9 @@
       "appointments": "View Appointments",
       "appointmentsDesc": "Check your upcoming sessions",
       "analytics": "View Analytics",
-      "analyticsDesc": "Track your performance"
+      "analyticsDesc": "Track your performance",
+      "students": "View Students",
+      "studentsDesc": "Manage your student list"
     },
     "recentActivity": {
       "title": "Recent Activity",
@@ -103,10 +105,6 @@
     },
     "analytics": {
       "title": "Analytics"
-    },
-    "quickActions": {
-      "students": "View Students",
-      "studentsDesc": "Manage your student list"
     }
   },
   "StudentDashboard": {

@@ -73,12 +73,14 @@
     },
     "quickActions": {
       "title": "快捷操作",
-      "availability": "设置空闲时间",
+      "availability": "设置可用时间",
       "availabilityDesc": "管理您的每周日程",
       "appointments": "查看预约",
-      "appointmentsDesc": "检查即将到来的课程",
+      "appointmentsDesc": "查看即将到来的课程",
       "analytics": "查看分析",
-      "analyticsDesc": "跟踪您的表现"
+      "analyticsDesc": "跟踪您的表现",
+      "students": "查看学生",
+      "studentsDesc": "管理您的学生列表"
     },
     "recentActivity": {
       "title": "最近活动",
@@ -103,10 +105,6 @@
     },
     "analytics": {
       "title": "分析"
-    },
-    "quickActions": {
-      "students": "查看学生",
-      "studentsDesc": "管理您的学生列表"
     }
   },
   "StudentDashboard": {
