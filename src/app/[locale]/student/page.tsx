@@ -104,7 +104,7 @@ function StudentDashboard() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 sm:space-x-4">
                 <img
-                  src="/logo.png"
+                  src="/logo.svg"
                   alt="Tutoring Calendar Logo"
                   width={40}
                   height={40}
