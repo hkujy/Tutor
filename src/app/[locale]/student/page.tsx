@@ -103,7 +103,7 @@ function StudentDashboard() {
           <div className="py-4 sm:py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 sm:space-x-4">
-                <Image
+                <img
                   src="/logo.png"
                   alt="Tutoring Calendar Logo"
                   width={40}
