@@ -805,5 +805,63 @@
       "totalSessions": "Total Sessions",
       "averageRating": "Average Rating"
     }
+  },
+  "LectureHoursTracker": {
+    "title": {
+      "student": "My Lecture Hours",
+      "tutor": "Student Lecture Hours"
+    },
+    "subtitle": {
+      "student": "Track your lesson hours and payment status",
+      "tutor": "Record sessions and track student progress"
+    },
+    "actions": {
+      "recordSession": "Record Session",
+      "clear": "Clear"
+    },
+    "recordSessionForm": {
+      "title": "Record New Session",
+      "studentSubject": "Student/Subject",
+      "selectStudentSubject": "Select student and subject",
+      "duration": "Duration (hours)",
+      "notes": "Notes (optional)"
+    },
+    "overview": {
+      "tutorName": "Tutor: {firstName} {lastName}",
+      "studentName": "Student: {firstName} {lastName}",
+      "totalHours": "Total Hours:",
+      "unpaidHours": "Unpaid Hours:",
+      "paymentFrequency": "Payment Frequency:",
+      "hours": "hours",
+      "everyHours": "Every {count}h",
+      "editPaymentFrequency": "Edit payment frequency",
+      "latestPayment": "Latest Payment:",
+      "progressToNextPayment": "Progress to next payment"
+    },
+    "paymentStatus": {
+      "PAID": "PAID",
+      "OVERDUE": "OVERDUE",
+      "PENDING": "PENDING"
+    },
+    "empty": {
+      "title": "No lecture hours found",
+      "tutorMessage": "Start recording sessions to track lecture hours for your students.",
+      "studentMessage": "Your tutor will record sessions to track your lecture hours and payments."
+    },
+    "detailedView": {
+      "title": "{subject} - Detailed View",
+      "recentSessions": "Recent Sessions",
+      "sessionDuration": "{duration}h session",
+      "paymentHistory": "Payment History",
+      "hoursPayment": "{hours}h payment",
+      "dueDate": "Due",
+      "noDueDate": "No due date",
+      "paidDate": "Paid",
+      "markPaid": "Mark Paid"
+    },
+    "error": {
+      "title": "Error Loading Data",
+      "message": "Sorry, there was an error loading the lecture hours data. Please refresh the page or try again later."
+    }
   }
 }

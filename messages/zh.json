@@ -810,5 +810,63 @@
       "totalSessions": "总课程数",
       "averageRating": "平均评分"
     }
+  },
+  "LectureHoursTracker": {
+    "title": {
+      "student": "我的授课时长",
+      "tutor": "学生授课时长"
+    },
+    "subtitle": {
+      "student": "跟踪您的课程时长和付款状态",
+      "tutor": "记录课程并跟踪学生进度"
+    },
+    "actions": {
+      "recordSession": "记录课程",
+      "clear": "清除"
+    },
+    "recordSessionForm": {
+      "title": "记录新课程",
+      "studentSubject": "学生/科目",
+      "selectStudentSubject": "选择学生和科目",
+      "duration": "时长 (小时)",
+      "notes": "备注 (可选)"
+    },
+    "overview": {
+      "tutorName": "导师：{firstName} {lastName}",
+      "studentName": "学生：{firstName} {lastName}",
+      "totalHours": "总时长：",
+      "unpaidHours": "未付时长：",
+      "paymentFrequency": "付款频率：",
+      "hours": "小时",
+      "everyHours": "每 {count} 小时",
+      "editPaymentFrequency": "编辑付款频率",
+      "latestPayment": "最新付款：",
+      "progressToNextPayment": "下一次付款进度"
+    },
+    "paymentStatus": {
+      "PAID": "已付",
+      "OVERDUE": "逾期",
+      "PENDING": "待处理"
+    },
+    "empty": {
+      "title": "未找到授课时长",
+      "tutorMessage": "开始记录课程以跟踪学生的授课时长。",
+      "studentMessage": "您的导师将记录课程以跟踪您的授课时长和付款。"
+    },
+    "detailedView": {
+      "title": "{subject} - 详细视图",
+      "recentSessions": "最近课程",
+      "sessionDuration": "{duration}小时课程",
+      "paymentHistory": "付款历史",
+      "hoursPayment": "{hours}小时付款",
+      "dueDate": "截止日期",
+      "noDueDate": "无截止日期",
+      "paidDate": "已付",
+      "markPaid": "标记为已付"
+    },
+    "error": {
+      "title": "加载数据出错",
+      "message": "抱歉，加载授课时长数据时出错。请刷新页面或稍后再试。"
+    }
   }
 }
