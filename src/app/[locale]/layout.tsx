@@ -28,6 +28,8 @@ export const viewport = {
   maximumScale: 5,
 }
 
+import { SocketProvider } from '../../providers/SocketProvider'
+
 export default async function RootLayout({
   children,
   params
@@ -45,12 +47,14 @@ export default async function RootLayout({
           <SessionProviderWrapper>
             <AuthProvider>
               <ClientThemeProvider>
-                <ErrorBoundary>
-                  <ToastProvider>
-                    <Navigation />
-                    {children}
-                  </ToastProvider>
-                </ErrorBoundary>
+                <SocketProvider>
+                  <ErrorBoundary>
+                    <ToastProvider>
+                      <Navigation />
+                      {children}
+                    </ToastProvider>
+                  </ErrorBoundary>
+                </SocketProvider>
               </ClientThemeProvider>
             </AuthProvider>
           </SessionProviderWrapper>
