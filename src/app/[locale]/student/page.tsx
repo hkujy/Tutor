@@ -23,6 +23,7 @@ const LectureHoursTracker = lazy(() => import('../../../components/lecture-hours
 const PaymentManager = lazy(() => import('../../../components/lecture-hours/PaymentManager'))
 const NotificationManager = lazy(() => import('../../../components/notifications/NotificationManager'))
 const NotificationPreferencesManager = lazy(() => import('../../../components/notifications/NotificationPreferencesManager'))
+const BrowseTutors = lazy(() => import('../../../components/student/BrowseTutors'))
 
 function StudentDashboard() {
   const { user, isLoading } = useAuth()
@@ -234,6 +235,15 @@ function StudentDashboard() {
                   </div>
                 </button>
               </div>
+            </div>
+
+            {/* Browse Tutors Section */}
+            <div className="mb-8">
+              <ErrorBoundary fallback={<SectionError title="Browse Error" message="Could not load tutors." />}>
+                <Suspense fallback={<DashboardSkeleton />}>
+                  <BrowseTutors />
+                </Suspense>
+              </ErrorBoundary>
             </div>
 
             {/* Appointment List - Full width */}

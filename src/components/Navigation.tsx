@@ -86,6 +86,8 @@ export default function Navigation() {
                   </span>
                   <button
                     onClick={logout}
+                    data-testid="logout-button"
+                    aria-label="Logout"
                     className="px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200"
                   >
                     {t('logout')}
@@ -146,6 +148,8 @@ export default function Navigation() {
                       logout()
                       setIsMobileMenuOpen(false)
                     }}
+                    data-testid="logout-button-mobile"
+                    aria-label="Logout"
                     className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200"
                   >
                     {t('logout')}

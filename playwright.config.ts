@@ -66,6 +66,32 @@ export default defineConfig({
       name: 'Google Chrome',
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     },
+
+    /* Multi-Agent Tests - Run separately with longer timeouts */
+    {
+      name: 'multi-agent-basic',
+      testDir: './tests/agents',
+      testMatch: '**/multi-agent-basic.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        // Longer timeout for agent tests
+        actionTimeout: 15000,
+        navigationTimeout: 15000,
+      },
+      timeout: 60000, // 60s per test
+    },
+    {
+      name: 'multi-agent-concurrent',
+      testDir: './tests/agents',
+      testMatch: '**/multi-agent-concurrent.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        actionTimeout: 15000,
+        navigationTimeout: 15000,
+      },
+      timeout: 120000, // 120s for heavy concurrent tests
+      workers: 1, // Run sequentially to avoid resource conflicts
+    },
   ],
 
   /* Run your local dev server before starting the tests */

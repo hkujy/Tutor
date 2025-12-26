@@ -12,6 +12,18 @@ export async function GET() {
             lastName: true,
             email: true,
           }
+        },
+        availability: {
+          where: {
+            isActive: true
+          },
+          select: {
+            id: true,
+            dayOfWeek: true,
+            startTime: true,
+            endTime: true,
+            isActive: true,
+          }
         }
       },
       where: {
@@ -30,10 +42,15 @@ export async function GET() {
         email: tutor.user.email,
       },
       subjects: tutor.specializations,
-      hourlyRate: tutor.hourlyRate
+      hourlyRate: tutor.hourlyRate,
+      availability: tutor.availability, // Include availability
+      availableSlots: tutor.availability.length, // Add count for easy filtering
     }))
 
-    return NextResponse.json({ tutors: formattedTutors })
+    // Filter to only return tutors with at least one availability slot
+    const availableTutors = formattedTutors.filter(t => t.availableSlots > 0)
+
+    return NextResponse.json({ tutors: availableTutors })
   } catch (error) {
     console.error('Failed to fetch tutors:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

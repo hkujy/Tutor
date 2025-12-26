@@ -87,10 +87,32 @@ export default function LoginPage() {
         redirect: false,
       })
 
+      // Check for explicit error first
       if (result?.error) {
-        setError('Demo login failed')
-      } else if (result?.ok) {
+        console.error('Demo login error:', result.error)
+        setError('Demo login failed: ' + result.error)
+        return
+      }
+
+      // If we get ok=true, it's definitely successful
+      if (result?.ok) {
         router.push(role === 'TUTOR' ? '/tutor' : '/student')
+        return
+      }
+
+      // Even if result.ok is undefined but no error, try to redirect
+      // This handles cases where NextAuth doesn't set ok correctly with tunnel URLs
+      try {
+        const session = await fetch('/api/auth/session').then(res => res.json())
+        if (session?.user) {
+          // Session exists, login was successful!
+          router.push(role === 'TUTOR' ? '/tutor' : '/student')
+        } else {
+          setError('Demo login failed: Unable to verify session')
+        }
+      } catch (sessionError) {
+        console.error('Session check error:', sessionError)
+        setError('Demo login failed: Session verification error')
       }
     } catch (error) {
       console.error('Quick login error:', error)
