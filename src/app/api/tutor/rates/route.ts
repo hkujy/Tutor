@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth/config'
 import { db } from '@/lib/db/client'
 
 // GET /api/tutor/rates - Get tutor's default rate and all student-specific rates
