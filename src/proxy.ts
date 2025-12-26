@@ -2,13 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import createMiddleware from 'next-intl/middleware'
 import { routing } from './i18n/routing'
-import { redis } from './lib/redis'
 
 const intlMiddleware = createMiddleware(routing)
-
-// Initialize Redis client for rate limiting
-// Using shared client from lib/redis
-
 
 // Security headers
 const securityHeaders = {
@@ -24,31 +19,6 @@ const securityHeaders = {
     "font-src 'self'; " +
     "connect-src 'self' ws: wss:; " +
     "frame-ancestors 'none';",
-}
-
-const RATE_LIMIT_WINDOW = 60 // 1 minute window
-const RATE_LIMIT_MAX_REQUESTS = 3000
-
-const checkRateLimit = async (ip: string): Promise<boolean> => {
-  // If Redis is not available (e.g., during build), skip rate limiting
-  if (!redis) {
-    console.warn('Redis not available, skipping rate limit check')
-    return true // Fail open to allow requests when Redis is unavailable
-  }
-
-  try {
-    const key = `rate_limit:${ip}`
-    const current = await redis.incr(key)
-
-    if (current === 1) {
-      await redis.expire(key, RATE_LIMIT_WINDOW)
-    }
-
-    return current <= RATE_LIMIT_MAX_REQUESTS
-  } catch (error) {
-    console.error('Redis rate limit error:', error)
-    return true // Fail open to not block users if Redis is down
-  }
 }
 
 const getClientIP = (request: NextRequest): string => {
@@ -85,23 +55,6 @@ export async function proxy(request: NextRequest) {
     Object.entries(securityHeaders).forEach(([key, value]) => {
       response.headers.set(key, value)
     })
-
-    // Skip rate limiting for auth endpoints (handled internally)
-    if (!pathname.startsWith('/api/auth/')) {
-      const isAllowed = await checkRateLimit(clientIP)
-      if (!isAllowed) {
-        return new NextResponse(
-          JSON.stringify({ error: 'Rate limit exceeded' }),
-          {
-            status: 429,
-            headers: {
-              'Content-Type': 'application/json',
-              ...securityHeaders
-            }
-          }
-        )
-      }
-    }
 
     // API Authentication Check
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
