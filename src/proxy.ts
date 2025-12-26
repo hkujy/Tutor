@@ -57,7 +57,7 @@ const getClientIP = (request: NextRequest): string => {
   return forwarded?.split(',')[0] || real || 'unknown'
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const clientIP = getClientIP(request)
   const pathname = request.nextUrl.pathname
 
