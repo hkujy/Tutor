@@ -171,27 +171,47 @@ export async function POST(request: NextRequest) {
       })
     ])
 
-    // Send notification to student about new appointment
+    // Send notifications to both student and tutor about new appointment
     if (student && tutor) {
       try {
-        await db.notification.create({
-          data: {
-            userId: student.user.id,
-            type: 'APPOINTMENT_REMINDER',
-            title: 'New Appointment Scheduled',
-            message: `${tutor.user.firstName} ${tutor.user.lastName} has scheduled a ${data.subject} session for ${new Date(startTime).toLocaleDateString()} at ${new Date(startTime).toLocaleTimeString()}.`,
-            channels: ['in_app', 'email'],
+        await Promise.all([
+          // Notification for student
+          db.notification.create({
             data: {
-              appointmentId: appointment.id,
-              tutorName: `${tutor.user.firstName} ${tutor.user.lastName}`,
-              subject: data.subject,
-              startTime: startTime.toISOString(),
-              endTime: endTime.toISOString()
+              userId: student.user.id,
+              type: 'APPOINTMENT_REMINDER',
+              title: 'New Appointment Scheduled',
+              message: `${tutor.user.firstName} ${tutor.user.lastName} has scheduled a ${data.subject} session for ${new Date(startTime).toLocaleDateString()} at ${new Date(startTime).toLocaleTimeString()}.`,
+              channels: ['in_app', 'email'],
+              data: {
+                appointmentId: appointment.id,
+                tutorName: `${tutor.user.firstName} ${tutor.user.lastName}`,
+                subject: data.subject,
+                startTime: startTime.toISOString(),
+                endTime: endTime.toISOString()
+              }
             }
-          }
-        })
+          }),
+          // Notification for tutor
+          db.notification.create({
+            data: {
+              userId: tutor.userId,
+              type: 'CONFIRMATION',
+              title: 'New Appointment Booked',
+              message: `${student.user.firstName} ${student.user.lastName} has booked a ${data.subject} session for ${new Date(startTime).toLocaleDateString()} at ${new Date(startTime).toLocaleTimeString()}.`,
+              channels: ['in_app', 'email'],
+              data: {
+                appointmentId: appointment.id,
+                studentName: `${student.user.firstName} ${student.user.lastName}`,
+                subject: data.subject,
+                startTime: startTime.toISOString(),
+                endTime: endTime.toISOString()
+              }
+            }
+          })
+        ])
       } catch (notificationError) {
-        console.error('Failed to create notification:', notificationError)
+        console.error('Failed to create notifications:', notificationError)
         // Don't fail the appointment creation if notification fails
       }
     }
