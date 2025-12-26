@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getToken } from 'next-auth/jwt'
 import createMiddleware from 'next-intl/middleware'
 import { routing } from './i18n/routing'
 
@@ -21,14 +20,7 @@ const securityHeaders = {
     "frame-ancestors 'none';",
 }
 
-const getClientIP = (request: NextRequest): string => {
-  const forwarded = request.headers.get('x-forwarded-for')
-  const real = request.headers.get('x-real-ip')
-  return forwarded?.split(',')[0] || real || 'unknown'
-}
-
 export async function middleware(request: NextRequest) {
-  const clientIP = getClientIP(request)
   const pathname = request.nextUrl.pathname
 
   // Generate or retrieve Correlation ID
@@ -56,76 +48,12 @@ export async function middleware(request: NextRequest) {
       response.headers.set(key, value)
     })
 
-    // API Authentication Check
-    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
-
-    // Allow public API routes
-    const isApiAuthRoute = pathname.startsWith('/api/auth')
-    const isHealthRoute = pathname === '/api/health'
-
-    if (isApiAuthRoute || isHealthRoute) {
-      return response
-    }
-
-    if (!token) {
-      return new NextResponse(
-        JSON.stringify({ error: 'Authentication required' }),
-        { status: 401, headers: { 'Content-Type': 'application/json', ...securityHeaders } }
-      )
-    }
-
-    if (token.expired) {
-      return new NextResponse(
-        JSON.stringify({ error: 'Token expired' }),
-        { status: 401, headers: { 'Content-Type': 'application/json', ...securityHeaders } }
-      )
-    }
-
-    if (pathname.startsWith('/api/admin/') && token.role !== 'ADMIN') {
-      return new NextResponse(
-        JSON.stringify({ error: 'Admin access required' }),
-        { status: 403, headers: { 'Content-Type': 'application/json', ...securityHeaders } }
-      )
-    }
-
     return response
   }
 
   // ==========================================
   // 2. Page Routes Handling (With localization)
   // ==========================================
-
-  // Explicitly redirect root to /en
-  if (pathname === '/') {
-    return NextResponse.redirect(new URL('/en', request.url))
-  }
-
-  // Normalize path by removing locale prefix for security checks
-  const publicPathname = pathname.replace(/^\/(en|zh)/, '') || '/'
-  const currentLocale = pathname.match(/^\/(en|zh)/)?.[1] || 'en'
-
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
-
-  const isAuthPage = publicPathname.startsWith('/auth') || publicPathname === '/login'
-  const isPublicRoute = publicPathname.startsWith('/public') || publicPathname === '/favicon.ico'
-
-  // If user is unauthenticated and trying to access protected page
-  if (!token && !isAuthPage && !isPublicRoute) {
-    const loginUrl = new URL(`/${currentLocale}/login`, request.url)
-    loginUrl.searchParams.set('callbackUrl', request.nextUrl.href)
-    return NextResponse.redirect(loginUrl)
-  }
-
-  // Role-based Access Control
-  if (token) {
-    if (publicPathname.startsWith('/tutor') && token.role !== 'TUTOR' && token.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL(`/${currentLocale}/unauthorized`, request.url))
-    }
-
-    if (publicPathname.startsWith('/student') && token.role !== 'STUDENT' && token.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL(`/${currentLocale}/unauthorized`, request.url))
-    }
-  }
 
   // Run next-intl middleware
   const response = intlMiddleware(request)
