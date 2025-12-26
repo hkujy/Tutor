@@ -411,9 +411,10 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                             <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                           </span>
                         )}
-                        <div className="flex-shrink-0">\n                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(appointment.status)}`}>
-                          {tEnums(APPOINTMENT_STATUS_MAP[appointment.status] || 'status.scheduled')}
-                        </span>
+                        <div className="flex-shrink-0">
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(appointment.status)}`}>
+                            {tEnums(APPOINTMENT_STATUS_MAP[appointment.status] || 'status.scheduled')}
+                          </span>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">{appointment.subject}</p>
