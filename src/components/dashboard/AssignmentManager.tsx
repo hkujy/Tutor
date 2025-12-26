@@ -36,56 +36,28 @@ export default function AssignmentManager({ userRole, userId }: AssignmentManage
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
 
   useEffect(() => {
-    // Mock data - in a real app this would come from an API
-    const mockAssignments: Assignment[] = [
-      {
-        id: '1',
-        title: 'Quadratic Equations Practice',
-        description: 'Complete the worksheet on solving quadratic equations using the quadratic formula.',
-        dueDate: '2025-10-05T23:59:00Z',
-        status: 'assigned',
-        subject: 'Mathematics',
-        difficulty: 'intermediate',
-        attachments: ['quadratic_worksheet.pdf']
-      },
-      {
-        id: '2',
-        title: 'Physics Lab Report',
-        description: 'Write a lab report on the pendulum experiment we conducted last week.',
-        dueDate: '2025-10-08T23:59:00Z',
-        status: 'in_progress',
-        subject: 'Physics',
-        difficulty: 'advanced',
-        attachments: ['lab_template.docx', 'data_sheet.xlsx']
-      },
-      {
-        id: '3',
-        title: 'Chemical Bonding Quiz',
-        description: 'Take the online quiz on ionic and covalent bonding.',
-        dueDate: '2025-09-28T23:59:00Z',
-        status: 'graded',
-        subject: 'Chemistry',
-        difficulty: 'beginner',
-        grade: 92,
-        feedback: 'Excellent work! You clearly understand the concepts.',
-        submittedDate: '2025-09-27T14:30:00Z'
-      },
-      {
-        id: '4',
-        title: 'Essay on Photosynthesis',
-        description: 'Write a 500-word essay explaining the process of photosynthesis.',
-        dueDate: '2025-09-30T23:59:00Z',
-        status: 'overdue',
-        subject: 'Biology',
-        difficulty: 'intermediate'
-      }
-    ]
+    const fetchAssignments = async () => {
+      try {
+        const response = await fetch(`/api/assignments?userId=${userId}&role=${userRole}`)
 
-    setTimeout(() => {
-      setAssignments(mockAssignments)
-      setLoading(false)
-    }, 1000)
-  }, [userId])
+        if (!response.ok) {
+          throw new Error('Failed to fetch assignments')
+        }
+
+        const data = await response.json()
+        setAssignments(data.assignments || [])
+      } catch (error) {
+        console.error('Failed to fetch assignments:', error)
+        setAssignments([]) // Show empty state on error
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (userId && userRole) {
+      fetchAssignments()
+    }
+  }, [userId, userRole])
 
   const getStatusColor = (status: Assignment['status']) => {
     switch (status) {
