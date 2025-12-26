@@ -46,7 +46,10 @@ export default function NotificationsPage() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
                     </div>
                 }>
-                    <NotificationManager userId={session.user.id} userRole={session.user.role} />
+                    <NotificationManager
+                        userId={session.user.id}
+                        userRole={session.user.role.toLowerCase() as 'student' | 'tutor'}
+                    />
                 </Suspense>
             </div>
         </div>
