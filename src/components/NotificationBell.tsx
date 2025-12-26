@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
+import { useRouter, useParams } from 'next/navigation';
 
 interface Notification {
     id: string;
@@ -26,6 +27,9 @@ export function NotificationBell() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
+    const router = useRouter();
+    const params = useParams();
+    const locale = params?.locale || 'en';
 
     const unreadCount = notifications.filter((n) => !n.readAt).length;
 
@@ -85,6 +89,7 @@ export function NotificationBell() {
         switch (type) {
             case 'APPOINTMENT_REMINDER':
             case 'APPOINTMENT_BOOKED':
+            case 'CONFIRMATION':
                 return '📅';
             case 'APPOINTMENT_CANCELLED':
                 return '❌';
@@ -198,7 +203,7 @@ export function NotificationBell() {
                             className="w-full"
                             onClick={() => {
                                 setOpen(false);
-                                window.location.href = '/notifications';
+                                router.push(`/${locale}/notifications`);
                             }}
                         >
                             View all notifications
