@@ -189,7 +189,7 @@ export default function StudentProgress({ studentId }: StudentProgressProps) {
             <div className="text-indigo-700">{t('overall.totalSessions')}</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-indigo-600">4.9</div>
+            <div className="text-2xl font-bold text-indigo-600">0.0</div>
             <div className="text-indigo-700">{t('overall.averageRating')}</div>
           </div>
         </div>

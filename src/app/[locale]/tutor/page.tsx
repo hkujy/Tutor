@@ -89,7 +89,7 @@ function TutorDashboard() {
     { label: t('stats.totalStudents'), value: '24', icon: '👥', color: 'bg-blue-500' },
     { label: t('stats.thisWeek'), value: '8', icon: '📚', color: 'bg-green-500' },
     { label: t('stats.thisWeek'), value: '12', icon: '⏰', color: 'bg-yellow-500' }, // Reusing thisWeek key or create nextWeek if needed, leaving as placeholder
-    { label: t('stats.rating'), value: '4.8', icon: '⭐', color: 'bg-purple-500' }
+    { label: t('stats.rating'), value: '0.0', icon: '⭐', color: 'bg-purple-500' }
   ]
 
   if (!user?.id) {

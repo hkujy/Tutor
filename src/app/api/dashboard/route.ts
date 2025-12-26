@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         }),
         // Upcoming appointments
         db.appointment.count({
-          where: { 
+          where: {
             tutorId,
             startTime: { gte: new Date() },
             status: { in: ['SCHEDULED', 'CONFIRMED'] }
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         }),
         // Completed appointments
         db.appointment.count({
-          where: { 
+          where: {
             tutorId,
             status: 'COMPLETED'
           }
@@ -68,8 +68,14 @@ export async function GET(request: NextRequest) {
         })
       ])
 
-      // Calculate average rating (mock for now)
-      const avgRating = 4.8
+      // Fetch tutor record to get rating
+      const tutorRecord = await db.tutor.findUnique({
+        where: { userId: tutorId },
+        select: { rating: true }
+      })
+
+      // Use actual rating or default to 0
+      const avgRating = tutorRecord?.rating ? Number(tutorRecord.rating) : 0
 
       return NextResponse.json({
         stats: {
@@ -104,7 +110,7 @@ export async function GET(request: NextRequest) {
         }),
         // Upcoming appointments
         db.appointment.count({
-          where: { 
+          where: {
             studentId: studentRecord.id,
             startTime: { gte: new Date() },
             status: { in: ['SCHEDULED', 'CONFIRMED'] }
@@ -112,7 +118,7 @@ export async function GET(request: NextRequest) {
         }),
         // Completed appointments
         db.appointment.count({
-          where: { 
+          where: {
             studentId: studentRecord.id,
             status: 'COMPLETED'
           }
@@ -134,8 +140,8 @@ export async function GET(request: NextRequest) {
         })
       ])
 
-      // Calculate average rating given (mock for now)
-      const avgRating = 4.9
+      // Default rating to 0 for students as requested (no rating field in schema)
+      const avgRating = 0
 
       return NextResponse.json({
         stats: {
