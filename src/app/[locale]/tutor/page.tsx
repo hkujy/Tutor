@@ -356,22 +356,25 @@ function TutorDashboard() {
         )}
 
         {activeTab === 'settings' && (
+          <div className="space-y-6">
+            <ErrorBoundary fallback={<SectionError title="Profile Error" message="Could not load profile settings." />}>
+              <Suspense fallback={<AvailabilitySkeleton />}>
                 <ProfileManager />
               </Suspense>
             </ErrorBoundary>
             <ErrorBoundary fallback={<SectionError title="Settings Error" message="Could not load notification settings." />}>
               <Suspense fallback={<AvailabilitySkeleton />}>
-                <NotificationPreferencesManager userId={user?.id || ''} />
+                <NotificationPreferencesManager />
               </Suspense>
             </ErrorBoundary>
-          </div >
-        )
-}
-      </div >
-    </div >
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
 export default function TutorPage() {
   return <TutorDashboard />
 }
+```
