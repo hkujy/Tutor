@@ -254,19 +254,8 @@ function TutorDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                        <span className="text-green-600 font-semibold">✓</span>
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-foreground">{t('recentActivity.sessionCompleted', { name: 'John Doe' })}</p>
-                        <p className="text-sm text-muted-foreground">Mathematics - 2 hours ago</p>
-                      </div>
-                    </div>
-                    <span className="text-sm text-muted-foreground">{t('recentActivity.today')}</span>
-                  </div>
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No recent activity</p>
                 </div>
               )}
             </div>
