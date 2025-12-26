@@ -309,10 +309,10 @@ function TutorDashboard() {
             {/* Appointment List */}
             <Suspense fallback={<AppointmentSkeleton />}>
               <AppointmentManagement userRole="tutor" userId={user?.id || ''} />
-```
             </Suspense>
           </div>
         )}
+
 
         {activeTab === 'billing' && (
           <ErrorBoundary fallback={<SectionError section="Billing" />}>
