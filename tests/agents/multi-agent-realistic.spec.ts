@@ -1,7 +1,7 @@
 import { test, expect, Browser } from '@playwright/test'
 import { TutorAgent } from './tutor-agent'
 import { StudentAgent } from './student-agent'
-import { TestRunLogger, ScenarioLogger, Agent Logger } from './test-logger'
+import { TestRunLogger, ScenarioLogger, AgentLogger } from './test-logger'
 
 /**
  * Multi-Agent Realistic Scenarios
@@ -10,7 +10,7 @@ import { TestRunLogger, ScenarioLogger, Agent Logger } from './test-logger'
  * Scenarios from approved test plan
  */
 
-const RUN_ID = `run-${Date.now()}`
+const RUN_ID = `run - ${Date.now()} `
 const testRunLogger = new TestRunLogger(RUN_ID)
 
 test.describe('Multi-Agent Realistic Scenarios', () => {
@@ -99,7 +99,7 @@ test.describe('Multi-Agent Realistic Scenarios', () => {
 
                     scenarioLogger.addEvent({
                         timestamp: new Date().toISOString(),
-                        agentId: `student-${index + 1}`,
+                        agentId: `student - ${index + 1} `,
                         agentName: cred.name,
                         eventType: 'action',
                         action: 'login',
@@ -118,7 +118,7 @@ test.describe('Multi-Agent Realistic Scenarios', () => {
 
                     scenarioLogger.addEvent({
                         timestamp: new Date().toISOString(),
-                        agentId: `student-${index + 1}`,
+                        agentId: `student - ${index + 1} `,
                         agentName: cred.name,
                         eventType: 'action',
                         action: 'browse',
@@ -144,7 +144,7 @@ test.describe('Multi-Agent Realistic Scenarios', () => {
 
                     scenarioLogger.addEvent({
                         timestamp: new Date().toISOString(),
-                        agentId: `student-${index + 1}`,
+                        agentId: `student - ${index + 1} `,
                         agentName: studentCredentials[index].name,
                         eventType: 'error',
                         data: { error: error.message },
@@ -161,7 +161,7 @@ test.describe('Multi-Agent Realistic Scenarios', () => {
             const successful = results.filter(r => r.success).length
             const failed = results.filter(r => !r.success).length
 
-            console.log(`\n📊 Results:`)
+            console.log(`\n📊 Results: `)
             console.log(`   Successful: ${successful}/${results.length}`)
             console.log(`   Failed: ${failed}/${results.length}`)
 
