@@ -58,6 +58,8 @@ jobs:
 
     - name: Run database migrations
       run: |
+        # Rename .env to prevent it from being loaded
+        if [ -f .env ]; then mv .env .env.backup; fi
         npx prisma migrate deploy
         npx prisma generate
       env:
