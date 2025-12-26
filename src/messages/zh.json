@@ -335,34 +335,6 @@
         "nextPayment": "下次付款进度"
       }
     },
-    "StudentProgress": {
-      "title": "学习进度",
-      "progressComplete": "完成 {progress}%",
-      "sessionsInfo": "已完成 {completed} / {total} 节课",
-      "remainingSessions": "剩余 {remaining} 节课",
-      "lastSession": "上次",
-      "nextSession": "下次",
-      "actions": {
-        "hideDetails": "隐藏详情",
-        "viewDetails": "查看详情"
-      },
-      "details": {
-        "recentActivities": "最近活动",
-        "activity1": "完成二次方程习题",
-        "activity2": "作业：第5章习题1-15",
-        "activity3": "模拟考试取得90%分数",
-        "upcomingGoals": "即将到来的目标",
-        "goal1": "掌握多项式因式分解",
-        "goal2": "完成模拟考试",
-        "goal3": "复习三角函数"
-      },
-      "overall": {
-        "title": "整体表现",
-        "averageProgress": "平均进度",
-        "totalSessions": "总课程数",
-        "averageRating": "平均评分"
-      }
-    },
     "AssignmentManager": {
       "tutorTitle": "作业管理",
       "studentTitle": "我的作业",

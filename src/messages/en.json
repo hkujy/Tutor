@@ -335,38 +335,6 @@
         "nextPayment": "Progress to next payment"
       }
     },
-    "StudentProgress": {
-      "title": "Learning Progress",
-      "progressComplete": "{progress}% Complete",
-      "sessionsInfo": "{completed} of {total} sessions",
-      "remainingSessions": "{remaining} remaining",
-      "lastSession": "Last",
-      "nextSession": "Next",
-      "actions": {
-        "hideDetails": "Hide details",
-        "viewDetails": "View details"
-      },
-      "details": {
-        "recentActivities": "Recent Activities",
-        "activity1": "Completed quadratic equations worksheet",
-        "activity2": "Homework: Chapter 5 problems 1-15",
-        "activity3": "Achieved 90% on practice test",
-        "upcomingGoals": "Upcoming Goals",
-        "goal1": "Master polynomial factoring",
-        "goal2": "Complete practice exam",
-        "goal3": "Review trigonometric functions"
-      },
-      "overall": {
-        "title": "Overall Performance",
-        "averageProgress": "Average Progress",
-        "totalSessions": "Total Sessions",
-        "averageRating": "Average Rating"
-      },
-      "empty": {
-        "title": "No Progress Data",
-        "description": "Your learning progress will appear here once you complete your first tutoring sessions."
-      }
-    },
     "AssignmentManager": {
       "tutorTitle": "Assignment Management",
       "studentTitle": "My Assignments",
@@ -808,6 +776,10 @@
       "averageProgress": "Average Progress",
       "totalSessions": "Total Sessions",
       "averageRating": "Average Rating"
+    },
+    "empty": {
+      "title": "No Progress Data",
+      "description": "Your learning progress will appear here once you complete your first tutoring sessions."
     }
   },
   "LectureHoursTracker": {
