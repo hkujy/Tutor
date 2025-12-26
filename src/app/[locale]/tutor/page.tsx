@@ -205,6 +205,7 @@ function TutorDashboard() {
                 <button
                   onClick={() => setActiveTab('students')}
                   className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
+                  data-testid="quick-action-students"
                 >
                   <div className="text-center">
                     <span className="text-2xl mb-2 block">👥</span>

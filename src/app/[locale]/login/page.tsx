@@ -64,14 +64,14 @@ export default function LoginPage() {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="bg-card rounded-xl shadow-lg p-8 border border-border">
-          <div className="text-center mb-8">
+          <header className="text-center mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">
               Tutoring Calendar
             </h1>
             <p className="text-muted-foreground">
               {t('loginTitle')}
             </p>
-          </div>
+          </header>
 
           {error && (
             <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
