@@ -10,6 +10,11 @@ const nextConfig = {
   // Enable React strict mode for better error detection
   reactStrictMode: true,
 
+  // ESLint configuration
+  eslint: {
+    dirs: ['src', 'app', 'components', 'lib', 'utils'], // Specify directories to lint
+  },
+
   env: {
     CUSTOM_KEY: 'my-value',
   },
