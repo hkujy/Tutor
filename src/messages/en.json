@@ -51,6 +51,21 @@
     "register": "Sign Up",
     "profile": "Profile"
   },
+  "ProfileManager": {
+    "title": "Personal Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "emailNote": "Contact support to change your email address.",
+    "phone": "Phone Number",
+    "phonePlaceholder": "Enter your phone number",
+    "saveButton": "Save Changes",
+    "messages": {
+      "loadError": "Failed to load profile. Please try again.",
+      "saveSuccess": "Profile updated successfully!",
+      "saveError": "Failed to update profile. Please try again."
+    }
+  },
   "Auth": {
     "loginTitle": "Sign in to your account",
     "emailLabel": "Email address",

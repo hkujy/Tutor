@@ -16,22 +16,6 @@ export default function LoginPage() {
   const router = useRouter()
   const t = useTranslations('Auth')
 
-  // Demo user credentials from the seed data
-  const demoUsers = {
-    TUTOR: {
-      email: 'tutor@example.com',
-      password: 'tutor123',
-      firstName: 'Sarah',
-      lastName: 'Johnson'
-    },
-    STUDENT: {
-      email: 'student@example.com',
-      password: 'student123',
-      firstName: 'Alex',
-      lastName: 'Smith'
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -75,52 +59,6 @@ export default function LoginPage() {
     }
   }
 
-  const handleQuickLogin = async (role: 'TUTOR' | 'STUDENT') => {
-    const demoUser = demoUsers[role]
-    setLoading(true)
-    setError('')
-
-    try {
-      const result = await signIn('credentials', {
-        email: demoUser.email,
-        password: demoUser.password,
-        redirect: false,
-      })
-
-      // Check for explicit error first
-      if (result?.error) {
-        console.error('Demo login error:', result.error)
-        setError('Demo login failed: ' + result.error)
-        return
-      }
-
-      // If we get ok=true, it's definitely successful
-      if (result?.ok) {
-        router.push(role === 'TUTOR' ? '/tutor' : '/student')
-        return
-      }
-
-      // Even if result.ok is undefined but no error, try to redirect
-      // This handles cases where NextAuth doesn't set ok correctly with tunnel URLs
-      try {
-        const session = await fetch('/api/auth/session').then(res => res.json())
-        if (session?.user) {
-          // Session exists, login was successful!
-          router.push(role === 'TUTOR' ? '/tutor' : '/student')
-        } else {
-          setError('Demo login failed: Unable to verify session')
-        }
-      } catch (sessionError) {
-        console.error('Session check error:', sessionError)
-        setError('Demo login failed: Session verification error')
-      }
-    } catch (error) {
-      console.error('Quick login error:', error)
-      setError('An unexpected error occurred. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -142,61 +80,6 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-6">
-            {/* Quick Demo Login Buttons */}
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground text-center">Quick Demo Login:</p>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => handleQuickLogin('TUTOR')}
-                  disabled={loading}
-                  className="flex flex-col items-center p-4 border-2 border-primary/30 rounded-lg hover:border-primary hover:bg-primary/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
-                    <svg
-                      className="w-6 h-6 text-primary"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      suppressHydrationWarning={true}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  </div>
-                  <span className="font-medium text-foreground">Tutor</span>
-                  <span className="text-xs text-muted-foreground">Sarah Johnson</span>
-                </button>
-
-                <button
-                  onClick={() => handleQuickLogin('STUDENT')}
-                  disabled={loading}
-                  className="flex flex-col items-center p-4 border-2 border-accent/30 rounded-lg hover:border-accent hover:bg-accent/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center mb-2">
-                    <svg
-                      className="w-6 h-6 text-accent-foreground"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      suppressHydrationWarning={true}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <span className="font-medium text-foreground">Student</span>
-                  <span className="text-xs text-muted-foreground">Alex Smith</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-card text-muted-foreground">{t('orManual')}</span>
-              </div>
-            </div>
-
             {/* Manual Login Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -247,12 +130,6 @@ export default function LoginPage() {
               </div>
             </form>
           </div>
-        </div>
-
-        <div className="text-center text-sm text-muted-foreground">
-          <p>Demo Credentials:</p>
-          <p>Tutor: tutor@example.com / tutor123</p>
-          <p>Student: student@example.com / student123</p>
         </div>
       </div>
     </div>

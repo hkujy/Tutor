@@ -24,6 +24,7 @@ const PaymentManager = lazy(() => import('../../../components/lecture-hours/Paym
 const NotificationManager = lazy(() => import('../../../components/notifications/NotificationManager'))
 const NotificationPreferencesManager = lazy(() => import('../../../components/notifications/NotificationPreferencesManager'))
 const BrowseTutors = lazy(() => import('../../../components/student/BrowseTutors'))
+const ProfileManager = lazy(() => import('../../../components/dashboard/ProfileManager'))
 
 function StudentDashboard() {
   const { user, isLoading } = useAuth()
@@ -323,7 +324,12 @@ function StudentDashboard() {
         )}
 
         {activeTab === 'settings' && (
-          <div>
+          <div className="space-y-6">
+            <ErrorBoundary fallback={<SectionError title="Settings Error" message="Could not load settings." />}>
+              <Suspense fallback={<AvailabilitySkeleton />}>
+                <ProfileManager />
+              </Suspense>
+            </ErrorBoundary>
             <ErrorBoundary fallback={<SectionError title="Settings Error" message="Could not load settings." />}>
               <Suspense fallback={<AvailabilitySkeleton />}>
                 <NotificationPreferencesManager userId={user?.id || ''} />

@@ -51,6 +51,21 @@
     "register": "注册",
     "profile": "个人资料"
   },
+  "ProfileManager": {
+    "title": "个人信息",
+    "firstName": "名",
+    "lastName": "姓",
+    "email": "电子邮箱",
+    "emailNote": "如需更改邮箱地址，请联系客服。",
+    "phone": "电话号码",
+    "phonePlaceholder": "请输入您的电话号码",
+    "saveButton": "保存更改",
+    "messages": {
+      "loadError": "加载个人资料失败，请重试。",
+      "saveSuccess": "个人资料更新成功！",
+      "saveError": "更新个人资料失败，请重试。"
+    }
+  },
   "Auth": {
     "loginTitle": "登录您的账户",
     "emailLabel": "电子邮件地址",

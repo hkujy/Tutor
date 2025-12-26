@@ -8,6 +8,8 @@ import { DashboardSkeleton, AppointmentSkeleton, AvailabilitySkeleton, NotesSkel
 import { ThemeToggle } from '../../../components/ui/ThemeToggle'
 import { NotificationBell } from '../../../components/NotificationBell'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs'
+import ErrorBoundary from '../../../components/ErrorBoundary'
+import { SectionError } from '../../../components/ui/ErrorFallbacks'
 import { Button } from '../../../components/ui/button'
 import { Plus, Clock, CreditCard } from 'lucide-react'
 import { toast } from 'sonner'
@@ -23,6 +25,7 @@ const PaymentManager = lazy(() => import('../../../components/lecture-hours/Paym
 const StudentSummaryList = lazy(() => import('../../../components/dashboard/StudentSummaryList'))
 const NotificationManager = lazy(() => import('../../../components/notifications/NotificationManager'))
 const NotificationPreferencesManager = lazy(() => import('../../../components/notifications/NotificationPreferencesManager'))
+const ProfileManager = lazy(() => import('../../../components/dashboard/ProfileManager'))
 
 function TutorDashboard() {
   const { user, isLoading } = useAuth()
@@ -356,10 +359,17 @@ function TutorDashboard() {
         )}
 
         {activeTab === 'settings' && (
-          <div>
-            <Suspense fallback={<AvailabilitySkeleton />}>
-              <NotificationPreferencesManager userId={user?.id || ''} />
-            </Suspense>
+          <div className="space-y-6">
+            <ErrorBoundary fallback={<SectionError title="Profile Error" message="Could not load profile settings." />}>
+              <Suspense fallback={<AvailabilitySkeleton />}>
+                <ProfileManager />
+              </Suspense>
+            </ErrorBoundary>
+            <ErrorBoundary fallback={<SectionError title="Settings Error" message="Could not load notification settings." />}>
+              <Suspense fallback={<AvailabilitySkeleton />}>
+                <NotificationPreferencesManager userId={user?.id || ''} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
       </div>
