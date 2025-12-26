@@ -377,4 +377,3 @@ function TutorDashboard() {
 export default function TutorPage() {
   return <TutorDashboard />
 }
-```
