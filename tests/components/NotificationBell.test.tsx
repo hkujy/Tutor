@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import NotificationBell from '@/components/NotificationBell';
+import { NotificationBell } from '@/components/NotificationBell';
 import { useSocketEvent } from '@/hooks/useSocket';
 
 // Mock next-intl
@@ -20,6 +20,19 @@ jest.mock('next-auth/react', () => ({
         },
         status: 'authenticated',
     }),
+}));
+
+// Mock next/navigation
+const mockPush = jest.fn();
+const mockParams = { locale: 'en' };
+
+jest.mock('next/navigation', () => ({
+    useRouter: () => ({
+        push: mockPush,
+        replace: jest.fn(),
+        prefetch: jest.fn(),
+    }),
+    useParams: () => mockParams,
 }));
 
 // Mock Socket.IO hooks
@@ -53,6 +66,7 @@ describe('NotificationBell Component', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        mockPush.mockClear();
 
         (global.fetch as jest.Mock).mockResolvedValue({
             ok: true,

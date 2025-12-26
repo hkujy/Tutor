@@ -4,9 +4,23 @@ import { NotificationBell } from '../NotificationBell';
 // Mock fetch globally
 global.fetch = jest.fn();
 
+// Mock next/navigation
+const mockPush = jest.fn();
+const mockParams = { locale: 'en' };
+
+jest.mock('next/navigation', () => ({
+    useRouter: () => ({
+        push: mockPush,
+        replace: jest.fn(),
+        prefetch: jest.fn(),
+    }),
+    useParams: () => mockParams,
+}));
+
 describe('NotificationBell', () => {
     beforeEach(() => {
         (fetch as jest.Mock).mockClear();
+        mockPush.mockClear();
     });
 
     it('should render notification bell button', () => {
