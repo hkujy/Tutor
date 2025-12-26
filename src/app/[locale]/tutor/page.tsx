@@ -26,12 +26,13 @@ const StudentSummaryList = lazy(() => import('../../../components/dashboard/Stud
 const NotificationManager = lazy(() => import('../../../components/notifications/NotificationManager'))
 const NotificationPreferencesManager = lazy(() => import('../../../components/notifications/NotificationPreferencesManager'))
 const ProfileManager = lazy(() => import('../../../components/dashboard/ProfileManager'))
+const HourlyRateManager = lazy(() => import('../../../components/tutor/HourlyRateManager'))
 
 function TutorDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
   const t = useTranslations('TutorDashboard')
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'availability' | 'appointments' | 'assignments' | 'billing' | 'settings'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'availability' | 'appointments' | 'assignments' | 'billing' | 'rates' | 'settings'>('dashboard')
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -80,6 +81,7 @@ function TutorDashboard() {
     { id: 'appointments', name: t('tabs.appointments'), icon: '📅' },
     { id: 'assignments', name: t('tabs.assignments'), icon: '📝' },
     { id: 'billing', name: t('tabs.billing'), icon: '💳' },
+    { id: 'rates', name: t('tabs.rates'), icon: '💰' },
     { id: 'settings', name: t('tabs.settings'), icon: '⚙️' }
   ]
 
@@ -307,37 +309,42 @@ function TutorDashboard() {
             {/* Appointment List */}
             <Suspense fallback={<AppointmentSkeleton />}>
               <AppointmentManagement userRole="tutor" userId={user?.id || ''} />
+```
             </Suspense>
           </div>
         )}
 
         {activeTab === 'billing' && (
-          <div>
-            <Tabs defaultValue="hours" className="w-full">
-              <TabsList className="grid w-full max-w-md grid-cols-2">
-                <TabsTrigger value="hours">
-                  <Clock className="mr-2 h-4 w-4" />
-                  Lecture Hours
-                </TabsTrigger>
-                <TabsTrigger value="payments">
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Payments
-                </TabsTrigger>
-              </TabsList>
+          <ErrorBoundary fallback={<SectionError section="Billing" />}>
+            <Suspense fallback={<DashboardSkeleton />}>
+              <Tabs defaultValue="hours">
+                <TabsList className="grid w-full max-w-md grid-cols-2">
+                  <TabsTrigger value="hours">
+                    <Clock className="h-4 w-4 mr-2" />
+                    Lecture Hours
+                  </TabsTrigger>
+                  <TabsTrigger value="payments">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Payments
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="hours">
+                  <LectureHoursTracker tutorId={user?.id || ''} />
+                </TabsContent>
+                <TabsContent value="payments">
+                  <PaymentManager tutorId={user?.id || ''} />
+                </TabsContent>
+              </Tabs>
+            </Suspense>
+          </ErrorBoundary>
+        )}
 
-              <TabsContent value="hours" className="mt-6">
-                <Suspense fallback={<DashboardSkeleton />}>
-                  <LectureHoursTracker userRole="tutor" userId={user?.id || ''} />
-                </Suspense>
-              </TabsContent>
-
-              <TabsContent value="payments" className="mt-6">
-                <Suspense fallback={<DashboardSkeleton />}>
-                  <PaymentManager userRole="tutor" userId={user?.id || ''} />
-                </Suspense>
-              </TabsContent>
-            </Tabs>
-          </div>
+        {activeTab === 'rates' && (
+          <ErrorBoundary fallback={<SectionError section="Rates" />}>
+            <Suspense fallback={<DashboardSkeleton />}>
+              <HourlyRateManager />
+            </Suspense>
+          </ErrorBoundary>
         )}
 
         {activeTab === 'assignments' && (
@@ -349,9 +356,6 @@ function TutorDashboard() {
         )}
 
         {activeTab === 'settings' && (
-          <div className="space-y-6">
-            <ErrorBoundary fallback={<SectionError title="Profile Error" message="Could not load profile settings." />}>
-              <Suspense fallback={<AvailabilitySkeleton />}>
                 <ProfileManager />
               </Suspense>
             </ErrorBoundary>
@@ -360,10 +364,11 @@ function TutorDashboard() {
                 <NotificationPreferencesManager userId={user?.id || ''} />
               </Suspense>
             </ErrorBoundary>
-          </div>
-        )}
-      </div>
-    </div>
+          </div >
+        )
+}
+      </div >
+    </div >
   )
 }
 
