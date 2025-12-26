@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl'
 import { notificationService, type Notification, type NotificationsResponse } from '../../lib/services/notification.service'
 import { Skeleton } from '../ui/skeleton'
 import LoadingButton from '../ui/LoadingButton'
+import { useSocketEvent } from '@/hooks/useSocket'
+import { SOCKET_EVENTS } from '@/lib/socket/socket-events'
 
 interface NotificationManagerProps {
   userId: string
@@ -67,6 +69,33 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
       isMounted = false
     }
   }, [activeFilter, currentPage])
+
+  // Listen for new notifications via socket
+  useSocketEvent(SOCKET_EVENTS.NOTIFICATION_NEW, (data) => {
+    // Only add if it matches current filter or we are on 'all'
+    if (activeFilter === 'all' || activeFilter === data.type || (activeFilter === 'unread' && !data.read)) {
+      setNotifications(prev => [
+        {
+          id: data.id,
+          title: data.title,
+          message: data.message,
+          type: data.type,
+          readAt: data.read ? new Date().toISOString() : null,
+          createdAt: data.createdAt,
+          channels: ['in_app'], // Default since it's via socket
+          scheduledFor: null,
+          sentAt: data.createdAt,
+          emailSent: false,
+          smsSent: false
+        },
+        ...prev
+      ])
+
+      if (!data.read) {
+        setUnreadCount(prev => prev + 1)
+      }
+    }
+  })
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -283,16 +312,16 @@ export default function NotificationManager({ userId, userRole }: NotificationMa
                 setSelectedNotifications(new Set())
               }}
               className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${activeFilter === option.key
-                  ? 'bg-indigo-100 text-indigo-700'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                ? 'bg-indigo-100 text-indigo-700'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`}
             >
               {option.icon && <span>{option.icon}</span>}
               <span>{option.label}</span>
               {option.count !== undefined && (
                 <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs ${activeFilter === option.key
-                    ? 'bg-indigo-200 text-indigo-800'
-                    : 'bg-gray-200 text-gray-600'
+                  ? 'bg-indigo-200 text-indigo-800'
+                  : 'bg-gray-200 text-gray-600'
                   }`}>
                   {option.count}
                 </span>

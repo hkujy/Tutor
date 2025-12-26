@@ -32,7 +32,7 @@ function TutorDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
   const t = useTranslations('TutorDashboard')
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'availability' | 'appointments' | 'assignments' | 'billing' | 'rates' | 'settings'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'availability' | 'appointments' | 'assignments' | 'billing' | 'rates' | 'notifications' | 'settings'>('dashboard')
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -82,6 +82,7 @@ function TutorDashboard() {
     { id: 'assignments', name: t('tabs.assignments'), icon: '📝' },
     { id: 'billing', name: t('tabs.billing'), icon: '💳' },
     { id: 'rates', name: t('tabs.rates'), icon: '💰' },
+    { id: 'notifications', name: t('tabs.notifications'), icon: '🔔' },
     { id: 'settings', name: t('tabs.settings'), icon: '⚙️' }
   ]
 
@@ -343,6 +344,17 @@ function TutorDashboard() {
           <ErrorBoundary fallback={<SectionError title="Rates" />}>
             <Suspense fallback={<DashboardSkeleton />}>
               <HourlyRateManager />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+
+        {activeTab === 'notifications' && (
+          <ErrorBoundary fallback={<SectionError title="Notifications Error" message="Could not load notifications." />}>
+            <Suspense fallback={<DashboardSkeleton />}>
+              <NotificationManager
+                userId={user?.id || ''}
+                userRole="tutor"
+              />
             </Suspense>
           </ErrorBoundary>
         )}

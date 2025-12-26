@@ -3,6 +3,8 @@ import { db } from '../../../lib/db/client'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/config'
 import { smsService } from '../../../lib/services/sms.service'
+import { emitToUser } from '../../../lib/socket/socket-server'
+import { SOCKET_EVENTS } from '../../../lib/socket/socket-events'
 
 // Helper to get system setting or default
 async function getSystemSetting(key: string, defaultValue: string): Promise<string> {
@@ -21,14 +23,14 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url)
     const rawLimit = url.searchParams.get('limit')
     const rawPage = url.searchParams.get('page')
-    
+
     // Validate and sanitize pagination parameters
     const limit = Math.min(Math.max(parseInt(rawLimit || '20'), 1), 100) // Max 100 items per page
     const page = Math.max(parseInt(rawPage || '1'), 1) // Minimum page 1
-    
+
     const unreadOnly = url.searchParams.get('unread') === 'true'
     const type = url.searchParams.get('type')
-    
+
     // Validate notification type if provided
     if (type) {
       const validTypes = ['APPOINTMENT_REMINDER', 'ASSIGNMENT_DUE', 'PAYMENT_REMINDER', 'SYSTEM_ANNOUNCEMENT', 'PAYMENT_RECEIVED']
@@ -105,8 +107,8 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!userId || !type || !title || !message) {
-      return NextResponse.json({ 
-        error: 'Missing required fields: userId, type, title, message' 
+      return NextResponse.json({
+        error: 'Missing required fields: userId, type, title, message'
       }, { status: 400 })
     }
 
@@ -114,8 +116,8 @@ export async function POST(request: NextRequest) {
     const validChannels = ['in_app', 'email', 'sms']
     const invalidChannels = channels.filter((channel: string) => !validChannels.includes(channel))
     if (invalidChannels.length > 0) {
-      return NextResponse.json({ 
-        error: `Invalid channels: ${invalidChannels.join(', ')}. Valid channels: ${validChannels.join(', ')}` 
+      return NextResponse.json({
+        error: `Invalid channels: ${invalidChannels.join(', ')}. Valid channels: ${validChannels.join(', ')}`
       }, { status: 400 })
     }
 
@@ -124,11 +126,11 @@ export async function POST(request: NextRequest) {
       where: { id: userId },
       select: { id: true }
     })
-    
+
     if (!userExists) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
-    
+
     // Validate scheduledFor date if provided
     let scheduledDate = null
     if (scheduledFor) {
@@ -138,7 +140,7 @@ export async function POST(request: NextRequest) {
       }
       scheduledDate = date
     }
-    
+
     // Create notification with transaction
     const notification = await db.notification.create({
       data: {
@@ -157,7 +159,7 @@ export async function POST(request: NextRequest) {
       await processNotification(notification)
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       notification: {
         id: notification.id,
         title: notification.title,
@@ -187,240 +189,249 @@ async function processNotification(notification: any) {
         }
       }
     })
-    
+
     if (recentNotifications >= 50) {
       console.warn(`Rate limit exceeded for user ${notification.userId}`)
       return
     }
-    
-        // Get user preferences and phone number
-    
-        const user = await db.user.findUnique({
-    
-          where: { id: notification.userId },
-    
-          include: { notificationPreference: true }
-    
-        })
-    
-    
-    
-        if (!user) return
-    
-    
-    
-        const preferences = user.notificationPreference
-    
-        const channels = notification.channels || ['in_app']
-    
-        const updates: any = { sentAt: new Date() }
-    
-    
-    
-        for (const channel of channels) {
-    
-          if (channel === 'email' && preferences?.emailNotifications !== false) {
-    
-            // TODO: Implement email sending logic with SendGrid/Resend
-    
-            await sendEmailNotification(notification, user.email)
-    
-            updates.emailSent = true
-    
-          } else if (channel === 'sms' && preferences?.smsNotifications === true) {
-    
-            if (user.phone) {
-    
-              const smsResult = await sendSMSNotification(notification, user.phone, user.id)
-    
-              if (smsResult) {
-    
-                updates.smsSent = true
-    
-              }
-    
-            } else {
-    
-              console.warn(`Skipping SMS for user ${user.id}: No phone number`)
-    
-            }
-    
+
+    // Get user preferences and phone number
+
+    const user = await db.user.findUnique({
+
+      where: { id: notification.userId },
+
+      include: { notificationPreference: true }
+
+    })
+
+
+
+    if (!user) return
+
+
+
+    const preferences = user.notificationPreference
+
+    const channels = notification.channels || ['in_app']
+
+    const updates: any = { sentAt: new Date() }
+
+
+
+    for (const channel of channels) {
+
+      if (channel === 'email' && preferences?.emailNotifications !== false) {
+
+        // TODO: Implement email sending logic with SendGrid/Resend
+
+        await sendEmailNotification(notification, user.email)
+
+        updates.emailSent = true
+
+      } else if (channel === 'sms' && preferences?.smsNotifications === true) {
+
+        if (user.phone) {
+
+          const smsResult = await sendSMSNotification(notification, user.phone, user.id)
+
+          if (smsResult) {
+
+            updates.smsSent = true
+
           }
-    
-        }
-    
-    
-    
-        // Update notification status
-    
-        await db.notification.update({
-    
-          where: { id: notification.id },
-    
-          data: updates
-    
-        })
-    
-      } catch (error) {
-    
-        console.error('Notification processing error:', error)
-    
-      }
-    
-    }
-    
-    
-    
-    // Placeholder for email sending
-    
-    async function sendEmailNotification(notification: any, email: string) {
-    
-      // TODO: Implement with SendGrid/Resend
-    
-      console.log('Email notification sent:', notification.title)
-    
-    }
-    
-    
-    
-    // SMS sending with budget and cap enforcement
-    
-    async function sendSMSNotification(notification: any, phoneNumber: string, userId: string): Promise<boolean> {
-    
-      try {
-    
-        // 1. Check Global Budget
-    
-        const monthlyBudget = parseFloat(await getSystemSetting('sms_monthly_budget', '100.00'))
-    
-        const currentSpend = parseFloat(await getSystemSetting('sms_current_month_spend', '0.00'))
-    
-    
-    
-        if (currentSpend >= monthlyBudget) {
-    
-          console.warn('Global SMS budget exceeded. Skipping SMS.')
-    
-          // TODO: Alert admin
-    
-          return false
-    
-        }
-    
-    
-    
-        // 2. Check User Daily Cap
-    
-        const dailyCap = parseInt(await getSystemSetting('sms_daily_cap_per_user', '5'))
-    
-        const today = new Date()
-    
-        today.setHours(0, 0, 0, 0)
-    
-        
-    
-        const userUsage = await db.smsUsage.findUnique({
-    
-          where: {
-    
-            userId_date: {
-    
-              userId,
-    
-              date: today
-    
-            }
-    
-          }
-    
-        })
-    
-    
-    
-        if (userUsage && userUsage.count >= dailyCap) {
-    
-          console.warn(`User ${userId} exceeded daily SMS cap. Skipping SMS.`)
-    
-          return false
-    
-        }
-    
-    
-    
-        // 3. Send SMS
-    
-        const result = await smsService.send(phoneNumber, notification.message)
-    
-        
-    
-        if (result.success) {
-    
-          const cost = result.cost || 0.01
-    
-    
-    
-          // 4. Update Global Spend
-    
-          // Note: This is a simple implementation. In high-concurrency, use atomic increments or a dedicated service.
-    
-          const newSpend = currentSpend + cost
-    
-          await db.systemSettings.upsert({
-    
-            where: { key: 'sms_current_month_spend' },
-    
-            update: { value: newSpend.toString() },
-    
-            create: { key: 'sms_current_month_spend', value: newSpend.toString() }
-    
-          })
-    
-    
-    
-          // 5. Update User Usage
-    
-          await db.smsUsage.upsert({
-    
-            where: {
-    
-              userId_date: {
-    
-                userId,
-    
-                date: today
-    
-              }
-    
-            },
-    
-            update: { count: { increment: 1 } },
-    
-            create: { userId, date: today, count: 1 }
-    
-          })
-    
-    
-    
-          console.log(`SMS sent to ${userId}. Cost: ${cost}`)
-    
-          return true
-    
+
         } else {
-    
-          console.error('SMS send failed:', result.error)
-    
-          return false
-    
+
+          console.warn(`Skipping SMS for user ${user.id}: No phone number`)
+
         }
-    
-      } catch (error) {
-    
-        console.error('Error in sendSMSNotification:', error)
-    
-        return false
-    
+
       }
-    
+
     }
-    
-    
+
+    // Emit real-time notification via socket
+    emitToUser(notification.userId, SOCKET_EVENTS.NOTIFICATION_NEW, {
+      id: notification.id,
+      userId: notification.userId,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      read: false,
+      createdAt: notification.createdAt.toISOString(),
+      data: notification.data
+    })
+
+    // Update notification status
+
+    await db.notification.update({
+
+      where: { id: notification.id },
+
+      data: updates
+
+    })
+
+  } catch (error) {
+
+    console.error('Notification processing error:', error)
+
+  }
+
+}
+
+
+
+// Placeholder for email sending
+
+async function sendEmailNotification(notification: any, email: string) {
+
+  // TODO: Implement with SendGrid/Resend
+
+  console.log('Email notification sent:', notification.title)
+
+}
+
+
+
+// SMS sending with budget and cap enforcement
+
+async function sendSMSNotification(notification: any, phoneNumber: string, userId: string): Promise<boolean> {
+
+  try {
+
+    // 1. Check Global Budget
+
+    const monthlyBudget = parseFloat(await getSystemSetting('sms_monthly_budget', '100.00'))
+
+    const currentSpend = parseFloat(await getSystemSetting('sms_current_month_spend', '0.00'))
+
+
+
+    if (currentSpend >= monthlyBudget) {
+
+      console.warn('Global SMS budget exceeded. Skipping SMS.')
+
+      // TODO: Alert admin
+
+      return false
+
+    }
+
+
+
+    // 2. Check User Daily Cap
+
+    const dailyCap = parseInt(await getSystemSetting('sms_daily_cap_per_user', '5'))
+
+    const today = new Date()
+
+    today.setHours(0, 0, 0, 0)
+
+
+
+    const userUsage = await db.smsUsage.findUnique({
+
+      where: {
+
+        userId_date: {
+
+          userId,
+
+          date: today
+
+        }
+
+      }
+
+    })
+
+
+
+    if (userUsage && userUsage.count >= dailyCap) {
+
+      console.warn(`User ${userId} exceeded daily SMS cap. Skipping SMS.`)
+
+      return false
+
+    }
+
+
+
+    // 3. Send SMS
+
+    const result = await smsService.send(phoneNumber, notification.message)
+
+
+
+    if (result.success) {
+
+      const cost = result.cost || 0.01
+
+
+
+      // 4. Update Global Spend
+
+      // Note: This is a simple implementation. In high-concurrency, use atomic increments or a dedicated service.
+
+      const newSpend = currentSpend + cost
+
+      await db.systemSettings.upsert({
+
+        where: { key: 'sms_current_month_spend' },
+
+        update: { value: newSpend.toString() },
+
+        create: { key: 'sms_current_month_spend', value: newSpend.toString() }
+
+      })
+
+
+
+      // 5. Update User Usage
+
+      await db.smsUsage.upsert({
+
+        where: {
+
+          userId_date: {
+
+            userId,
+
+            date: today
+
+          }
+
+        },
+
+        update: { count: { increment: 1 } },
+
+        create: { userId, date: today, count: 1 }
+
+      })
+
+
+
+      console.log(`SMS sent to ${userId}. Cost: ${cost}`)
+
+      return true
+
+    } else {
+
+      console.error('SMS send failed:', result.error)
+
+      return false
+
+    }
+
+  } catch (error) {
+
+    console.error('Error in sendSMSNotification:', error)
+
+    return false
+
+  }
+
+}
+

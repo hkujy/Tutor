@@ -30,7 +30,7 @@ function StudentDashboard() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
   const t = useTranslations('StudentDashboard')
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'sessions' | 'assignments' | 'billing' | 'settings'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'sessions' | 'assignments' | 'billing' | 'notifications' | 'settings'>('dashboard')
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [dashboardStats, setDashboardStats] = useState<any>(null)
@@ -94,6 +94,7 @@ function StudentDashboard() {
     { id: 'sessions', name: t('tabs.sessions'), icon: '📅' },
     { id: 'assignments', name: t('tabs.assignments'), icon: '📝' },
     { id: 'billing', name: t('tabs.billing'), icon: '💳' },
+    { id: 'notifications', name: t('tabs.notifications'), icon: '🔔' },
     { id: 'settings', name: t('tabs.settings'), icon: '⚙️' }
   ]
 
@@ -321,6 +322,17 @@ function StudentDashboard() {
               </TabsContent>
             </Tabs>
           </div>
+        )}
+
+        {activeTab === 'notifications' && (
+          <ErrorBoundary fallback={<SectionError title="Notifications Error" message="Could not load notifications." />}>
+            <Suspense fallback={<DashboardSkeleton />}>
+              <NotificationManager
+                userId={user?.id || ''}
+                userRole="student"
+              />
+            </Suspense>
+          </ErrorBoundary>
         )}
 
         {activeTab === 'settings' && (

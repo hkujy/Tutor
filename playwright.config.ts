@@ -92,6 +92,18 @@ export default defineConfig({
       timeout: 120000, // 120s for heavy concurrent tests
       workers: 1, // Run sequentially to avoid resource conflicts
     },
+    {
+      name: 'production-simulation',
+      testDir: './tests/agents',
+      testMatch: '**/vercel-simulation.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'https://tutor-sandy.vercel.app/',
+        actionTimeout: 20000,
+        navigationTimeout: 20000,
+      },
+      timeout: 180000, // 3 minutes for production tests
+    },
   ],
 
   /* Run your local dev server before starting the tests */

@@ -13,6 +13,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import { useRouter, useParams } from 'next/navigation';
+import { useSocketEvent } from '@/hooks/useSocket';
+import { SOCKET_EVENTS } from '@/lib/socket/socket-events';
 
 interface Notification {
     id: string;
@@ -50,6 +52,30 @@ export function NotificationBell() {
             setLoading(false);
         }
     };
+
+    // Listen for new notifications via socket
+    useSocketEvent(SOCKET_EVENTS.NOTIFICATION_NEW, (data) => {
+        setNotifications((prev) => [
+            {
+                id: data.id,
+                title: data.title,
+                message: data.message,
+                type: data.type,
+                readAt: null,
+                createdAt: new Date(data.createdAt),
+            },
+            ...prev,
+        ].slice(0, 20)); // Keep only latest 20 in bell
+
+        // Show toast
+        toast.info(data.title, {
+            description: data.message,
+            action: {
+                label: 'View',
+                onClick: () => router.push(`/${locale}/notifications`),
+            },
+        });
+    });
 
     const markAsRead = async (id: string) => {
         try {
