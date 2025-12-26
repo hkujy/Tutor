@@ -179,7 +179,8 @@ model Student {
   assignmentSubmissions AssignmentSubmission[]
   studentProgress  StudentProgress[]
   lectureHours     LectureHours[]
-  notes            StudentNote[]
+  studentNotes     StudentNote[]
+  customRates      StudentRate[]
 
   @@map("students")
 }
@@ -208,6 +209,7 @@ model Tutor {
   appointments     Appointment[]
   lectureHours     LectureHours[]
   studentNotes     StudentNote[]
+  studentRates     StudentRate[]
 
   @@map("tutors")
 }
@@ -262,6 +264,8 @@ model Appointment {
   zoomLink    String?           @map("zoom_link")
   rating      Int?              @db.SmallInt // 1-5 stars
   feedback    String?
+  hourlyRate  Decimal?          @map("hourly_rate") @db.Decimal(10,2)
+  totalCost   Decimal?          @map("total_cost") @db.Decimal(10,2)
   createdAt   DateTime          @default(now()) @map("created_at")
   updatedAt   DateTime          @updatedAt @map("updated_at")
 
@@ -546,4 +550,22 @@ enum NotePriority {
   URGENT
 
   @@map("note_priority")
+}
+
+model StudentRate {
+  id         String   @id @default(cuid())
+  tutorId    String   @map("tutor_id")
+  studentId  String   @map("student_id")
+  hourlyRate Decimal  @map("hourly_rate") @db.Decimal(10,2)
+  subject    String?  // Optional: rate can vary by subject
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  tutor   Tutor   @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([tutorId, studentId, subject])
+  @@index([tutorId])
+  @@index([studentId])
+  @@map("student_rates")
 }
