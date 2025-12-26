@@ -115,6 +115,7 @@
       "hours": "Lecture Hours",
       "payments": "Payments",
       "billing": "Billing",
+      "rates": "Rates",
       "notifications": "Notifications",
       "settings": "Settings"
     },
@@ -1329,4 +1330,39 @@
     "confirmDelete": "Are you sure you want to delete this availability slot?",
     "confirmDeleteIndividual": "Are you sure you want to delete this individual slot?"
   }
-}
+},
+  "HourlyRateManager": {
+    "title": "Hourly Rates",
+    "defaultRate": {
+      "title": "Default Hourly Rate",
+      "description": "This rate applies to all students unless you set a custom rate",
+      "notSet": "No default rate set",
+      "edit": "Edit Rate",
+      "save": "Save Rate",
+      "cancel": "Cancel"
+    },
+    "studentRates": {
+      "title": "Student-Specific Rates",
+      "description": "Set custom rates for individual students",
+      "addButton": "Add Student Rate",
+      "noRates": "No custom rates set",
+      "allSubjects": "All subjects",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Remove custom rate for {studentName}?"
+    },
+    "form": {
+      "selectStudent": "Select Student",
+      "hourlyRate": "Hourly Rate",
+      "subject": "Subject (optional)",
+      "allSubjects": "All subjects",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "rateUpdated": "Rate updated successfully",
+      "rateAdded": "Student rate added",
+      "rateDeleted": "Student rate removed",
+      "error": "Failed to update rate"
+    }
+  }
