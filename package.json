@@ -46,7 +46,7 @@
     "@sentry/nextjs": "^10.32.1",
     "@tanstack/react-query": "^5.0.0",
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20.0.0",
+    "@types/node": "^22.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "autoprefixer": "^10.4.21",
@@ -87,7 +87,7 @@
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^22.0.0",
     "@types/socket.io": "^3.0.1",
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
@@ -116,7 +116,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "engines": {
-    "node": "20.x",
+    "node": "22.x",
     "pnpm": ">=8.0.0"
   },
   "packageManager": "pnpm@8.0.0"
