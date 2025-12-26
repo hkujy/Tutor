@@ -395,15 +395,15 @@ export async function DELETE(request: NextRequest) {
                 email: true,
               }
             }
-          },
-          student: {
-            select: {
-              user: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  email: true,
-                }
+          }
+        },
+        student: {
+          select: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true,
               }
             }
           }
