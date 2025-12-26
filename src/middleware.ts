@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Absolutely minimal proxy for testing
-export async function proxy(request: NextRequest) {
+// Absolutely minimal middleware for testing
+export async function middleware(request: NextRequest) {
   return NextResponse.next()
 }
 
