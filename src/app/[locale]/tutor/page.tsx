@@ -315,7 +315,7 @@ function TutorDashboard() {
 
 
         {activeTab === 'billing' && (
-          <ErrorBoundary fallback={<SectionError section="Billing" />}>
+          <ErrorBoundary fallback={<SectionError title="Billing" />}>
             <Suspense fallback={<DashboardSkeleton />}>
               <Tabs defaultValue="hours">
                 <TabsList className="grid w-full max-w-md grid-cols-2">
@@ -329,10 +329,10 @@ function TutorDashboard() {
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="hours">
-                  <LectureHoursTracker tutorId={user?.id || ''} />
+                  <LectureHoursTracker userRole="tutor" userId={user?.id || ''} />
                 </TabsContent>
                 <TabsContent value="payments">
-                  <PaymentManager tutorId={user?.id || ''} />
+                  <PaymentManager userRole="tutor" userId={user?.id || ''} />
                 </TabsContent>
               </Tabs>
             </Suspense>
@@ -340,7 +340,7 @@ function TutorDashboard() {
         )}
 
         {activeTab === 'rates' && (
-          <ErrorBoundary fallback={<SectionError section="Rates" />}>
+          <ErrorBoundary fallback={<SectionError title="Rates" />}>
             <Suspense fallback={<DashboardSkeleton />}>
               <HourlyRateManager />
             </Suspense>
@@ -364,7 +364,7 @@ function TutorDashboard() {
             </ErrorBoundary>
             <ErrorBoundary fallback={<SectionError title="Settings Error" message="Could not load notification settings." />}>
               <Suspense fallback={<AvailabilitySkeleton />}>
-                <NotificationPreferencesManager />
+                <NotificationPreferencesManager userId={user?.id || ''} />
               </Suspense>
             </ErrorBoundary>
           </div>
