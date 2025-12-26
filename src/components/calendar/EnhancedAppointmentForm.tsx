@@ -86,28 +86,6 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
 
-  // Mock tutors data (in real app this would come from API)
-  const mockTutors: Tutor[] = [
-    {
-      id: 'cmg7z5uy90003lvjgzvfa50hg',
-      user: { firstName: 'John', lastName: 'Smith', email: 'tutor@example.com' },
-      subjects: ['Music'],
-      hourlyRate: 50
-    },
-    {
-      id: 'mock-tutor-2',
-      user: { firstName: 'Sarah', lastName: 'Johnson', email: 'sarah@example.com' },
-      subjects: ['Music'],
-      hourlyRate: 45
-    },
-    {
-      id: 'mock-tutor-3',
-      user: { firstName: 'Mike', lastName: 'Chen', email: 'mike@example.com' },
-      subjects: ['Music'],
-      hourlyRate: 60
-    }
-  ]
-
   useEffect(() => {
     fetchTutors()
     fetchExistingAppointments()
@@ -445,14 +423,14 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
                   onClick={() => !isPast && handleDateSelect(date)}
                   disabled={isPast}
                   className={`p-3 text-center rounded-lg border transition-colors min-h-[48px] ${isPast
-                      ? 'border-gray-100 text-gray-300 cursor-not-allowed'
-                      : isSelected
-                        ? 'border-indigo-500 bg-indigo-100 text-indigo-700'
-                        : isToday_
-                          ? 'border-indigo-300 bg-indigo-50 text-indigo-600 font-medium'
-                          : isCurrentMonth
-                            ? 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-900'
-                            : 'border-gray-100 text-gray-400 hover:border-gray-200'
+                    ? 'border-gray-100 text-gray-300 cursor-not-allowed'
+                    : isSelected
+                      ? 'border-indigo-500 bg-indigo-100 text-indigo-700'
+                      : isToday_
+                        ? 'border-indigo-300 bg-indigo-50 text-indigo-600 font-medium'
+                        : isCurrentMonth
+                          ? 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-900'
+                          : 'border-gray-100 text-gray-400 hover:border-gray-200'
                     }`}
                 >
                   <div className="text-sm">{format(date, 'd')}</div>
@@ -472,10 +450,10 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
                   onClick={() => slot.available && handleTimeSelect(slot.time)}
                   disabled={!slot.available}
                   className={`p-2 text-sm rounded border transition-colors ${slot.available
-                      ? selectedTime === slot.time
-                        ? 'border-indigo-500 bg-indigo-100 text-indigo-700'
-                        : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50'
-                      : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                    ? selectedTime === slot.time
+                      ? 'border-indigo-500 bg-indigo-100 text-indigo-700'
+                      : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50'
+                    : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
                   title={slot.conflictReason}
                 >

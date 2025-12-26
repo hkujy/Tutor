@@ -361,6 +361,10 @@
         "averageProgress": "Average Progress",
         "totalSessions": "Total Sessions",
         "averageRating": "Average Rating"
+      },
+      "empty": {
+        "title": "No Progress Data",
+        "description": "Your learning progress will appear here once you complete your first tutoring sessions."
       }
     },
     "AssignmentManager": {

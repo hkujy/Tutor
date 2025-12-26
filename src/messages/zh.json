@@ -809,6 +809,10 @@
       "averageProgress": "平均进度",
       "totalSessions": "总课程数",
       "averageRating": "平均评分"
+    },
+    "empty": {
+      "title": "暂无进度数据",
+      "description": "完成您的第一次辅导课程后，您的学习进度将显示在这里。"
     }
   },
   "LectureHoursTracker": {

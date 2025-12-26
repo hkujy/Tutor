@@ -25,38 +25,10 @@ export default function StudentProgress({ studentId }: StudentProgressProps) {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null)
 
   useEffect(() => {
-    // Mock data - in a real app this would come from an API
-    const mockSubjects: Subject[] = [
-      {
-        name: 'Mathematics',
-        sessionsCompleted: 8,
-        totalSessions: 12,
-        progress: 67,
-        lastSession: '2025-09-28T10:00:00Z',
-        nextSession: '2025-10-05T10:00:00Z'
-      },
-      {
-        name: 'Physics',
-        sessionsCompleted: 5,
-        totalSessions: 8,
-        progress: 63,
-        lastSession: '2025-09-25T14:00:00Z',
-        nextSession: '2025-10-02T14:00:00Z'
-      },
-      {
-        name: 'Chemistry',
-        sessionsCompleted: 3,
-        totalSessions: 6,
-        progress: 50,
-        lastSession: '2025-09-20T16:00:00Z',
-        nextSession: '2025-10-03T16:00:00Z'
-      }
-    ]
-
-    setTimeout(() => {
-      setSubjects(mockSubjects)
-      setLoading(false)
-    }, 1000)
+    // In a real app, this would fetch from an API
+    // For now, we initialize as empty to show the empty state for new users
+    setSubjects([])
+    setLoading(false)
   }, [studentId])
 
   const getProgressColor = (progress: number) => {
@@ -76,12 +48,26 @@ export default function StudentProgress({ studentId }: StudentProgressProps) {
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <Skeleton width={180} height={24} className="bg-gray-300 mb-6" />
-        <div className="space-y-6">
-          {[...Array(3)].map((_, i) => (
-            <SkeletonCard key={i} lines={4} className="border" />
-          ))}
+        <div className="animate-pulse flex flex-col space-y-4">
+          <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-40 bg-gray-100 rounded"></div>
         </div>
+      </div>
+    )
+  }
+
+  if (subjects.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow p-8 text-center">
+        <div className="mx-auto h-16 w-16 text-indigo-100 flex items-center justify-center bg-indigo-50 rounded-full mb-4">
+          <svg className="h-8 w-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('empty.title')}</h3>
+        <p className="text-gray-600 max-w-sm mx-auto">
+          {t('empty.description')}
+        </p>
       </div>
     )
   }
