@@ -57,6 +57,17 @@ process.env.REDIS_URL = 'redis://localhost:6379'
 process.env.SENDGRID_API_KEY = 'SG.test-api-key'
 process.env.FROM_EMAIL = 'noreply@example.com'
 
+// Mock next-intl globally to avoid ESM issues
+jest.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => key,
+  useLocale: () => 'en',
+  useFormatter: () => ({
+    dateTime: (date: Date) => date.toISOString(),
+    number: (n: number) => n.toString(),
+  }),
+  NextIntlClientProvider: ({ children }: { children: React.ReactNode }) => children,
+}))
+
 // Mock fetch globally
 global.fetch = jest.fn(() =>
   Promise.resolve({

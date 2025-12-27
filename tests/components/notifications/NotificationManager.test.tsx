@@ -16,9 +16,7 @@ jest.mock('../../../src/lib/services/notification.service', () => ({
 }))
 
 // Mock next-intl
-jest.mock('next-intl', () => ({
-  useTranslations: () => (key: string) => key,
-}))
+// Mock next-intl (removed - using global in jest.setup.ts)
 
 describe('NotificationManager', () => {
   const mockNotifications = [
@@ -44,16 +42,16 @@ describe('NotificationManager', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(notificationService.getNotifications as jest.Mock).mockResolvedValue({
-      notifications: mockNotifications,
-      pagination: { page: 1, limit: 20, total: 2, pages: 1 },
-      unreadCount: 1,
-    })
+      ; (notificationService.getNotifications as jest.Mock).mockResolvedValue({
+        notifications: mockNotifications,
+        pagination: { page: 1, limit: 20, total: 2, pages: 1 },
+        unreadCount: 1,
+      })
   })
 
   it('renders loading state initially', async () => {
     // Delay resolution to catch loading state
-    ;(notificationService.getNotifications as jest.Mock).mockImplementation(
+    ; (notificationService.getNotifications as jest.Mock).mockImplementation(
       () => new Promise(resolve => setTimeout(() => resolve({
         notifications: [],
         pagination: { page: 1, limit: 20, total: 0, pages: 1 },
@@ -62,12 +60,12 @@ describe('NotificationManager', () => {
     )
 
     render(<NotificationManager userId="user-1" userRole="student" />)
-    
+
     // Check for skeletons (checking by class or structure might be brittle, let's assume skeletons render some generic container or just check it doesn't show "No notifications")
     // In our component, loading + empty notifications renders skeletons.
     // We can check if the "title" is present, as it renders even when loading? 
     // Actually, in `if (loading && notifications.length === 0)` block, it returns skeletons WITHOUT the header title "title".
-    
+
     expect(screen.queryByText('title')).not.toBeInTheDocument()
   })
 
@@ -84,7 +82,7 @@ describe('NotificationManager', () => {
   })
 
   it('handles empty state', async () => {
-    ;(notificationService.getNotifications as jest.Mock).mockResolvedValue({
+    ; (notificationService.getNotifications as jest.Mock).mockResolvedValue({
       notifications: [],
       pagination: { page: 1, limit: 20, total: 0, pages: 1 },
       unreadCount: 0,

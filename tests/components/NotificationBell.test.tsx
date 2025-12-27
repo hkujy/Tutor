@@ -4,9 +4,7 @@ import { NotificationBell } from '@/components/NotificationBell';
 import { useSocketEvent } from '@/hooks/useSocket';
 
 // Mock next-intl
-jest.mock('next-intl', () => ({
-    useTranslations: () => (key: string) => key,
-}));
+// Mock next-intl (removed - using global in jest.setup.ts)
 
 // Mock next-auth
 jest.mock('next-auth/react', () => ({
@@ -51,7 +49,7 @@ describe('NotificationBell Component', () => {
             type: 'APPOINTMENT_REMINDER',
             title: 'Appointment Reminder',
             message: 'Your session starts in 1 hour',
-            read: false,
+            readAt: null,
             createdAt: '2025-12-25T09:00:00Z',
         },
         {
@@ -59,7 +57,7 @@ describe('NotificationBell Component', () => {
             type: 'PAYMENT_REMINDER',
             title: 'Payment Due',
             message: 'You have 10 unpaid hours',
-            read: true,
+            readAt: '2025-12-24T10:00:00Z',
             createdAt: '2025-12-24T10:00:00Z',
         },
     ];
@@ -97,7 +95,7 @@ describe('NotificationBell Component', () => {
             (global.fetch as jest.Mock).mockResolvedValueOnce({
                 ok: true,
                 json: async () => ({
-                    notifications: mockNotifications.map(n => ({ ...n, read: true })),
+                    notifications: mockNotifications.map(n => ({ ...n, readAt: '2025-12-25T10:00:00Z' })),
                 }),
             });
 
@@ -183,7 +181,7 @@ describe('NotificationBell Component', () => {
                 expect(global.fetch).toHaveBeenCalledWith(
                     expect.stringContaining('/api/notifications'),
                     expect.objectContaining({
-                        method: 'PUT',
+                        method: 'POST',
                     })
                 );
             });
@@ -202,7 +200,7 @@ describe('NotificationBell Component', () => {
                 .mockResolvedValueOnce({
                     ok: true,
                     json: async () => ({
-                        notifications: mockNotifications.map(n => ({ ...n, read: true })),
+                        notifications: mockNotifications.map(n => ({ ...n, readAt: '2025-12-25T10:00:00Z' })),
                     }),
                 });
 
@@ -260,7 +258,7 @@ describe('NotificationBell Component', () => {
                 type: 'APPOINTMENT_CREATED',
                 title: 'New Appointment',
                 message: 'Student booked a session',
-                read: false,
+                readAt: null,
                 createdAt: new Date().toISOString(),
             };
 
@@ -298,7 +296,7 @@ describe('NotificationBell Component', () => {
                 type: 'APPOINTMENT_CREATED',
                 title: 'Real-Time Notification',
                 message: 'This came via WebSocket',
-                read: false,
+                readAt: null,
                 createdAt: new Date().toISOString(),
             };
 
