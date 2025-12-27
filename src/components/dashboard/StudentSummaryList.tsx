@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
 import { useTranslations } from 'next-intl'
+import { formatCurrency } from '@/lib/utils'
 import StudentEditModal from './StudentEditModal'
 import AddHoursModal from './AddHoursModal'
 import StudentNotesModal from '../notes/StudentNotesModal'
@@ -18,6 +19,7 @@ interface StudentSummary {
   lastSession?: string
   paymentStatus: 'up-to-date' | 'payment-due' | 'overdue'
   paymentInterval: number
+  currency?: string
 }
 
 interface StudentSummaryListProps {
@@ -38,7 +40,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
       setLoading(true)
       const response = await fetch(`/api/tutors/${tutorId}/student-summary`)
       const data = await response.json()
-      
+
       if (response.ok) {
         setStudents(data.students || [])
       } else {
@@ -61,7 +63,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
       // We need to get the tutor ID first, since the API expects the actual tutor ID, not user ID
       const tutorResponse = await fetch(`/api/tutors/by-user/${tutorId}`)
       const tutorData = await tutorResponse.json()
-      
+
       if (!tutorResponse.ok) {
         throw new Error(tutorData.error || 'Failed to find tutor')
       }
@@ -92,7 +94,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
       // We need to get the tutor ID first
       const tutorResponse = await fetch(`/api/tutors/by-user/${tutorId}`)
       const tutorData = await tutorResponse.json()
-      
+
       if (!tutorResponse.ok) {
         throw new Error(tutorData.error || 'Failed to find tutor')
       }
@@ -127,7 +129,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
       // We need to get the tutor ID first
       const tutorResponse = await fetch(`/api/tutors/by-user/${tutorId}`)
       const tutorData = await tutorResponse.json()
-      
+
       if (!tutorResponse.ok) {
         throw new Error(tutorData.error || 'Failed to find tutor')
       }
@@ -195,7 +197,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold mb-6">{t('title')}</h2>
-      
+
       {students.length === 0 ? (
         <div className="text-gray-500 text-center py-8">
           {t('empty')}
@@ -213,7 +215,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(student.paymentStatus)}`}>
                     {getPaymentStatusText(student.paymentStatus)}
                   </span>
-                  
+
                   {/* Action Buttons */}
                   <div className="flex space-x-1">
                     <button
@@ -225,7 +227,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
-                    
+
                     <button
                       onClick={() => setAddingHoursForStudent(student)}
                       className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
@@ -235,7 +237,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                       </svg>
                     </button>
-                    
+
                     <button
                       onClick={() => setNotesModalStudent(student)}
                       className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
@@ -245,7 +247,7 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
-                    
+
                     {student.unpaidEarnings > 0 && (
                       <button
                         onClick={() => handleMarkPaymentReceived(student.studentId)}
@@ -260,47 +262,47 @@ export default function StudentSummaryList({ tutorId }: StudentSummaryListProps)
                   </div>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
                   <span className="text-gray-500">{t('stats.totalHours')}</span>
                   <div className="font-semibold">{student.totalHours.toFixed(1)}h</div>
                 </div>
-                
+
                 <div>
                   <span className="text-gray-500">{t('stats.unpaidHours')}</span>
                   <div className={`font-semibold ${student.unpaidHours > 0 ? 'text-red-600' : 'text-green-600'}`}>
                     {student.unpaidHours.toFixed(1)}h
                   </div>
                 </div>
-                
+
                 <div>
                   <span className="text-gray-500">{t('stats.totalEarnings')}</span>
-                  <div className="font-semibold">${student.totalEarnings.toFixed(2)}</div>
+                  <div className="font-semibold">{formatCurrency(student.totalEarnings, student.currency || 'USD')}</div>
                 </div>
-                
+
                 <div>
                   <span className="text-gray-500">{t('stats.unpaidEarnings')}</span>
                   <div className={`font-semibold ${student.unpaidEarnings > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    ${student.unpaidEarnings.toFixed(2)}
+                    {formatCurrency(student.unpaidEarnings, student.currency || 'USD')}
                   </div>
                 </div>
               </div>
-              
+
               {student.lastSession && (
                 <div className="mt-3 pt-3 border-t">
                   <span className="text-gray-500 text-sm">{t('stats.lastSession')} </span>
                   <span className="text-sm">{format(new Date(student.lastSession), 'MMM d, yyyy')}</span>
                 </div>
               )}
-              
+
               <div className="mt-2">
                 <div className="flex justify-between text-xs text-gray-500 mb-1">
                   <span>{t('progress.nextPayment')}</span>
                   <span>{(student.unpaidHours % student.paymentInterval).toFixed(1)}/{student.paymentInterval}h</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div 
+                  <div
                     className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
                     style={{ width: `${Math.min(100, (student.unpaidHours % student.paymentInterval) / student.paymentInterval * 100)}%` }}
                   ></div>

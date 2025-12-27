@@ -15,7 +15,8 @@ export async function GET(
       },
       select: {
         id: true,
-        hourlyRate: true
+        hourlyRate: true,
+        currency: true
       }
     })
 
@@ -67,11 +68,11 @@ export async function GET(
       const unpaidHours = parseFloat(lh.unpaidHours.toString())
       const totalEarnings = totalHours * hourlyRate
       const unpaidEarnings = unpaidHours * hourlyRate
-      
+
       // Determine payment status
       let paymentStatus: 'up-to-date' | 'payment-due' | 'overdue'
       const paymentInterval = lh.paymentInterval
-      
+
       if (unpaidHours === 0) {
         paymentStatus = 'up-to-date'
       } else if (unpaidHours >= paymentInterval) {
@@ -92,7 +93,8 @@ export async function GET(
         unpaidEarnings,
         lastSession: lh.sessions[0]?.actualStartTime,
         paymentStatus,
-        paymentInterval
+        paymentInterval,
+        currency: tutor.currency || 'USD'
       }
     })
 
