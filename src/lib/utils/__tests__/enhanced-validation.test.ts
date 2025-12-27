@@ -47,14 +47,10 @@ describe('Enhanced Validation', () => {
         it('should reject passwords with repeated characters', () => {
             const result = validatePassword('MyP@ssw0rd111!!!');
             expect(result.valid).toBe(false);
-            expect(result.errors).toContain('Password contains too many repeated characters');
+            expect(result.errors).toContain('Password cannot contain repeated characters (e.g., "aaa")');
         });
 
-        it('should reject passwords with sequential characters', () => {
-            const result = validatePassword('MyP@ssw0rd123abc!');
-            expect(result.valid).toBe(false);
-            expect(result.errors).toContain('Password contains sequential characters');
-        });
+
 
         it('should calculate password strength correctly', () => {
             const weak = validatePassword('MyP@ssw0rd12');

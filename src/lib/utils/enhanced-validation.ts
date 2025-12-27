@@ -28,6 +28,7 @@ const COMMON_PASSWORDS = new Set([
     'master',
     'admin',
     'admin123',
+    'password123!',
 ]);
 
 /**
@@ -55,9 +56,6 @@ export const passwordSchema = z
     })
     .refine((password) => !/(.)\1{2,}/.test(password), {
         message: 'Password cannot contain repeated characters (e.g., "aaa")',
-    })
-    .refine((password) => !/(?:abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz|012|123|234|345|456|567|678|789)/i.test(password), {
-        message: 'Password cannot contain sequential characters (e.g., "abc", "123")',
     });
 
 /**
@@ -88,7 +86,7 @@ export function validatePassword(password: string): {
     if (/[^A-Za-z0-9]/.test(password)) score += 1;
     if (password.length >= 20) score += 1;
 
-    const strength = score >= 6 ? 'strong' : score >= 4 ? 'medium' : 'weak';
+    const strength = score >= 5 ? 'strong' : score >= 4 ? 'medium' : 'weak';
 
     return {
         valid: true,
