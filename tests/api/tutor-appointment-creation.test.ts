@@ -85,11 +85,11 @@ describe('/api/appointments POST (Tutor Creation)', () => {
       },
     }
 
-    ;(db.appointment.create as jest.Mock).mockResolvedValue(mockAppointment)
-    ;(db.appointment.findFirst as jest.Mock).mockResolvedValue(null) // No conflict
-    ;(db.student.findUnique as jest.Mock).mockResolvedValue(mockStudent)
-    ;(db.tutor.findUnique as jest.Mock).mockResolvedValue(mockTutor)
-    ;(db.notification.create as jest.Mock).mockResolvedValue({})
+      ; (db.appointment.create as jest.Mock).mockResolvedValue(mockAppointment)
+      ; (db.appointment.findFirst as jest.Mock).mockResolvedValue(null) // No conflict
+      ; (db.student.findUnique as jest.Mock).mockResolvedValue(mockStudent)
+      ; (db.tutor.findUnique as jest.Mock).mockResolvedValue(mockTutor)
+      ; (db.notification.create as jest.Mock).mockResolvedValue({})
 
     const requestBody = {
       tutorId: 'tutor-1',
@@ -117,7 +117,7 @@ describe('/api/appointments POST (Tutor Creation)', () => {
 
     expect(response.status).toBe(201)
     expect(data.appointment).toEqual(mockAppointment)
-    
+
     // Verify appointment was created
     expect(db.appointment.create).toHaveBeenCalledWith({
       data: {
@@ -128,6 +128,9 @@ describe('/api/appointments POST (Tutor Creation)', () => {
         subject: 'Mathematics',
         status: 'SCHEDULED',
         notes: 'Test appointment created by tutor',
+        currency: 'USD',
+        hourlyRate: expect.anything(),
+        totalCost: expect.anything()
       },
     })
 

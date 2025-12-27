@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { createServer } from 'http';
 import { initSocketServer, getSocketServer } from '../socket-server';
 import { io as ioClient, Socket as ClientSocket } from 'socket.io-client';
