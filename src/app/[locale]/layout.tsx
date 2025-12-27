@@ -8,6 +8,7 @@ import { ClientThemeProvider } from '../../components/ClientThemeProvider'
 import Navigation from '../../components/Navigation'
 import ErrorBoundary from '../../components/ErrorBoundary'
 import { ToastProvider } from '../../components/Toast'
+import PWAInstallPrompt from '../../components/PWAInstallPrompt'
 import '../globals.css'
 import { routing } from '../../i18n/routing';
 
@@ -20,6 +21,12 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Tutoring Calendar - Efficient Scheduling Platform',
   description: 'Professional tutoring appointment scheduling and management system with real-time booking and optimized performance',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'TutorCal',
+  },
 }
 
 export const viewport = {
@@ -52,6 +59,7 @@ export default async function RootLayout({
                     <ToastProvider>
                       <Navigation />
                       {children}
+                      <PWAInstallPrompt />
                     </ToastProvider>
                   </ErrorBoundary>
                 </SocketProvider>

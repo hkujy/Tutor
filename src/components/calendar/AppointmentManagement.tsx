@@ -400,51 +400,55 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
           <ul className="divide-y divide-gray-200">
             {sortedAppointments.map((appointment) => (
-              <li key={appointment.id} className={`px-6 py-4 transition-all duration-300 ${(appointment as any)._justUpdated ? 'bg-green-50' : ''}`}>
-                <div className="flex items-center justify-between">
+              <li key={appointment.id} className={`px-4 sm:px-6 py-4 transition-all duration-300 ${(appointment as any)._justUpdated ? 'bg-green-50' : ''}`}>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
+                    <div className="flex flex-wrap items-center gap-2 mb-2 sm:mb-0">
+                      <div className="flex items-center space-x-2">
                         {(appointment as any)._justUpdated && (
                           <span className="relative flex h-3 w-3">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                           </span>
                         )}
-                        <div className="flex-shrink-0">
-                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(appointment.status)}`}>
-                            {tEnums(APPOINTMENT_STATUS_MAP[appointment.status] || 'status.scheduled')}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{appointment.subject}</p>
-                          <p className="text-sm text-gray-500">
-                            {userRole === 'tutor'
-                              ? `${appointment.student.user.firstName} ${appointment.student.user.lastName}`
-                              : `${appointment.tutor.user.firstName} ${appointment.tutor.user.lastName}`
-                            }
-                          </p>
-                        </div>
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(appointment.status)}`}>
+                          {tEnums(APPOINTMENT_STATUS_MAP[appointment.status] || 'status.scheduled')}
+                        </span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-900">
-                          {isHydrated && format(parseISO(appointment.startTime), 'MMM d, yyyy')}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {isHydrated && format(parseISO(appointment.startTime), 'h:mm a')} - {isHydrated && format(parseISO(appointment.endTime), 'h:mm a')}
-                        </p>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {appointment.subject}
+                      </p>
+                    </div>
+
+                    <div className="mt-1 sm:flex sm:justify-between">
+                      <div className="text-sm text-gray-500 mb-2 sm:mb-0">
+                        {userRole === 'tutor'
+                          ? `${appointment.student.user.firstName} ${appointment.student.user.lastName}`
+                          : `${appointment.tutor.user.firstName} ${appointment.tutor.user.lastName}`
+                        }
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {isHydrated && (
+                          <>
+                            <span className="block sm:inline">{format(parseISO(appointment.startTime), 'MMM d, yyyy')}</span>
+                            <span className="hidden sm:inline mx-1">•</span>
+                            <span className="block sm:inline">{format(parseISO(appointment.startTime), 'h:mm a')} - {format(parseISO(appointment.endTime), 'h:mm a')}</span>
+                          </>
+                        )}
                       </div>
                     </div>
+
                     {appointment.notes && (
-                      <p className="mt-2 text-sm text-gray-600">{appointment.notes}</p>
+                      <p className="mt-2 text-sm text-gray-600 line-clamp-2">{appointment.notes}</p>
                     )}
                   </div>
 
-                  <div className="ml-4 flex items-center space-x-2">
+                  <div className="flex items-center space-x-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 mt-2 sm:mt-0">
                     {canReschedule(appointment) && (
                       <button
                         onClick={() => openRescheduleModal(appointment)}
-                        className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                        className="text-indigo-600 hover:text-indigo-800 text-sm font-medium p-2 -ml-2 hover:bg-indigo-50 rounded-md transition-colors"
+                        aria-label={t('actions.reschedule')}
                       >
                         {t('actions.reschedule')}
                       </button>
@@ -452,7 +456,8 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                     {canMarkCompleted(appointment) && (
                       <button
                         onClick={() => handleMarkCompleted(appointment)}
-                        className="text-green-600 hover:text-green-800 text-sm font-medium"
+                        className="text-green-600 hover:text-green-800 text-sm font-medium p-2 hover:bg-green-50 rounded-md transition-colors"
+                        aria-label={t('actions.complete')}
                       >
                         {t('actions.complete')}
                       </button>
@@ -460,7 +465,8 @@ export default function AppointmentManagement({ userRole, userId, refreshTrigger
                     {canCancel(appointment) && (
                       <button
                         onClick={() => openCancelModal(appointment)}
-                        className="text-red-600 hover:text-red-800 text-sm font-medium"
+                        className="text-red-600 hover:text-red-800 text-sm font-medium p-2 hover:bg-red-50 rounded-md transition-colors"
+                        aria-label={t('actions.cancel')}
                       >
                         {t('actions.cancel')}
                       </button>

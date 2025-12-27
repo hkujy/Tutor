@@ -1,4 +1,10 @@
 {
+  "PWA": {
+    "installTitle": "Install App",
+    "installDescription": "Install this app on your home screen for quick and easy access.",
+    "installButton": "Install",
+    "dismiss": "Dismiss"
+  },
   "Enums": {
     "status": {
       "scheduled": "Scheduled",

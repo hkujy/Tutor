@@ -1,4 +1,10 @@
 {
+  "PWA": {
+    "installTitle": "安装应用",
+    "installDescription": "将此应用安装到您的主屏幕，以便快速访问。",
+    "installButton": "安装",
+    "dismiss": "关闭"
+  },
   "Enums": {
     "status": {
       "scheduled": "已安排",
