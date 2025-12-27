@@ -56,3 +56,4 @@ test-uploads/
 
 # Husky
 .husky/_
+.env

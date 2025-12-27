@@ -173,708 +173,6 @@
     },
     "sessions": {
       "bookNew": "预约新课程"
-    },
-    "AppointmentManagement": {
-      "title": "预约管理",
-      "showingCount": "显示 {current} / {total} 个预约",
-      "filters": {
-        "time": {
-          "all": "所有时间",
-          "upcoming": "即将到来",
-          "today": "今天",
-          "past": "过去"
-        },
-        "status": {
-          "all": "所有状态"
-        }
-      },
-      "sort": {
-        "date": "按日期排序",
-        "subject": "按科目排序",
-        "status": "按状态排序"
-      },
-      "view": {
-        "list": "列表",
-        "grid": "网格"
-      },
-      "empty": {
-        "title": "未找到预约",
-        "filter": "尝试调整筛选条件以查看更多预约。",
-        "start": "开始创建您的第一个预约。"
-      },
-      "status": {
-        "SCHEDULED": "已安排",
-        "CONFIRMED": "已确认",
-        "IN_PROGRESS": "进行中",
-        "COMPLETED": "已完成",
-        "CANCELLED": "已取消",
-        "NO_SHOW": "缺席"
-      },
-      "actions": {
-        "reschedule": "重新安排",
-        "complete": "完成",
-        "cancel": "取消"
-      },
-      "labels": {
-        "student": "学生：",
-        "tutor": "导师：",
-        "date": "日期：",
-        "time": "时间：",
-        "notes": "备注："
-      },
-      "modals": {
-        "reschedule": {
-          "title": "重新安排预约",
-          "date": "日期",
-          "time": "时间",
-          "subject": "科目",
-          "notes": "备注",
-          "notesPlaceholder": "添加关于重新安排的备注..."
-        },
-        "cancel": {
-          "title": "取消预约",
-          "confirm": "您确定要取消与 {name} 在 {date} {time} 的预约吗？",
-          "keep": "保留预约",
-          "confirmBtn": "取消预约"
-        }
-      }
-    },
-    "TutorAvailability": {
-      "title": "每周空闲时间",
-      "actions": {
-        "addSlot": "添加时间段",
-        "cancel": "取消",
-        "adding": "添加中...",
-        "markAvailable": "标记为有空",
-        "markUnavailable": "标记为无空",
-        "delete": "删除",
-        "enable": "启用",
-        "disable": "禁用"
-      },
-      "form": {
-        "title": "添加新的空闲时间段",
-        "slotType": "时间段类型",
-        "dayOfWeek": "星期几",
-        "date": "日期",
-        "startTime": "开始时间",
-        "endTime": "结束时间",
-        "recurringDuration": "重复持续时间",
-        "numberOfWeeks": "周数",
-        "endDate": "结束日期",
-        "startDate": "开始日期",
-        "createWeeksInfo": "将创建 {weeks} 个每周时间段",
-        "untilDateInfo": "直到 {date}",
-        "selectEndDate": "选择结束日期"
-      },
-      "slotType": {
-        "repeating": "重复（每周）",
-        "individual": "单个时间段"
-      },
-      "weeks": "周",
-      "week": "周",
-      "individualSlots": {
-        "title": "单个时间段"
-      },
-      "recurringSlots": {
-        "title": "每周重复时间段",
-        "empty": "这天没有设置空闲时间"
-      },
-      "status": {
-        "available": "有空",
-        "unavailable": "无空",
-        "active": "启用",
-        "inactive": "禁用"
-      },
-      "days": {
-        "Sunday": "星期日",
-        "Monday": "星期一",
-        "Tuesday": "星期二",
-        "Wednesday": "星期三",
-        "Thursday": "星期四",
-        "Friday": "星期五",
-        "Saturday": "星期六"
-      },
-      "messages": {
-        "addSuccess": "{type} 空闲时间段添加成功！",
-        "addError": "添加空闲时间段失败",
-        "deleteSuccess": "空闲时间段删除成功！",
-        "deleteError": "删除空闲时间段失败",
-        "deleteIndividualSuccess": "单个时间段删除成功！",
-        "deleteIndividualError": "删除单个时间段失败"
-      },
-      "confirmDelete": "您确定要删除此空闲时间段吗？",
-      "confirmDeleteIndividual": "您确定要删除此单个时间段吗？"
-    },
-    "AppointmentList": {
-      "title": "预约",
-      "filters": {
-        "all": "所有预约",
-        "upcoming": "即将到来",
-        "today": "今天",
-        "past": "过去"
-      },
-      "sort": {
-        "date": "按日期排序",
-        "subject": "按科目排序",
-        "status": "按状态排序"
-      },
-      "empty": {
-        "title": "无预约",
-        "all": "未找到预约。",
-        "upcoming": "未找到即将到来的预约。",
-        "today": "今天没有安排预约。",
-        "past": "未找到过去的预约。"
-      },
-      "status": {
-        "SCHEDULED": "已安排",
-        "CONFIRMED": "已确认",
-        "IN_PROGRESS": "进行中",
-        "COMPLETED": "已完成",
-        "CANCELLED": "已取消",
-        "NO_SHOW": "缺席"
-      },
-      "min": "分钟",
-      "pagination": {
-        "previous": "上一页",
-        "next": "下一页",
-        "pageInfo": "第 {current} 页，共 {total} 页"
-      }
-    },
-    "StudentSummaryList": {
-      "title": "学生概况",
-      "empty": "未找到学生",
-      "confirmPayment": "标记所有未付工时为已付？此操作无法撤销。",
-      "status": {
-        "upToDate": "最新",
-        "paymentDue": "应付",
-        "overdue": "逾期",
-        "unknown": "未知"
-      },
-      "actions": {
-        "edit": "编辑学生数据",
-        "addHours": "添加授课时长",
-        "notes": "查看/添加备注",
-        "markPaid": "标记为已收款"
-      },
-      "stats": {
-        "totalHours": "总工时：",
-        "unpaidHours": "未付工时：",
-        "totalEarnings": "总收入：",
-        "unpaidEarnings": "未收金额：",
-        "lastSession": "最后课程："
-      },
-      "progress": {
-        "nextPayment": "下次付款进度"
-      }
-    },
-    "AssignmentManager": {
-      "tutorTitle": "作业管理",
-      "studentTitle": "我的作业",
-      "filters": {
-        "all": "所有作业",
-        "pending": "待处理",
-        "completed": "已完成",
-        "overdue": "逾期"
-      },
-      "actions": {
-        "create": "创建作业"
-      },
-      "stats": {
-        "pending": "待处理",
-        "completed": "已完成",
-        "overdue": "逾期",
-        "avgGrade": "平均分数"
-      },
-      "empty": {
-        "title": "无作业",
-        "all": "未找到作业。",
-        "filter": "未找到 {filter} 作业。"
-      },
-      "status": {
-        "assigned": "已分配",
-        "in_progress": "进行中",
-        "submitted": "已提交",
-        "graded": "已评分",
-        "overdue": "逾期"
-      },
-      "difficulty": {
-        "beginner": "初级",
-        "intermediate": "中级",
-        "advanced": "高级"
-      },
-      "labels": {
-        "dueDate": "截止日期",
-        "dueToday": "今天截止",
-        "daysLeft": "剩余 {count} 天",
-        "grade": "分数"
-      },
-      "modal": {
-        "attachments": "附件",
-        "feedback": "反馈",
-        "submitAssignment": "提交作业",
-        "gradeAssignment": "批改作业"
-      }
-    },
-    "LectureHoursTracker": {
-      "title": {
-        "student": "我的授课时长",
-        "tutor": "学生授课时长"
-      },
-      "subtitle": {
-        "student": "跟踪您的课程时长和付款状态",
-        "tutor": "记录课程并跟踪学生进度"
-      },
-      "actions": {
-        "recordSession": "记录课程",
-        "clear": "清除"
-      },
-      "recordSessionForm": {
-        "title": "记录新课程",
-        "studentSubject": "学生/科目",
-        "selectStudentSubject": "选择学生和科目",
-        "duration": "时长 (小时)",
-        "notes": "备注 (可选)"
-      },
-      "overview": {
-        "tutorName": "导师：{firstName} {lastName}",
-        "studentName": "学生：{firstName} {lastName}",
-        "totalHours": "总时长：",
-        "unpaidHours": "未付时长：",
-        "paymentFrequency": "付款频率：",
-        "hours": "小时",
-        "everyHours": "每 {count} 小时",
-        "editPaymentFrequency": "编辑付款频率",
-        "latestPayment": "最新付款：",
-        "progressToNextPayment": "下一次付款进度"
-      },
-      "paymentStatus": {
-        "PAID": "已付",
-        "OVERDUE": "逾期",
-        "PENDING": "待处理"
-      },
-      "empty": {
-        "title": "未找到授课时长",
-        "tutorMessage": "开始记录课程以跟踪学生的授课时长。",
-        "studentMessage": "您的导师将记录课程以跟踪您的授课时长和付款。"
-      },
-      "detailedView": {
-        "title": "{subject} - 详细视图",
-        "recentSessions": "最近课程",
-        "sessionDuration": "{duration}小时课程",
-        "paymentHistory": "付款历史",
-        "hoursPayment": "{hours}小时付款",
-        "dueDate": "截止日期",
-        "noDueDate": "无截止日期",
-        "paidDate": "已付",
-        "markPaid": "标记为已付"
-      },
-      "error": {
-        "title": "加载数据出错",
-        "message": "抱歉，加载授课时长数据时出错。请刷新页面或稍后再试。"
-      }
-    },
-    "PaymentManager": {
-      "title": {
-        "student": "我的付款",
-        "tutor": "付款管理"
-      },
-      "actions": {
-        "addPayment": "添加付款",
-        "markPaid": "标记为已付"
-      },
-      "filters": {
-        "all": "所有",
-        "pending": "待处理",
-        "overdue": "逾期",
-        "paid": "已付"
-      },
-      "summary": {
-        "pendingPayments": "待付款",
-        "overduePayments": "逾期付款",
-        "totalRevenue": "总收入",
-        "paidThisMonth": "本月已付",
-        "paymentsCount": "{count} 笔付款"
-      },
-      "groupedPayments": {
-        "countTotal": "{count} 笔付款 • 总计：${total}",
-        "paid": "已付",
-        "pending": "待处理",
-        "overdue": "逾期"
-      },
-      "paymentDetails": {
-        "hoursDue": "{hours} 小时 • 截止日期 {dueDate}",
-        "created": "创建日期",
-        "paid": "已付",
-        "viaMethod": " 通过 {method}",
-        "transactionId": " (ID: {id})",
-        "note": "备注",
-        "tutorName": "导师：{firstName} {lastName}",
-        "studentName": "学生：{firstName} {lastName}",
-        "moreNotifications": "+{count} 条通知"
-      },
-      "paymentStatus": {
-        "PAID": "已付",
-        "OVERDUE": "逾期",
-        "PENDING": "待处理"
-      },
-      "empty": {
-        "noPayments": "未找到付款"
-      },
-      "addPaymentForm": {
-        "title": "添加新付款",
-        "validation": {
-          "requiredFields": "请填写所有必填字段"
-        },
-        "studentSubject": {
-          "label": "学生与科目 *",
-          "select": "选择学生和科目"
-        },
-        "amount": {
-          "label": "金额 ($) *"
-        },
-        "hoursIncluded": {
-          "label": "包含小时数 *"
-        },
-        "paymentMethod": {
-          "label": "付款方式 *",
-          "select": "选择付款方式",
-          "cash": "现金",
-          "creditCard": "信用卡",
-          "bankTransfer": "银行转账",
-          "payPal": "PayPal",
-          "venmo": "Venmo",
-          "zelle": "Zelle",
-          "check": "支票",
-          "other": "其他"
-        },
-        "paymentDate": {
-          "label": "付款日期与时间 *"
-        },
-        "transactionId": {
-          "label": "交易ID (可选)",
-          "placeholder": "参考编号、支票号等"
-        },
-        "notes": {
-          "label": "备注 (可选)",
-          "placeholder": "关于此付款的附加备注..."
-        },
-        "actions": {
-          "cancel": "取消",
-          "addPayment": "添加付款"
-        }
-      },
-      "GlobalError": {
-        "title": "出了些问题！",
-        "description": "我们对造成的不便深表歉意。请稍后再试。",
-        "tryAgainButton": "重试"
-      }
-    },
-    "NotificationManager": {
-      "title": "通知",
-      "unreadCount": "{count} 条未读",
-      "selectedCount": "已选择 {count} 条",
-      "filters": {
-        "all": "所有通知",
-        "unread": "未读",
-        "appointmentReminder": "预约提醒",
-        "assignmentDue": "作业截止",
-        "paymentReminder": "付款提醒",
-        "systemAnnouncement": "系统公告",
-        "paymentReceived": "已收款"
-      },
-      "actions": {
-        "markSelectedRead": "标记已选为已读",
-        "clearSelection": "清除",
-        "markAllRead": "全部标记为已读",
-        "selectAllUnread": "选择所有未读"
-      },
-      "empty": {
-        "title": "无通知",
-        "unread": "您已查看所有通知！没有未读通知。",
-        "none": "您还没有任何通知。"
-      },
-      "pagination": {
-        "page": "第 {current} 页，共 {total} 页",
-        "previous": "上一页",
-        "next": "下一页"
-      },
-      "NotificationItem": {
-        "via": "通过",
-        "channels": {
-          "email": "电子邮件",
-          "sms": "短信",
-          "in_app": "应用内"
-        },
-        "scheduledFor": "计划于 {date}",
-        "markAsRead": "标记为已读"
-      }
-    },
-    "NotificationPreferencesManager": {
-      "title": "通知偏好设置",
-      "saveChanges": "保存更改",
-      "emailNotifications": {
-        "title": "电子邮件通知",
-        "description": "通过电子邮件接收重要更新通知"
-      },
-      "smsNotifications": {
-        "title": "短信通知",
-        "description": "接收紧急通知的短信"
-      },
-      "assignmentReminders": {
-        "title": "作业提醒",
-        "description": "获取作业截止日期和提交的通知"
-      },
-      "marketingEmails": {
-        "title": "营销邮件",
-        "description": "接收促销内容和平台更新"
-      },
-      "reminderTiming": {
-        "title": "提醒时间",
-        "description": "我们应该提前多久提醒您预约？"
-      },
-      "reminderTimingOptions": {
-        "noReminder": "不提醒",
-        "1hour": "提前1小时",
-        "2hours": "提前2小时",
-        "4hours": "提前4小时",
-        "8hours": "提前8小时",
-        "1day": "提前1天",
-        "2days": "提前2天",
-        "3days": "提前3天",
-        "1week": "提前1周"
-      },
-      "channelsInfo": {
-        "title": "通知渠道",
-        "emailChannel": "电子邮件",
-        "emailDesc": "包含操作按钮的完整通知详情",
-        "smsChannel": "短信",
-        "smsDesc": "仅用于紧急通知的简短提醒",
-        "inAppChannel": "应用内",
-        "inAppDesc": "始终启用实时通知"
-      },
-      "privacyNotice": {
-        "title": "隐私与数据",
-        "description": "我们尊重您的隐私。您可以随时更改这些偏好设置。我们只发送与您的辅导活动相关的通知，绝不会与第三方共享您的联系信息。"
-      },
-      "saveNotificationPreferences": "保存通知偏好设置",
-      "empty": {
-        "message": "无法加载通知偏好设置",
-        "retry": "重试"
-      },
-      "messages": {
-        "loadError": "无法加载通知偏好设置",
-        "saveSuccess": "通知偏好设置保存成功！",
-        "saveError": "保存偏好设置失败。请重试。"
-      }
-    },
-    "TutorAnalytics": {
-      "dashboardTitle": "分析仪表板",
-      "period": {
-        "last7Days": "最近7天",
-        "last30Days": "最近30天",
-        "last3Months": "最近3个月",
-        "lastYear": "去年"
-      },
-      "tabs": {
-        "overview": "概览",
-        "students": "学生",
-        "subjects": "科目",
-        "schedule": "日程"
-      },
-      "weeklyActivity": {
-        "title": "每周活动",
-        "sessions": "课程",
-        "hours": "小时",
-        "earnings": "收入"
-      },
-      "monthlyEarnings": {
-        "title": "月度收入趋势",
-        "hoursSessions": "{hours}小时 • {sessions} 节课"
-      },
-      "studentProgressOverview": {
-        "title": "学生进度概览",
-        "trend": {
-          "improving": "进步中",
-          "stable": "稳定",
-          "declining": "下降"
-        },
-        "totalHours": "总时长",
-        "recentSessions": "最近课程",
-        "avgRating": "平均评分"
-      },
-      "subjectPerformance": {
-        "title": "科目表现分析",
-        "table": {
-          "subject": "科目",
-          "students": "学生",
-          "sessions": "课程",
-          "totalHours": "总时长",
-          "avgSession": "平均课程",
-          "earnings": "收入"
-        }
-      },
-      "scheduleAnalysis": {
-        "title": "日程分析",
-        "activeTimeSlots": "最活跃时间段",
-        "percentage": "{percentage}%",
-        "insightsTitle": "日程洞察",
-        "peakHours": "高峰时段",
-        "peakHoursMessage": "{time} 是您最忙的时间段",
-        "noTimeData": "无时间分布数据",
-        "availabilityOptimization": "空闲时间优化",
-        "optimizationMessage": "考虑在高需求时段添加更多时间段",
-        "workLifeBalance": "工作生活平衡",
-        "hoursThisWeek": "本周 {hours} 小时"
-      },
-      "empty": {
-        "title": "无分析数据",
-        "message": "您还没有任何分析数据。完成一些辅导课程以查看您的分析。",
-        "refreshData": "刷新数据"
-      },
-      "errors": {
-        "invalidTutorId": "提供的导师ID无效",
-        "dataNotFound": "未找到分析数据。请检查您是否有任何预约记录。",
-        "accessDenied": "访问被拒绝。请检查您的权限。",
-        "serverError": "服务器错误。请稍后再试。",
-        "requestFailed": "请求失败，状态码 {status}",
-        "fetchFailedFallback": "获取分析数据失败",
-        "loadFailedTitle": "加载分析失败",
-        "contactSupport": "请刷新页面，如果问题仍然存在，请联系支持人员。"
-      },
-      "actions": {
-        "retrying": "重试中...",
-        "tryAgain": "重试"
-      }
-    },
-    "GlobalError": {
-      "title": "出了些问题！",
-      "description": "我们对造成的不便深表歉意。请稍后再试。",
-      "tryAgainButton": "重试"
-    }
-  },
-  "AppointmentList": {
-    "title": "预约",
-    "filters": {
-      "all": "所有预约",
-      "upcoming": "即将到来",
-      "today": "今天",
-      "past": "过去"
-    },
-    "sort": {
-      "date": "按日期排序",
-      "subject": "按科目排序",
-      "status": "按状态排序"
-    },
-    "empty": {
-      "title": "无预约",
-      "all": "未找到预约。",
-      "upcoming": "未找到即将到来的预约。",
-      "today": "今天没有安排预约。",
-      "past": "未找到过去的预约。"
-    },
-    "status": {
-      "SCHEDULED": "已安排",
-      "CONFIRMED": "已确认",
-      "IN_PROGRESS": "进行中",
-      "COMPLETED": "已完成",
-      "CANCELLED": "已取消",
-      "NO_SHOW": "缺席"
-    },
-    "min": "分钟",
-    "pagination": {
-      "previous": "上一页",
-      "next": "下一页",
-      "pageInfo": "第 {current} 页，共 {total} 页"
-    }
-  },
-  "StudentProgress": {
-    "title": "学习进度",
-    "progressComplete": "完成 {progress}%",
-    "sessionsInfo": "已完成 {completed} / {total} 节课",
-    "remainingSessions": "剩余 {remaining} 节课",
-    "lastSession": "上次",
-    "nextSession": "下次",
-    "actions": {
-      "hideDetails": "隐藏详情",
-      "viewDetails": "查看详情"
-    },
-    "details": {
-      "recentActivities": "最近活动",
-      "activity1": "完成二次方程习题",
-      "activity2": "作业：第5章习题1-15",
-      "activity3": "模拟考试取得90%分数",
-      "upcomingGoals": "即将到来的目标",
-      "goal1": "掌握多项式因式分解",
-      "goal2": "完成模拟考试",
-      "goal3": "复习三角函数"
-    },
-    "overall": {
-      "title": "整体表现",
-      "averageProgress": "平均进度",
-      "totalSessions": "总课程数",
-      "averageRating": "平均评分"
-    },
-    "empty": {
-      "title": "暂无进度数据",
-      "description": "完成您的第一次辅导课程后，您的学习进度将显示在这里。"
-    }
-  },
-  "LectureHoursTracker": {
-    "title": {
-      "student": "我的授课时长",
-      "tutor": "学生授课时长"
-    },
-    "subtitle": {
-      "student": "跟踪您的课程时长和付款状态",
-      "tutor": "记录课程并跟踪学生进度"
-    },
-    "actions": {
-      "recordSession": "记录课程",
-      "clear": "清除"
-    },
-    "recordSessionForm": {
-      "title": "记录新课程",
-      "studentSubject": "学生/科目",
-      "selectStudentSubject": "选择学生和科目",
-      "duration": "时长 (小时)",
-      "notes": "备注 (可选)"
-    },
-    "overview": {
-      "tutorName": "导师：{firstName} {lastName}",
-      "studentName": "学生：{firstName} {lastName}",
-      "totalHours": "总时长：",
-      "unpaidHours": "未付时长：",
-      "paymentFrequency": "付款频率：",
-      "hours": "小时",
-      "everyHours": "每 {count} 小时",
-      "editPaymentFrequency": "编辑付款频率",
-      "latestPayment": "最新付款：",
-      "progressToNextPayment": "下一次付款进度"
-    },
-    "paymentStatus": {
-      "PAID": "已付",
-      "OVERDUE": "逾期",
-      "PENDING": "待处理"
-    },
-    "empty": {
-      "title": "未找到授课时长",
-      "tutorMessage": "开始记录课程以跟踪学生的授课时长。",
-      "studentMessage": "您的导师将记录课程以跟踪您的授课时长和付款。"
-    },
-    "detailedView": {
-      "title": "{subject} - 详细视图",
-      "recentSessions": "最近课程",
-      "sessionDuration": "{duration}小时课程",
-      "paymentHistory": "付款历史",
-      "hoursPayment": "{hours}小时付款",
-      "dueDate": "截止日期",
-      "noDueDate": "无截止日期",
-      "paidDate": "已付",
-      "markPaid": "标记为已付"
-    },
-    "error": {
-      "title": "加载数据出错",
-      "message": "抱歉，加载授课时长数据时出错。请刷新页面或稍后再试。"
     }
   },
   "AppointmentManagement": {
@@ -942,6 +240,134 @@
       }
     }
   },
+  "TutorAvailability": {
+    "title": "每周空闲时间",
+    "actions": {
+      "addSlot": "添加时间段",
+      "cancel": "取消",
+      "adding": "添加中...",
+      "markAvailable": "标记为有空",
+      "markUnavailable": "标记为无空",
+      "delete": "删除",
+      "enable": "启用",
+      "disable": "禁用"
+    },
+    "form": {
+      "title": "添加新的空闲时间段",
+      "slotType": "时间段类型",
+      "dayOfWeek": "星期几",
+      "date": "日期",
+      "startTime": "开始时间",
+      "endTime": "结束时间",
+      "recurringDuration": "重复持续时间",
+      "numberOfWeeks": "周数",
+      "endDate": "结束日期",
+      "startDate": "开始日期",
+      "createWeeksInfo": "将创建 {weeks} 个每周时间段",
+      "untilDateInfo": "直到 {date}",
+      "selectEndDate": "选择结束日期"
+    },
+    "slotType": {
+      "repeating": "重复（每周）",
+      "individual": "单个时间段"
+    },
+    "weeks": "周",
+    "week": "周",
+    "individualSlots": {
+      "title": "单个时间段"
+    },
+    "recurringSlots": {
+      "title": "每周重复时间段",
+      "empty": "这天没有设置空闲时间"
+    },
+    "status": {
+      "available": "有空",
+      "unavailable": "无空",
+      "active": "启用",
+      "inactive": "禁用"
+    },
+    "days": {
+      "Sunday": "星期日",
+      "Monday": "星期一",
+      "Tuesday": "星期二",
+      "Wednesday": "星期三",
+      "Thursday": "星期四",
+      "Friday": "星期五",
+      "Saturday": "星期六"
+    },
+    "messages": {
+      "addSuccess": "{type} 空闲时间段添加成功！",
+      "addError": "添加空闲时间段失败",
+      "deleteSuccess": "空闲时间段删除成功！",
+      "deleteError": "删除空闲时间段失败",
+      "deleteIndividualSuccess": "单个时间段删除成功！",
+      "deleteIndividualError": "删除单个时间段失败"
+    },
+    "confirmDelete": "您确定要删除此空闲时间段吗？",
+    "confirmDeleteIndividual": "您确定要删除此单个时间段吗？"
+  },
+  "AppointmentList": {
+    "title": "预约",
+    "filters": {
+      "all": "所有预约",
+      "upcoming": "即将到来",
+      "today": "今天",
+      "past": "过去"
+    },
+    "sort": {
+      "date": "按日期排序",
+      "subject": "按科目排序",
+      "status": "按状态排序"
+    },
+    "empty": {
+      "title": "无预约",
+      "all": "未找到预约。",
+      "upcoming": "未找到即将到来的预约。",
+      "today": "今天没有安排预约。",
+      "past": "未找到过去的预约。"
+    },
+    "status": {
+      "SCHEDULED": "已安排",
+      "CONFIRMED": "已确认",
+      "IN_PROGRESS": "进行中",
+      "COMPLETED": "已完成",
+      "CANCELLED": "已取消",
+      "NO_SHOW": "缺席"
+    },
+    "min": "分钟",
+    "pagination": {
+      "previous": "上一页",
+      "next": "下一页",
+      "pageInfo": "第 {current} 页，共 {total} 页"
+    }
+  },
+  "StudentSummaryList": {
+    "title": "学生概况",
+    "empty": "未找到学生",
+    "confirmPayment": "标记所有未付工时为已付？此操作无法撤销。",
+    "status": {
+      "upToDate": "最新",
+      "paymentDue": "应付",
+      "overdue": "逾期",
+      "unknown": "未知"
+    },
+    "actions": {
+      "edit": "编辑学生数据",
+      "addHours": "添加授课时长",
+      "notes": "查看/添加备注",
+      "markPaid": "标记为已收款"
+    },
+    "stats": {
+      "totalHours": "总工时：",
+      "unpaidHours": "未付工时：",
+      "totalEarnings": "总收入：",
+      "unpaidEarnings": "未收金额：",
+      "lastSession": "最后课程："
+    },
+    "progress": {
+      "nextPayment": "下次付款进度"
+    }
+  },
   "AssignmentManager": {
     "tutorTitle": "作业管理",
     "studentTitle": "我的作业",
@@ -990,110 +416,62 @@
       "gradeAssignment": "批改作业"
     }
   },
-  "TutorAnalytics": {
-    "dashboardTitle": "分析仪表板",
-    "period": {
-      "last7Days": "最近7天",
-      "last30Days": "最近30天",
-      "last3Months": "最近3个月",
-      "lastYear": "去年"
+  "LectureHoursTracker": {
+    "title": {
+      "student": "我的授课时长",
+      "tutor": "学生授课时长"
     },
-    "tabs": {
-      "overview": "概览",
-      "students": "学生",
-      "subjects": "科目",
-      "schedule": "日程"
+    "subtitle": {
+      "student": "跟踪您的课程时长和付款状态",
+      "tutor": "记录课程并跟踪学生进度"
     },
-    "weeklyActivity": {
-      "title": "每周活动",
-      "sessions": "课程",
+    "actions": {
+      "recordSession": "记录课程",
+      "clear": "清除"
+    },
+    "recordSessionForm": {
+      "title": "记录新课程",
+      "studentSubject": "学生/科目",
+      "selectStudentSubject": "选择学生和科目",
+      "duration": "时长 (小时)",
+      "notes": "备注 (可选)"
+    },
+    "overview": {
+      "tutorName": "导师：{firstName} {lastName}",
+      "studentName": "学生：{firstName} {lastName}",
+      "totalHours": "总时长：",
+      "unpaidHours": "未付时长：",
+      "paymentFrequency": "付款频率：",
       "hours": "小时",
-      "earnings": "收入"
+      "everyHours": "每 {count} 小时",
+      "editPaymentFrequency": "编辑付款频率",
+      "latestPayment": "最新付款：",
+      "progressToNextPayment": "下一次付款进度"
     },
-    "monthlyEarnings": {
-      "title": "月度收入趋势",
-      "hoursSessions": "{hours}小时 • {sessions} 节课"
-    },
-    "studentProgressOverview": {
-      "title": "学生进度概览",
-      "trend": {
-        "improving": "进步中",
-        "stable": "稳定",
-        "declining": "下降"
-      },
-      "totalHours": "总时长",
-      "recentSessions": "最近课程",
-      "avgRating": "平均评分"
-    },
-    "subjectPerformance": {
-      "title": "科目表现分析",
-      "table": {
-        "subject": "科目",
-        "students": "学生",
-        "sessions": "课程",
-        "totalHours": "总时长",
-        "avgSession": "平均课程",
-        "earnings": "收入"
-      }
-    },
-    "scheduleAnalysis": {
-      "title": "日程分析",
-      "activeTimeSlots": "最活跃时间段",
-      "percentage": "{percentage}%",
-      "insightsTitle": "日程洞察",
-      "peakHours": "高峰时段",
-      "peakHoursMessage": "{time} 是您最忙的时间段",
-      "noTimeData": "无时间分布数据",
-      "availabilityOptimization": "空闲时间优化",
-      "optimizationMessage": "考虑在高需求时段添加更多时间段",
-      "workLifeBalance": "工作生活平衡",
-      "hoursThisWeek": "本周 {hours} 小时"
+    "paymentStatus": {
+      "PAID": "已付",
+      "OVERDUE": "逾期",
+      "PENDING": "待处理"
     },
     "empty": {
-      "title": "无分析数据",
-      "message": "您还没有任何分析数据。完成一些辅导课程以查看您的分析。",
-      "refreshData": "刷新数据"
+      "title": "未找到授课时长",
+      "tutorMessage": "开始记录课程以跟踪学生的授课时长。",
+      "studentMessage": "您的导师将记录课程以跟踪您的授课时长和付款。"
     },
-    "errors": {
-      "invalidTutorId": "提供的导师ID无效",
-      "dataNotFound": "未找到分析数据。请检查您是否有任何预约记录。",
-      "accessDenied": "访问被拒绝。请检查您的权限。",
-      "serverError": "服务器错误。请稍后再试。",
-      "requestFailed": "请求失败，状态码 {status}",
-      "fetchFailedFallback": "获取分析数据失败",
-      "loadFailedTitle": "加载分析失败",
-      "contactSupport": "请刷新页面，如果问题仍然存在，请联系支持人员。"
+    "detailedView": {
+      "title": "{subject} - 详细视图",
+      "recentSessions": "最近课程",
+      "sessionDuration": "{duration}小时课程",
+      "paymentHistory": "付款历史",
+      "hoursPayment": "{hours}小时付款",
+      "dueDate": "截止日期",
+      "noDueDate": "无截止日期",
+      "paidDate": "已付",
+      "markPaid": "标记为已付"
     },
-    "actions": {
-      "retrying": "重试中...",
-      "tryAgain": "重试"
-    }
-  },
-  "StudentSummaryList": {
-    "title": "学生概况",
-    "empty": "未找到学生",
-    "confirmPayment": "标记所有未付工时为已付？此操作无法撤销。",
-    "status": {
-      "upToDate": "最新",
-      "paymentDue": "应付",
-      "overdue": "逾期",
-      "unknown": "未知"
-    },
-    "actions": {
-      "edit": "编辑学生数据",
-      "addHours": "添加授课时长",
-      "notes": "查看/添加备注",
-      "markPaid": "标记为已收款"
-    },
-    "stats": {
-      "totalHours": "总工时：",
-      "unpaidHours": "未付工时：",
-      "totalEarnings": "总收入：",
-      "unpaidEarnings": "未收金额：",
-      "lastSession": "最后课程："
-    },
-    "progress": {
-      "nextPayment": "下次付款进度"
+    "error": {
+      "title": "加载数据出错",
+      "message": "抱歉，加载授课时长数据时出错。请刷新页面或稍后再试。"
     }
   },
   "PaymentManager": {
@@ -1290,71 +668,121 @@
       "saveError": "保存偏好设置失败。请重试。"
     }
   },
-  "TutorAvailability": {
-    "title": "每周空闲时间",
+  "TutorAnalytics": {
+    "dashboardTitle": "分析仪表板",
+    "period": {
+      "last7Days": "最近7天",
+      "last30Days": "最近30天",
+      "last3Months": "最近3个月",
+      "lastYear": "去年"
+    },
+    "tabs": {
+      "overview": "概览",
+      "students": "学生",
+      "subjects": "科目",
+      "schedule": "日程"
+    },
+    "weeklyActivity": {
+      "title": "每周活动",
+      "sessions": "课程",
+      "hours": "小时",
+      "earnings": "收入"
+    },
+    "monthlyEarnings": {
+      "title": "月度收入趋势",
+      "hoursSessions": "{hours}小时 • {sessions} 节课"
+    },
+    "studentProgressOverview": {
+      "title": "学生进度概览",
+      "trend": {
+        "improving": "进步中",
+        "stable": "稳定",
+        "declining": "下降"
+      },
+      "totalHours": "总时长",
+      "recentSessions": "最近课程",
+      "avgRating": "平均评分"
+    },
+    "subjectPerformance": {
+      "title": "科目表现分析",
+      "table": {
+        "subject": "科目",
+        "students": "学生",
+        "sessions": "课程",
+        "totalHours": "总时长",
+        "avgSession": "平均课程",
+        "earnings": "收入"
+      }
+    },
+    "scheduleAnalysis": {
+      "title": "日程分析",
+      "activeTimeSlots": "最活跃时间段",
+      "percentage": "{percentage}%",
+      "insightsTitle": "日程洞察",
+      "peakHours": "高峰时段",
+      "peakHoursMessage": "{time} 是您最忙的时间段",
+      "noTimeData": "无时间分布数据",
+      "availabilityOptimization": "空闲时间优化",
+      "optimizationMessage": "考虑在高需求时段添加更多时间段",
+      "workLifeBalance": "工作生活平衡",
+      "hoursThisWeek": "本周 {hours} 小时"
+    },
+    "empty": {
+      "title": "无分析数据",
+      "message": "您还没有任何分析数据。完成一些辅导课程以查看您的分析。",
+      "refreshData": "刷新数据"
+    },
+    "errors": {
+      "invalidTutorId": "提供的导师ID无效",
+      "dataNotFound": "未找到分析数据。请检查您是否有任何预约记录。",
+      "accessDenied": "访问被拒绝。请检查您的权限。",
+      "serverError": "服务器错误。请稍后再试。",
+      "requestFailed": "请求失败，状态码 {status}",
+      "fetchFailedFallback": "获取分析数据失败",
+      "loadFailedTitle": "加载分析失败",
+      "contactSupport": "请刷新页面，如果问题仍然存在，请联系支持人员。"
+    },
     "actions": {
-      "addSlot": "添加时间段",
-      "cancel": "取消",
-      "adding": "添加中...",
-      "markAvailable": "标记为有空",
-      "markUnavailable": "标记为无空",
-      "delete": "删除",
-      "enable": "启用",
-      "disable": "禁用"
+      "retrying": "重试中...",
+      "tryAgain": "重试"
+    }
+  },
+  "GlobalError": {
+    "title": "出了些问题！",
+    "description": "我们对造成的不便深表歉意。请稍后再试。",
+    "tryAgainButton": "重试"
+  },
+  "StudentProgress": {
+    "title": "学习进度",
+    "progressComplete": "完成 {progress}%",
+    "sessionsInfo": "已完成 {completed} / {total} 节课",
+    "remainingSessions": "剩余 {remaining} 节课",
+    "lastSession": "上次",
+    "nextSession": "下次",
+    "actions": {
+      "hideDetails": "隐藏详情",
+      "viewDetails": "查看详情"
     },
-    "form": {
-      "title": "添加新的空闲时间段",
-      "slotType": "时间段类型",
-      "dayOfWeek": "星期几",
-      "date": "日期",
-      "startTime": "开始时间",
-      "endTime": "结束时间",
-      "recurringDuration": "重复持续时间",
-      "numberOfWeeks": "周数",
-      "endDate": "结束日期",
-      "startDate": "开始日期",
-      "createWeeksInfo": "将创建 {weeks} 个每周时间段",
-      "untilDateInfo": "直到 {date}",
-      "selectEndDate": "选择结束日期"
+    "details": {
+      "recentActivities": "最近活动",
+      "activity1": "完成二次方程习题",
+      "activity2": "作业：第5章习题1-15",
+      "activity3": "模拟考试取得90%分数",
+      "upcomingGoals": "即将到来的目标",
+      "goal1": "掌握多项式因式分解",
+      "goal2": "完成模拟考试",
+      "goal3": "复习三角函数"
     },
-    "slotType": {
-      "repeating": "重复（每周）",
-      "individual": "单个时间段"
+    "overall": {
+      "title": "整体表现",
+      "averageProgress": "平均进度",
+      "totalSessions": "总课程数",
+      "averageRating": "平均评分"
     },
-    "weeks": "周",
-    "week": "周",
-    "individualSlots": {
-      "title": "单个时间段"
-    },
-    "recurringSlots": {
-      "title": "每周重复时间段",
-      "empty": "这天没有设置空闲时间"
-    },
-    "status": {
-      "available": "有空",
-      "unavailable": "无空",
-      "active": "启用",
-      "inactive": "禁用"
-    },
-    "days": {
-      "Sunday": "星期日",
-      "Monday": "星期一",
-      "Tuesday": "星期二",
-      "Wednesday": "星期三",
-      "Thursday": "星期四",
-      "Friday": "星期五",
-      "Saturday": "星期六"
-    },
-    "messages": {
-      "addSuccess": "{type} 空闲时间段添加成功！",
-      "addError": "添加空闲时间段失败",
-      "deleteSuccess": "空闲时间段删除成功！",
-      "deleteError": "删除空闲时间段失败",
-      "deleteIndividualSuccess": "单个时间段删除成功！",
-      "deleteIndividualError": "删除单个时间段失败"
-    },
-    "confirmDelete": "您确定要删除此空闲时间段吗？",
-    "confirmDeleteIndividual": "您确定要删除此单个时间段吗？"
+    "empty": {
+      "title": "暂无进度数据",
+      "description": "完成您的第一次辅导课程后，您的学习进度将显示在这里。"
+    }
   },
   "HourlyRateManager": {
     "title": "每小时费率",
