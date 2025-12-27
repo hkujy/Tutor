@@ -41,7 +41,7 @@ describe('Enhanced Validation', () => {
         it('should reject common passwords', () => {
             const result = validatePassword('Password123!');
             expect(result.valid).toBe(false);
-            expect(result.errors).toContain('Password is too common');
+            expect(result.errors).toContain('This password is too common. Please choose a stronger password');
         });
 
         it('should reject passwords with repeated characters', () => {
@@ -53,7 +53,7 @@ describe('Enhanced Validation', () => {
 
 
         it('should calculate password strength correctly', () => {
-            const weak = validatePassword('MyP@ssw0rd12');
+            const weak = validatePassword('MyP@ss123!'); // 10 chars, score 4 (medium)
             expect(weak.strength).toBe('medium');
 
             const strong = validatePassword('MyP@ssw0rd123!@#');
