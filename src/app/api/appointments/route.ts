@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../../lib/auth/config'
 import { db } from '../../../lib/db/client'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { checkIdempotency, clearIdempotencyKey } from '../../../lib/redis'
 import { emitToUsers } from '../../../lib/socket/socket-server'
@@ -169,9 +170,9 @@ export async function POST(request: NextRequest) {
         subject: data.subject,
         status: 'SCHEDULED',
         notes: data.notes || null,
-        hourlyRate,
-        totalCost,
-        currency: tutorProfile.currency
+        hourlyRate: new Prisma.Decimal(hourlyRate),
+        totalCost: new Prisma.Decimal(totalCost),
+        currency: tutorProfile.currency || 'USD'
       },
     })
 
