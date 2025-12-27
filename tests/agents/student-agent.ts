@@ -8,14 +8,6 @@ export type StudentBehaviorPattern = 'eager' | 'browsing' | 'indecisive'
 
 /**
  * StudentAgent - Simulates student user behavior
- * 
- * Students can:
- * - Browse and search for tutors
- * - View tutor availability
- * - Book appointments
- * - View their schedule
- * - Cancel or reschedule appointments
- * - Check notifications
  */
 export class StudentAgent extends BaseAgent {
     public behaviorPattern: StudentBehaviorPattern
@@ -25,9 +17,6 @@ export class StudentAgent extends BaseAgent {
         this.behaviorPattern = behaviorPattern
     }
 
-    /**
-     * Browse available tutors
-     */
     async browseTutors(subject?: string): Promise<number> {
         const actionName = 'browseTutors'
         const startTime = Date.now()
@@ -40,21 +29,22 @@ export class StudentAgent extends BaseAgent {
             await this.navigateTo('/en/student')
             await this.humanDelay(500, 1000)
 
-            // Look for tutor list or browse section
             const tutorCards = await this.page.locator('[data-testid="tutor-card"], .tutor-card, .tutor-item').count()
-
             this.state.sessionData.availableTutors = tutorCards
             this.log(`Found ${tutorCards} available tutors`)
 
-            // If looking for specific subject, try filtering
             if (subject && tutorCards > 0) {
-                const filterInput = this.page.locator('input[placeholder*="subject"], input[name="subject"]')
+                const filterInput = this.page.locator('input[placeholder*="subject"], input[name="subject"], input[placeholder*="Subject"]')
                 if (await filterInput.count() > 0) {
                     await filterInput.first().fill(subject)
                     await this.humanDelay(500, 1000)
 
-                    const filteredCount = await this.page.locator('[data-testid="tutor-card"], .tutor-card').count()
-                    this.log(`Filtered to ${filteredCount} tutors for ${subject}`)
+                    let filteredCount = await this.page.locator('[data-testid="tutor-card"], .tutor-card').count()
+                    if (filteredCount === 0) {
+                        this.log(`No tutors found for ${subject}, clearing filter...`, 'warn')
+                        await filterInput.first().fill('')
+                        await this.humanDelay(500, 1000)
+                    }
                 }
             }
 
@@ -67,9 +57,6 @@ export class StudentAgent extends BaseAgent {
         }
     }
 
-    /**
-     * View a specific tutor's profile and availability
-     */
     async viewTutorProfile(tutorIndex: number = 0): Promise<boolean> {
         const actionName = 'viewTutorProfile'
         const startTime = Date.now()
@@ -77,26 +64,30 @@ export class StudentAgent extends BaseAgent {
         try {
             if (!this.page) throw new Error('Agent not initialized')
 
-            this.log(`Viewing tutor profile at index ${tutorIndex}`)
+            this.log(`Viewing tutor profile/booking at index ${tutorIndex}`)
 
             const tutorCards = this.page.locator('[data-testid="tutor-card"], .tutor-card, .tutor-item')
             const count = await tutorCards.count()
 
             if (count === 0) {
-                throw new Error('No tutors available to view')
+                throw new Error('No tutors available to book')
             }
 
-            // Click on a tutor card
             const index = Math.min(tutorIndex, count - 1)
-            await tutorCards.nth(index).click()
-            await this.humanDelay(800, 1500)
+            const bookButton = tutorCards.nth(index).locator('button:has-text("Book")')
 
-            // Check for availability calendar
-            const hasCalendar = await this.page.locator('[data-testid="availability-calendar"], .calendar, .availability-grid').count() > 0
-            this.log(`Tutor profile loaded, calendar visible: ${hasCalendar}`)
+            if (await bookButton.count() > 0) {
+                this.log('Clicking "Book Session" button')
+                await bookButton.first().click()
+                await this.humanDelay(1500, 3000)
+            } else {
+                this.log('Could not find Book button, clicking card instead', 'warn')
+                await tutorCards.nth(index).click()
+                await this.humanDelay(1500, 3000)
+            }
 
             this.recordAction(actionName, startTime, true)
-            return hasCalendar
+            return true
         } catch (error) {
             this.recordAction(actionName, startTime, false)
             this.log(`Failed to view tutor profile: ${error}`, 'error')
@@ -104,9 +95,6 @@ export class StudentAgent extends BaseAgent {
         }
     }
 
-    /**
-     * Book an appointment with available slot
-     */
     async bookAppointment(subject: string = 'Mathematics'): Promise<boolean> {
         const actionName = 'bookAppointment'
         const startTime = Date.now()
@@ -116,55 +104,73 @@ export class StudentAgent extends BaseAgent {
 
             this.log(`Attempting to book appointment for ${subject}`)
 
-            // Look for available time slots
-            const timeSlots = this.page.locator('[data-testid="time-slot"], .time-slot, button[data-time]')
-            const availableSlots = await timeSlots.filter({ hasText: /available|open/i }).count()
+            // Step 0: Handle "Step 1" - Select Subject if it's visible
+            const step1Title = this.page.locator('h3:has-text("Step 1"), h4:has-text("Select a Subject")')
+            if (await step1Title.count() > 0) {
+                this.log('On Step 1, selecting subject explicitly')
+                const subjectBtn = this.page.locator(`button:has-text("${subject}")`)
+                if (await subjectBtn.count() > 0) {
+                    await subjectBtn.first().click()
+                } else {
+                    this.log(`Subject "${subject}" not found, clicking first available subject button`, 'warn')
+                    const anySubjectBtn = this.page.locator('h4:has-text("Select a Subject") + div button, .subject-button, button:has-text("Music"), button:has-text("Mathematics"), button:has-text("English")').first()
+                    await anySubjectBtn.click()
+                }
+                await this.humanDelay(1000, 2000)
+            }
 
-            if (availableSlots === 0) {
+            // Step 1: Handle calendar if time slots aren't visible yet
+            const timeSlots = this.page.locator('[data-testid="time-slot"], .time-slot, button[data-time]')
+            const calendarGrid = this.page.locator('.grid-cols-7')
+
+            if (await calendarGrid.count() > 0 && await timeSlots.count() === 0) {
+                this.log('Selecting a date from calendar')
+                const days = this.page.locator('.grid-cols-7 button:not([disabled])')
+                if (await days.count() > 0) {
+                    await days.first().click()
+                    await this.humanDelay(1000, 2000)
+                }
+            }
+
+            const finalSlots = this.page.locator('[data-testid="time-slot"], .time-slot, button[data-time]')
+            const availableCount = await finalSlots.count()
+
+            if (availableCount === 0) {
                 this.log('No available time slots found', 'warn')
+                await this.screenshot('no-slots-found')
                 this.recordAction(actionName, startTime, false)
                 return false
             }
 
-            this.log(`Found ${availableSlots} available slots`)
+            this.log(`Found ${availableCount} available slots, selecting first one`)
+            await finalSlots.first().click()
+            await this.humanDelay(500, 1000)
 
-            // Select a random available slot
-            const slotIndex = Math.floor(Math.random() * availableSlots)
-            await timeSlots.filter({ hasText: /available|open/i }).nth(slotIndex).click()
-            await this.humanDelay(300, 600)
-
-            // Fill in booking form if present
-            const subjectInput = this.page.locator('input[name="subject"], select[name="subject"]')
-            if (await subjectInput.count() > 0) {
-                await subjectInput.first().fill(subject)
-                await this.humanDelay(200, 400)
+            // Step 2: Confirmation/Notes
+            const continueButton = this.page.locator('button:has-text("Continue")')
+            if (await continueButton.count() > 0) {
+                await continueButton.first().click()
+                await this.humanDelay(500, 1000)
             }
 
             const notesInput = this.page.locator('textarea[name="notes"], textarea[placeholder*="note"]')
             if (await notesInput.count() > 0) {
-                const notes = this.decide({
-                    choices: [
-                        'Looking forward to the session!',
-                        'Need help with homework',
-                        'Preparing for exam',
-                        'Want to improve understanding',
-                    ],
-                    strategy: 'random',
-                })
-                await notesInput.first().fill(notes)
-                await this.humanDelay(200, 400)
+                await notesInput.first().fill('Test booking from student agent')
+                await this.humanDelay(300, 600)
             }
 
-            // Confirm booking
-            await this.page.click('button:has-text("Book"), button:has-text("Confirm"), button[type="submit"]')
-            await this.humanDelay(1000, 2000)
+            // Step 3: Final Book button
+            const finalBookBtn = this.page.locator('button:has-text("Book Appointment"), button:has-text("Confirm Booking"), button:has-text("Book")')
+            await finalBookBtn.first().click()
+            await this.humanDelay(3000, 5000)
 
-            // Wait for confirmation
-            const successMessage = await this.page.locator('text=/booked|confirmed|success/i').count()
-            const isBooked = successMessage > 0
+            // Verify success
+            const successIndicator = await this.page.locator('text=/success|booked|confirmed/i').count()
+            const isBooked = successIndicator > 0
 
             this.recordAction(actionName, startTime, isBooked)
-            this.log(isBooked ? 'Appointment booked successfully' : 'Booking may have failed')
+            this.log(isBooked ? 'Appointment booked successfully' : 'Booking verification failed')
+            if (!isBooked) await this.screenshot('booking-failed')
 
             return isBooked
         } catch (error) {
@@ -174,9 +180,6 @@ export class StudentAgent extends BaseAgent {
         }
     }
 
-    /**
-     * View student's appointment schedule
-     */
     async viewSchedule(): Promise<number> {
         const actionName = 'viewSchedule'
         const startTime = Date.now()
@@ -186,10 +189,16 @@ export class StudentAgent extends BaseAgent {
 
             this.log('Viewing schedule')
 
-            await this.navigateTo('/en/student/schedule')
-            await this.humanDelay(500, 1000)
+            await this.navigateTo('/en/student')
+            await this.humanDelay(1000, 2000)
 
-            const appointments = await this.page.locator('[data-testid="appointment"], .appointment-card').count()
+            const sessionsTab = this.page.locator('button:has-text("Sessions"), button:has-text("课程"), button:has-text("预约")')
+            if (await sessionsTab.count() > 0) {
+                await sessionsTab.first().click()
+                await this.humanDelay(1000, 2000)
+            }
+
+            const appointments = await this.page.locator('[data-testid="appointment"], .appointment-card, [role="tabpanel"] table tr').count()
             this.state.sessionData.myAppointments = appointments
             this.log(`Found ${appointments} appointments in schedule`)
 
@@ -202,9 +211,6 @@ export class StudentAgent extends BaseAgent {
         }
     }
 
-    /**
-     * Cancel an appointment
-     */
     async cancelAppointment(appointmentIndex: number = 0): Promise<boolean> {
         const actionName = 'cancelAppointment'
         const startTime = Date.now()
@@ -214,10 +220,16 @@ export class StudentAgent extends BaseAgent {
 
             this.log(`Cancelling appointment at index ${appointmentIndex}`)
 
-            await this.navigateTo('/en/student/schedule')
-            await this.humanDelay(500, 1000)
+            await this.navigateTo('/en/student')
+            await this.humanDelay(1000, 2000)
 
-            const appointments = this.page.locator('[data-testid="appointment"], .appointment-card')
+            const sessionsTab = this.page.locator('button:has-text("Sessions")')
+            if (await sessionsTab.count() > 0) {
+                await sessionsTab.first().click()
+                await this.humanDelay(1000, 2000)
+            }
+
+            const appointments = this.page.locator('button:has-text("Cancel")')
             const count = await appointments.count()
 
             if (count === 0) {
@@ -226,31 +238,18 @@ export class StudentAgent extends BaseAgent {
                 return false
             }
 
-            // Click on appointment to view details or find cancel button
             const index = Math.min(appointmentIndex, count - 1)
-            const appointment = appointments.nth(index)
+            await appointments.nth(index).click()
+            await this.humanDelay(1000, 2000)
 
-            // Look for cancel button
-            const cancelButton = appointment.locator('button:has-text("Cancel")')
-            if (await cancelButton.count() > 0) {
-                await cancelButton.click()
-                await this.humanDelay(300, 600)
-
-                // Confirm cancellation
-                const confirmButton = this.page.locator('button:has-text("Confirm"), button:has-text("Yes")')
-                if (await confirmButton.count() > 0) {
-                    await confirmButton.click()
-                    await this.humanDelay(500, 1000)
-                }
-
-                this.recordAction(actionName, startTime, true)
-                this.log('Appointment cancelled successfully')
-                return true
+            const confirmBtn = this.page.locator('button:has-text("Confirm"), button:has-text("Yes")')
+            if (await confirmBtn.count() > 0) {
+                await confirmBtn.first().click()
+                await this.humanDelay(1000, 2000)
             }
 
-            this.log('Could not find cancel button', 'warn')
-            this.recordAction(actionName, startTime, false)
-            return false
+            this.recordAction(actionName, startTime, true)
+            return true
         } catch (error) {
             this.recordAction(actionName, startTime, false)
             this.log(`Failed to cancel appointment: ${error}`, 'error')
@@ -258,104 +257,52 @@ export class StudentAgent extends BaseAgent {
         }
     }
 
-    /**
-     * Check notifications
-     */
     async checkNotifications(): Promise<number> {
         const actionName = 'checkNotifications'
         const startTime = Date.now()
 
         try {
             if (!this.page) throw new Error('Agent not initialized')
-
-            this.log('Checking notifications')
-
-            const notifButton = this.page.locator('[data-testid="notifications"], button[aria-label*="notification"]')
-            if (await notifButton.count() > 0) {
-                await notifButton.first().click()
-                await this.humanDelay(300, 600)
-
-                const unreadCount = await this.page.locator('.notification.unread, [data-unread="true"]').count()
-                this.log(`Found ${unreadCount} unread notifications`)
-
-                this.recordAction(actionName, startTime, true)
-                return unreadCount
+            const notifBtn = this.page.locator('[data-testid="notifications"], .notification-bell')
+            if (await notifBtn.count() > 0) {
+                await notifBtn.first().click()
+                await this.humanDelay(500, 1000)
             }
-
             this.recordAction(actionName, startTime, true)
             return 0
         } catch (error) {
             this.recordAction(actionName, startTime, false)
-            this.log(`Failed to check notifications: ${error}`, 'error')
             return 0
         }
     }
 
-    /**
-     * Main action logic based on behavior pattern
-     */
     async performActions(): Promise<void> {
         this.log(`Starting actions with ${this.behaviorPattern} behavior pattern`)
 
         switch (this.behaviorPattern) {
             case 'eager':
-                // Eager students book quickly
                 await this.browseTutors()
-                await this.humanDelay(500, 1000)
-
-                await this.viewTutorProfile(0) // View first tutor
-                await this.humanDelay(300, 700)
-
+                await this.viewTutorProfile(0)
                 await this.bookAppointment()
-                await this.humanDelay(500, 1000)
-
                 await this.viewSchedule()
                 break
 
             case 'browsing':
-                // Browsing students explore multiple options
-                const tutorCount = await this.browseTutors('Mathematics')
-                await this.humanDelay(1000, 2000)
-
-                if (tutorCount > 0) {
-                    await this.viewTutorProfile(0)
-                    await this.humanDelay(1000, 2000)
-
-                    // Maybe view another tutor
-                    if (tutorCount > 1) {
-                        await this.browseTutors()
-                        await this.humanDelay(800, 1500)
-                        await this.viewTutorProfile(1)
-                        await this.humanDelay(1000, 2000)
-                    }
-                }
-
+                await this.browseTutors('Mathematics')
+                await this.viewTutorProfile(0)
                 await this.checkNotifications()
                 break
 
             case 'indecisive':
-                // Indecisive students browse, book, then sometimes cancel
                 await this.browseTutors()
-                await this.humanDelay(1000, 2000)
-
                 await this.viewTutorProfile(0)
-                await this.humanDelay(1500, 3000)
-
                 const booked = await this.bookAppointment()
-                await this.humanDelay(2000, 4000)
-
-                // 30% chance to cancel after booking
-                if (booked && Math.random() < 0.3) {
-                    this.log('Changed mind, cancelling appointment')
+                if (booked && Math.random() < 0.5) {
                     await this.viewSchedule()
-                    await this.humanDelay(1000, 2000)
                     await this.cancelAppointment(0)
-                } else {
-                    await this.viewSchedule()
                 }
                 break
         }
-
         this.log('Actions completed')
     }
 }

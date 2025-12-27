@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 async function main() {
   console.log('🌱 Starting database seeding... (this might take a moment)')
-  
+
   // Clear existing data first - fresh start each time
   console.log('🧹 Cleaning up existing data...')
 
@@ -49,7 +49,7 @@ async function main() {
     update: {},
     create: {
       userId: tutorUser.id,
-      specializations: ['Music'],
+      specializations: ['Mathematics', 'English', 'Music'],
       experienceYears: 5,
       education: 'MS in Mathematics, MIT',
       certifications: ['Certified Math Teacher'],
@@ -96,7 +96,78 @@ async function main() {
     },
   })
 
-  console.log('✅ Created student profile for:', studentUser.email)
+  // --- Additional Realistic Test Users ---
+  const realisticTutors = [
+    { email: 'sarah.chen@tutortest.com', firstName: 'Sarah', lastName: 'Chen', bio: 'Expert Math Tutor', subjects: ['Mathematics', 'Physics'] },
+    { email: 'raj.patel@tutortest.com', firstName: 'Raj', lastName: 'Patel', bio: 'Chemistry & Biology Specialist', subjects: ['Chemistry', 'Biology'] },
+    { email: 'maria.rodriguez@tutortest.com', firstName: 'Maria', lastName: 'Rodriguez', bio: 'Spanish Language Expert', subjects: ['Spanish', 'History'] },
+  ]
+
+  for (const t of realisticTutors) {
+    const user = await prisma.user.upsert({
+      where: { email: t.email },
+      update: {},
+      create: {
+        email: t.email,
+        password: await hash('TutorTest123!', 12),
+        role: 'TUTOR',
+        firstName: t.firstName,
+        lastName: t.lastName,
+        isActive: true,
+        isVerified: true,
+      }
+    })
+
+    await prisma.tutor.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: {
+        userId: user.id,
+        specializations: t.subjects,
+        bio: t.bio,
+        experienceYears: 10,
+        hourlyRate: 60.0,
+        verified: true,
+      }
+    })
+  }
+
+  const realisticStudents = [
+    { email: 'alex.thompson@studenttest.com', firstName: 'Alex', lastName: 'Thompson' },
+    { email: 'michael.lee@studenttest.com', firstName: 'Michael', lastName: 'Lee' },
+    { email: 'david.kim@studenttest.com', firstName: 'David', lastName: 'Kim' },
+    { email: 'ethan.davis@studenttest.com', firstName: 'Ethan', lastName: 'Davis' },
+    { email: 'isabella.anderson@studenttest.com', firstName: 'Isabella', lastName: 'Anderson' },
+    { email: 'olivia.brown@studenttest.com', firstName: 'Olivia', lastName: 'Brown' },
+    { email: 'noah.garcia@studenttest.com', firstName: 'Noah', lastName: 'Garcia' },
+  ]
+
+  for (const s of realisticStudents) {
+    const user = await prisma.user.upsert({
+      where: { email: s.email },
+      update: {},
+      create: {
+        email: s.email,
+        password: await hash('StudentTest123!', 12),
+        role: 'STUDENT',
+        firstName: s.firstName,
+        lastName: s.lastName,
+        isActive: true,
+        isVerified: true,
+      }
+    })
+
+    await prisma.student.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: {
+        userId: user.id,
+        gradeLevel: '10',
+      }
+    })
+  }
+
+  console.log('✅ Created realistic test users')
 
   // Create notification preferences
   await prisma.notificationPreference.upsert({

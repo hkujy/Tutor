@@ -62,16 +62,22 @@ export class TutorAgent extends BaseAgent {
                 }
             }
 
-            // Set time range
-            await this.page.fill('input[name="startTime"], input[type="time"]:first-of-type', schedule.startTime)
-            await this.humanDelay(100, 200)
+            // Set time range - using more robust positional selection as labels might match multiple containers
+            const selects = this.page.locator('select')
+            // nth(0) is Day, nth(1) is Start Time, nth(2) is End Time
 
-            await this.page.fill('input[name="endTime"], input[type="time"]:last-of-type', schedule.endTime)
-            await this.humanDelay(100, 200)
+            this.log(`Setting start time to ${schedule.startTime}`)
+            await selects.nth(1).selectOption({ label: this.formatTimeToLabel(schedule.startTime) })
+            await this.humanDelay(200, 400)
 
-            if (schedule.duration) {
-                await this.page.fill('input[name="duration"], input[placeholder*="duration"]', schedule.duration.toString())
-                await this.humanDelay(100, 200)
+            this.log(`Setting end time to ${schedule.endTime}`)
+            await selects.nth(2).selectOption({ label: this.formatTimeToLabel(schedule.endTime) })
+            await this.humanDelay(200, 400)
+
+            // Number of weeks (if recurring)
+            if (await selects.count() > 3) {
+                await selects.nth(3).selectOption({ index: 2 })
+                await this.humanDelay(200, 400)
             }
 
             // Save availability
@@ -289,6 +295,18 @@ export class TutorAgent extends BaseAgent {
         }
 
         this.log('Actions completed')
+    }
+
+    /**
+     * Helper to format HH:MM to "h:mm a" for select labels
+     */
+    private formatTimeToLabel(time: string): string {
+        const [hours, minutes] = time.split(':').map(Number)
+        const period = hours >= 12 ? 'PM' : 'AM'
+        const h = hours % 12 || 12
+        const m = minutes.toString().padStart(2, '0')
+        // The component uses date-fns format 'h:mm a'
+        return `${h}:${m} ${period}`
     }
 
     /**

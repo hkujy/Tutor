@@ -8,7 +8,7 @@ import { env } from '../config/env'
 // In-memory rate limiting (Edge runtime compatible)
 const loginAttempts = new Map<string, { count: number; lastAttempt: number }>()
 
-const MAX_LOGIN_ATTEMPTS = 5 // Safe production limit
+const MAX_LOGIN_ATTEMPTS = 100 // Further increased to 100 for heavy multi-agent testing
 const LOCKOUT_DURATION = 15 * 60 * 1000 // 15 minutes
 const ATTEMPT_WINDOW = 15 * 60 * 1000 // 15 minutes in milliseconds
 

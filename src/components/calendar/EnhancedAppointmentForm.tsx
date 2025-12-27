@@ -52,9 +52,16 @@ interface Availability {
 interface EnhancedAppointmentFormProps {
   onAppointmentCreated?: () => void
   initialDate?: Date | null
+  initialTutorId?: string | null
+  initialSubject?: string | null
 }
 
-export default function EnhancedAppointmentForm({ onAppointmentCreated, initialDate }: EnhancedAppointmentFormProps) {
+export default function EnhancedAppointmentForm({
+  onAppointmentCreated,
+  initialDate,
+  initialTutorId,
+  initialSubject
+}: EnhancedAppointmentFormProps) {
   const { user } = useAuth()
   const [step, setStep] = useState(1) // 1: Select Tutor & Subject, 2: Select Date & Time, 3: Confirm
 
@@ -90,6 +97,30 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
     fetchTutors()
     fetchExistingAppointments()
   }, [])
+
+  // Pre-select tutor and subject if provided via props
+  useEffect(() => {
+    if (initialTutorId && tutors.length > 0) {
+      const tutor = tutors.find(t => t.id === initialTutorId)
+      if (tutor) {
+        setSelectedTutor(tutor)
+        if (initialSubject) {
+          const normalizedInput = initialSubject.trim().toLowerCase()
+          const matchedSubject = tutor.subjects.find(s => s.trim().toLowerCase() === normalizedInput)
+
+          if (matchedSubject) {
+            setSelectedSubject(matchedSubject)
+            setStep(2)
+          } else {
+            console.warn(`Subject "${initialSubject}" not found for tutor ${tutor.id}. Subjects: ${tutor.subjects.join(', ')}`)
+            setStep(1)
+          }
+        } else {
+          setStep(1)
+        }
+      }
+    }
+  }, [initialTutorId, initialSubject, tutors])
 
   const fetchTutors = async () => {
     try {
@@ -456,6 +487,7 @@ export default function EnhancedAppointmentForm({ onAppointmentCreated, initialD
                     : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
                   title={slot.conflictReason}
+                  data-testid="time-slot"
                 >
                   {slot.time}
                 </button>

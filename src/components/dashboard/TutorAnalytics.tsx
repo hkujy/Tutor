@@ -167,7 +167,10 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
 
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error(t('errors.dataNotFound'))
+          // Handle 404 as "no data" instead of a fatal error
+          setAnalyticsData({ metrics: [], weeklyActivity: [], monthlyEarnings: [], studentProgress: [], timeDistribution: [], subjectPerformance: [] })
+          setLoading(false)
+          return
         } else if (response.status === 403) {
           throw new Error(t('errors.accessDenied'))
         } else if (response.status >= 500) {
@@ -416,8 +419,8 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center space-x-2 pb-2 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
             >
               <span>{tab.icon}</span>

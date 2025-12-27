@@ -11,6 +11,7 @@ import { WidgetError, SectionError } from '../../../components/ui/ErrorFallbacks
 import { NotificationBell } from '../../../components/NotificationBell'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs'
 import { Clock, CreditCard } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 
 // Lazy load heavy components to reduce initial bundle size
 const CalendarView = lazy(() => import('../../../components/calendar/CalendarView'))
@@ -35,6 +36,16 @@ function StudentDashboard() {
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const searchParams = useSearchParams()
+  const initialTutorId = searchParams.get('tutorId')
+  const initialSubject = searchParams.get('subject')
+
+  // Effect to handle initial tab from URL or query params
+  useEffect(() => {
+    if (initialTutorId) {
+      setActiveTab('sessions')
+    }
+  }, [initialTutorId])
 
   // Handle authentication
   useEffect(() => {
@@ -265,6 +276,8 @@ function StudentDashboard() {
                 <Suspense fallback={<AvailabilitySkeleton />}>
                   <EnhancedAppointmentForm
                     initialDate={selectedDate}
+                    initialTutorId={initialTutorId}
+                    initialSubject={initialSubject}
                     onAppointmentCreated={handleAppointmentCreated}
                   />
                 </Suspense>

@@ -171,9 +171,8 @@ export default function BrowseTutors() {
                                 </div>
                             </div>
 
-                            {/* Book Button */}
                             <button
-                                onClick={() => router.push(`/student/book?tutorId=${tutor.id}`)}
+                                onClick={() => router.push(`/student?tutorId=${tutor.id}${subjectFilter ? `&subject=${subjectFilter}` : ''}`)}
                                 className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
                             >
                                 Book Session

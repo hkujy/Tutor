@@ -79,11 +79,12 @@ export default defineConfig({
         navigationTimeout: 15000,
       },
       timeout: 60000, // 60s per test
+      workers: 1, // Run sequentially to avoid rate limiting
     },
     {
       name: 'multi-agent-concurrent',
       testDir: './tests/agents',
-      testMatch: '**/multi-agent-concurrent.spec.ts',
+      testMatch: '**/multi-agent-realistic.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
         actionTimeout: 15000,
