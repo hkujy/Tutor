@@ -1329,10 +1329,12 @@
     },
     "confirmDelete": "Are you sure you want to delete this availability slot?",
     "confirmDeleteIndividual": "Are you sure you want to delete this individual slot?"
-  }
-},
+  },
   "HourlyRateManager": {
     "title": "Hourly Rates",
+    "labels": {
+      "baseCurrency": "Base Currency"
+    },
     "defaultRate": {
       "title": "Default Hourly Rate",
       "description": "This rate applies to all students unless you set a custom rate",
@@ -1354,7 +1356,7 @@
     "form": {
       "selectStudent": "Select Student",
       "hourlyRate": "Hourly Rate",
-      "subject": "Subject (optional)",
+      "subject": "Subject / Level (optional)",
       "allSubjects": "All subjects",
       "save": "Save",
       "cancel": "Cancel"
@@ -1363,6 +1365,8 @@
       "rateUpdated": "Rate updated successfully",
       "rateAdded": "Student rate added",
       "rateDeleted": "Student rate removed",
-      "error": "Failed to update rate"
+      "error": "Failed to update rate",
+      "enterValidRate": "Please enter a valid rate"
     }
   }
+}

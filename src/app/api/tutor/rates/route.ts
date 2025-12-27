@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
             where: { tutorId: tutor.id },
             include: {
                 student: {
-                    include: {
+                    select: {
                         user: {
                             select: {
                                 firstName: true,
@@ -49,10 +49,10 @@ export async function GET(request: NextRequest) {
         })
 
         // Format response
-        const formattedRates = studentRates.map((rate) => ({
+        const formattedRates = studentRates.map((rate: any) => ({
             id: rate.id,
             studentId: rate.studentId,
-            studentName: `${rate.student.user.firstName} ${rate.student.user.lastName}`,
+            studentName: rate.student?.user ? `${rate.student.user.firstName} ${rate.student.user.lastName}` : 'Unknown Student',
             hourlyRate: rate.hourlyRate.toNumber(),
             subject: rate.subject,
             createdAt: rate.createdAt,
@@ -87,11 +87,18 @@ export async function PUT(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { hourlyRate } = body
+        const { hourlyRate, currency } = body
 
-        if (typeof hourlyRate !== 'number' || hourlyRate < 0) {
+        if (hourlyRate !== undefined && (typeof hourlyRate !== 'number' || hourlyRate < 0)) {
             return NextResponse.json(
                 { error: 'Invalid hourly rate' },
+                { status: 400 }
+            )
+        }
+
+        if (currency !== undefined && (typeof currency !== 'string' || currency.length !== 3)) {
+            return NextResponse.json(
+                { error: 'Invalid currency code' },
                 { status: 400 }
             )
         }
@@ -105,10 +112,14 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: 'Tutor profile not found' }, { status: 404 })
         }
 
-        // Update hourly rate
+        // Update tutor profile
+        const updateData: any = {}
+        if (hourlyRate !== undefined) updateData.hourlyRate = hourlyRate
+        if (currency !== undefined) updateData.currency = currency
+
         const updatedTutor = await db.tutor.update({
             where: { id: tutor.id },
-            data: { hourlyRate },
+            data: updateData,
             select: {
                 hourlyRate: true,
                 currency: true,

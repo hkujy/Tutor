@@ -23,6 +23,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { SkeletonList, Skeleton } from '../ui/skeleton'
 import LoadingButton from '../ui/LoadingButton'
+import { formatCurrency } from '@/lib/utils'
 
 interface TimeSlot {
   time: string
@@ -39,6 +40,9 @@ interface Tutor {
   }
   subjects: string[]
   hourlyRate: number
+  tutorProfile?: {
+    currency: string
+  }
 }
 
 interface Availability {
@@ -350,7 +354,10 @@ export default function EnhancedAppointmentForm({
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-lg font-semibold text-green-600">${tutor.hourlyRate}/hr</span>
+                      <span className="text-lg font-semibold text-green-600">
+                        {formatCurrency(tutor.hourlyRate, tutor.tutorProfile?.currency || 'USD')}
+                        <span className="text-sm font-normal text-muted-foreground ml-1">/hr</span>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -543,7 +550,7 @@ export default function EnhancedAppointmentForm({
           <div><strong>Date:</strong> {selectedDate && format(selectedDate, 'EEEE, MMMM d, yyyy')}</div>
           <div><strong>Time:</strong> {selectedTime}</div>
           <div><strong>Duration:</strong> {duration} minutes</div>
-          <div><strong>Cost:</strong> ${selectedTutor && (selectedTutor.hourlyRate * (duration / 60)).toFixed(2)}</div>
+          <div><strong>Cost:</strong> {selectedTutor && formatCurrency((selectedTutor.hourlyRate * (duration / 60)), selectedTutor.tutorProfile?.currency || 'USD')}</div>
         </div>
       </div>
 

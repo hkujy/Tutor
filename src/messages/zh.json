@@ -1339,4 +1339,44 @@
     "confirmDelete": "您确定要删除此空闲时间段吗？",
     "confirmDeleteIndividual": "您确定要删除此单个时间段吗？"
   }
+  ,
+  "HourlyRateManager": {
+    "title": "每小时费率",
+    "labels": {
+      "baseCurrency": "基础货币"
+    },
+    "defaultRate": {
+      "title": "默认每小时费率",
+      "description": "除非您为特定学生设置自定义费率，否则此费率适用于所有学生",
+      "notSet": "未设置默认费率",
+      "edit": "修改费率",
+      "save": "保存费率",
+      "cancel": "取消"
+    },
+    "studentRates": {
+      "title": "学生特定费率",
+      "description": "为个别学生设置自定义费率",
+      "addButton": "添加学生费率",
+      "noRates": "未设置自定义费率",
+      "allSubjects": "所有科目",
+      "edit": "编辑",
+      "delete": "删除",
+      "confirmDelete": "确认移除 {studentName} 的自定义费率吗？"
+    },
+    "form": {
+      "selectStudent": "选择学生",
+      "hourlyRate": "每小时费率",
+      "subject": "科目 / 等级（可选）",
+      "allSubjects": "所有科目",
+      "save": "保存",
+      "cancel": "取消"
+    },
+    "messages": {
+      "rateUpdated": "费率更新成功",
+      "rateAdded": "学生费率已添加",
+      "rateDeleted": "学生费率已移除",
+      "error": "更新费率失败",
+      "enterValidRate": "请输入有效的费率"
+    }
+  }
 }

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from '@/i18n/routing'
+import { formatCurrency } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 type Tutor = {
     id: string
@@ -18,9 +20,13 @@ type Tutor = {
         endTime: string
     }>
     availableSlots: number
+    tutorProfile?: {
+        currency: string
+    }
 }
 
 export default function BrowseTutors() {
+    const t = useTranslations('BrowseTutors')
     const [tutors, setTutors] = useState<Tutor[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -88,12 +94,12 @@ export default function BrowseTutors() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-foreground">
-                    Browse Tutors ({filteredTutors.length})
+                    {t('title', { count: filteredTutors.length })}
                 </h2>
                 <div>
                     <input
                         type="text"
-                        placeholder="Filter by subject..."
+                        placeholder={t('filterPlaceholder')}
                         value={subjectFilter}
                         onChange={(e) => setSubjectFilter(e.target.value)}
                         className="px-4 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -106,8 +112,8 @@ export default function BrowseTutors() {
                 <div className="bg-card border border-border rounded-lg p-8 text-center">
                     <p className="text-muted-foreground">
                         {subjectFilter
-                            ? `No tutors found for "${subjectFilter}"`
-                            : 'No tutors available at the moment'}
+                            ? t('noTutorsFiltered', { subject: subjectFilter })
+                            : t('noTutors')}
                     </p>
                 </div>
             ) : (
@@ -128,7 +134,7 @@ export default function BrowseTutors() {
 
                             {/* Subjects */}
                             <div className="mb-4">
-                                <p className="text-xs font-medium text-muted-foreground mb-2">Subjects:</p>
+                                <p className="text-xs font-medium text-muted-foreground mb-2">{t('subjectsLabel')}:</p>
                                 <div className="flex flex-wrap gap-2">
                                     {tutor.subjects.map((subject, idx) => (
                                         <span
@@ -144,7 +150,7 @@ export default function BrowseTutors() {
                             {/* Rate */}
                             <div className="mb-4">
                                 <p className="text-2xl font-bold text-foreground">
-                                    ${tutor.hourlyRate}
+                                    {formatCurrency(tutor.hourlyRate || 0, tutor.tutorProfile?.currency || 'USD')}
                                     <span className="text-sm text-muted-foreground font-normal">/hour</span>
                                 </p>
                             </div>
@@ -152,7 +158,7 @@ export default function BrowseTutors() {
                             {/* Availability Summary */}
                             <div className="mb-4">
                                 <p className="text-xs font-medium text-muted-foreground mb-2">
-                                    Available: {tutor.availableSlots} slots
+                                    {t('availableSlots', { count: tutor.availableSlots })}
                                 </p>
                                 <div className="flex flex-wrap gap-1">
                                     {tutor.availability.slice(0, 3).map((slot, idx) => (
@@ -165,7 +171,7 @@ export default function BrowseTutors() {
                                     ))}
                                     {tutor.availability.length > 3 && (
                                         <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                                            +{tutor.availability.length - 3} more
+                                            +{tutor.availability.length - 3} {t('more')}
                                         </span>
                                     )}
                                 </div>
@@ -175,7 +181,7 @@ export default function BrowseTutors() {
                                 onClick={() => router.push(`/student?tutorId=${tutor.id}${subjectFilter ? `&subject=${subjectFilter}` : ''}`)}
                                 className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
                             >
-                                Book Session
+                                {t('bookButton')}
                             </button>
                         </div>
                     ))}

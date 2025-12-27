@@ -147,6 +147,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Time slot already booked' }, { status: 409 })
     }
 
+    // Get tutor info to capture rate and currency
+    const tutorProfile = await db.tutor.findUnique({
+      where: { id: data.tutorId },
+      select: { hourlyRate: true, currency: true }
+    })
+
+    if (!tutorProfile) {
+      return NextResponse.json({ error: 'Tutor not found' }, { status: 404 })
+    }
+
+    const hourlyRate = tutorProfile.hourlyRate ? tutorProfile.hourlyRate.toNumber() : 0
+    const totalCost = (hourlyRate * data.duration) / 60
+
     const appointment = await db.appointment.create({
       data: {
         tutorId: data.tutorId,
@@ -156,6 +169,9 @@ export async function POST(request: NextRequest) {
         subject: data.subject,
         status: 'SCHEDULED',
         notes: data.notes || null,
+        hourlyRate,
+        totalCost,
+        currency: tutorProfile.currency
       },
     })
 
@@ -473,6 +489,7 @@ async function handleCompletedAppointment(appointment: any, tx: any) {
         subject: appointment.subject,
         totalHours: durationHours,
         unpaidHours: durationHours,
+        currency: appointment.currency,
         lastSessionDate: endTime,
         paymentInterval: 10 // Default to 10 hours payment interval
       }

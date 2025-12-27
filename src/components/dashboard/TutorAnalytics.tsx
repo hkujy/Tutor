@@ -5,6 +5,7 @@ import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, subMonths, 
 import { useTranslations } from 'next-intl'
 import { Skeleton } from '../ui/skeleton'
 import ErrorBoundary from '../ErrorBoundary'
+import { formatCurrency as globalFormatCurrency } from '@/lib/utils'
 
 // Type guards for data validation
 const isValidNumber = (value: any): value is number => {
@@ -123,6 +124,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
   const [selectedPeriod, setSelectedPeriod] = useState('7d')
   const [analyticsData, setAnalyticsData] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'subjects' | 'schedule'>('overview')
+  const [tutorCurrency, setTutorCurrency] = useState('USD')
 
   // Performance optimization: abort controller for cleanup
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -195,6 +197,16 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
       setStudentProgress(data.studentProgress || [])
       setTimeDistribution(data.timeDistribution || [])
       setSubjectPerformance(data.subjectPerformance || [])
+
+      // Fetch tutor's base currency if not already set
+      if (!tutorCurrency || tutorCurrency === 'USD') {
+        const profileRes = await fetch('/api/tutor/rates')
+        if (profileRes.ok) {
+          const profileData = await profileRes.json()
+          setTutorCurrency(profileData.currency || 'USD')
+        }
+      }
+
       setError(null)
       setRetryCount(0)
 
@@ -290,21 +302,10 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
   }, [weeklyData])
 
   // Safe currency formatter with error handling
-  const formatCurrency = useCallback((amount: any): string => {
-    if (!isValidNumber(amount)) return '$0'
-
-    try {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-      }).format(Math.max(0, amount))
-    } catch (error) {
-      console.warn('Currency formatting error:', error)
-      return `$${Math.round(Math.max(0, amount))}`
-    }
-  }, [])
+  const formatCurrencyLocal = useCallback((amount: any): string => {
+    if (!isValidNumber(amount)) return globalFormatCurrency(0, tutorCurrency)
+    return globalFormatCurrency(amount, tutorCurrency)
+  }, [tutorCurrency])
 
   // Safe percentage calculator
   const calculatePercentage = useCallback((value: number, max: number): number => {
@@ -497,7 +498,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                           style={{ height: `${calculatePercentage(day.earnings, chartData.maxEarnings)}%` }}
                         />
                         <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-gray-700">
-                          {formatCurrency(day.earnings)}
+                          {formatCurrencyLocal(day.earnings)}
                         </div>
                       </div>
                     </div>
@@ -515,7 +516,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                     <div key={month.month} className="p-4 border border-gray-200 rounded-lg text-center">
                       <div className="text-sm font-medium text-gray-600 mb-2">{month.month}</div>
                       <div className="text-xl font-bold text-green-600 mb-1">
-                        {formatCurrency(month.earnings)}
+                        {formatCurrencyLocal(month.earnings)}
                       </div>
                       <div className="text-xs text-gray-500">{t('monthlyEarnings.hoursSessions', { hours: month.hours, sessions: month.sessions })}</div>
                     </div>
@@ -598,7 +599,7 @@ function TutorAnalytics({ tutorId }: TutorAnalyticsProps) {
                         {subject.averageSessionLength.toFixed(1)}h
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                        {formatCurrency(subject.totalEarnings)}
+                        {formatCurrencyLocal(subject.totalEarnings)}
                       </td>
                     </tr>
                   ))}
