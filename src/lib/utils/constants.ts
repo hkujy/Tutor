@@ -38,7 +38,7 @@ export const VALID_GRADE_LEVELS = [
     'Graduate',
 ] as const
 
-export const VALID_CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF'] as const
+export const VALID_CURRENCIES = ['USD', 'CNY', 'GBP', 'EUR', 'CAD', 'AUD', 'JPY', 'CHF'] as const
 
 export const VALID_ROLES = ['STUDENT', 'TUTOR', 'ADMIN'] as const
 

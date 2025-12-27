@@ -190,7 +190,7 @@ function StudentDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {/* Calendar View */}
               <div>
-                <ErrorBoundary fallback={<SectionError title="Calendar Error" message="Unable to load the calendar view." />}>
+                <ErrorBoundary fallback={<SectionError title={t('errors.calendarTitle')} message={t('errors.calendarMessage')} />}>
                   <Suspense fallback={<DashboardSkeleton />}>
                     <CalendarView />
                   </Suspense>
@@ -199,7 +199,7 @@ function StudentDashboard() {
 
               {/* Progress Charts */}
               <div>
-                <ErrorBoundary fallback={<SectionError title="Progress Error" message="Could not load progress data." />}>
+                <ErrorBoundary fallback={<SectionError title={t('errors.progressTitle')} message={t('errors.progressMessage')} />}>
                   <Suspense fallback={<DashboardSkeleton />}>
                     <StudentProgress studentId={user?.id || ''} />
                   </Suspense>
@@ -252,7 +252,7 @@ function StudentDashboard() {
 
             {/* Browse Tutors Section */}
             <div className="mb-8">
-              <ErrorBoundary fallback={<SectionError title="Browse Error" message="Could not load tutors." />}>
+              <ErrorBoundary fallback={<SectionError title={t('errors.browseTitle')} message={t('errors.browseMessage')} />}>
                 <Suspense fallback={<DashboardSkeleton />}>
                   <BrowseTutors />
                 </Suspense>
@@ -260,7 +260,7 @@ function StudentDashboard() {
             </div>
 
             {/* Appointment List - Full width */}
-            <ErrorBoundary fallback={<SectionError title="Appointments Error" message="Could not load your appointments." />}>
+            <ErrorBoundary fallback={<SectionError title={t('errors.appointmentsTitle')} message={t('errors.appointmentsMessage')} />}>
               <AppointmentList refreshTrigger={refreshTrigger} />
             </ErrorBoundary>
           </div>
@@ -271,8 +271,8 @@ function StudentDashboard() {
           <div className="space-y-6">
             {/* Booking Form */}
             <div className="bg-card rounded-lg shadow p-6 border border-border">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Book New Session</h3>
-              <ErrorBoundary fallback={<WidgetError title="Booking Error" message="Appointment form unavailable." />}>
+              <h3 className="text-lg font-semibold text-foreground mb-4">{t('sessions.bookNew')}</h3>
+              <ErrorBoundary fallback={<WidgetError title={t('errors.bookingTitle')} message={t('errors.bookingMessage')} />}>
                 <Suspense fallback={<AvailabilitySkeleton />}>
                   <EnhancedAppointmentForm
                     initialDate={selectedDate}
@@ -285,7 +285,7 @@ function StudentDashboard() {
             </div>
 
             {/* Appointment Manager */}
-            <ErrorBoundary fallback={<SectionError title="Management Error" message="Appointment manager unavailable." />}>
+            <ErrorBoundary fallback={<SectionError title={t('errors.managementTitle')} message={t('errors.managementMessage')} />}>
               <Suspense fallback={<AppointmentSkeleton />}>
                 <AppointmentManager userRole="student" userId={user?.id || ''} />
               </Suspense>

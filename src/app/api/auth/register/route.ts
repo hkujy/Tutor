@@ -13,21 +13,21 @@ const registerSchema = z.object({
   role: z.enum(['STUDENT', 'TUTOR'], {
     errorMap: () => ({ message: 'Role must be either STUDENT or TUTOR' }),
   }),
-  phone: z.string().optional(),
-  timezone: z.string().optional(),
+  phone: z.string().nullish(),
+  timezone: z.string().nullish(),
   // Student specific fields
-  gradeLevel: z.string().optional(),
-  subjects: z.array(z.string()).optional(),
-  learningGoals: z.string().optional(),
-  parentContact: z.string().optional(),
+  gradeLevel: z.string().nullish(),
+  subjects: z.array(z.string()).nullish(),
+  learningGoals: z.string().nullish(),
+  parentContact: z.string().nullish(),
   // Tutor specific fields
-  specializations: z.array(z.string()).optional(),
-  experienceYears: z.number().min(0).optional(),
-  education: z.string().optional(),
-  certifications: z.array(z.string()).optional(),
-  bio: z.string().optional(),
-  hourlyRate: z.number().min(0).optional(),
-  languages: z.array(z.string()).optional(),
+  specializations: z.array(z.string()).nullish(),
+  experienceYears: z.number().min(0).nullish(),
+  education: z.string().nullish(),
+  certifications: z.array(z.string()).nullish(),
+  bio: z.string().nullish(),
+  hourlyRate: z.number().min(0).nullish(),
+  languages: z.array(z.string()).nullish(),
 })
 
 export async function POST(request: NextRequest) {
@@ -55,28 +55,28 @@ export async function POST(request: NextRequest) {
       firstName: validatedData.firstName,
       lastName: validatedData.lastName,
       role: validatedData.role,
-      phone: validatedData.phone,
-      timezone: validatedData.timezone || 'UTC',
+      phone: validatedData.phone || undefined,
+      timezone: validatedData.timezone || undefined,
     })
 
     // Create role-specific profile
     if (user && validatedData.role === 'STUDENT') {
       await studentRepository.create({
         userId: user.id,
-        gradeLevel: validatedData.gradeLevel,
+        gradeLevel: validatedData.gradeLevel || undefined,
         subjects: validatedData.subjects || [],
-        learningGoals: validatedData.learningGoals,
-        parentContact: validatedData.parentContact,
+        learningGoals: validatedData.learningGoals || undefined,
+        parentContact: validatedData.parentContact || undefined,
       })
     } else if (user && validatedData.role === 'TUTOR') {
       await tutorRepository.create({
         userId: user.id,
         specializations: validatedData.specializations || [],
-        experienceYears: validatedData.experienceYears,
-        education: validatedData.education,
+        experienceYears: validatedData.experienceYears || undefined,
+        education: validatedData.education || undefined,
         certifications: validatedData.certifications || [],
-        bio: validatedData.bio,
-        hourlyRate: validatedData.hourlyRate,
+        bio: validatedData.bio || undefined,
+        hourlyRate: validatedData.hourlyRate || undefined,
         languages: validatedData.languages || ['English'],
       })
     }
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     // Return user data (without password)
     const { password, ...userWithoutPassword } = user
-    
+
     return NextResponse.json(
       {
         user: userWithoutPassword,

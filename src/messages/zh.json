@@ -157,6 +157,23 @@
       "notifications": "通知",
       "settings": "设置"
     },
+    "errors": {
+      "calendarTitle": "日历错误",
+      "calendarMessage": "无法加载日历视图。",
+      "progressTitle": "进度错误",
+      "progressMessage": "无法加载进度数据。",
+      "browseTitle": "浏览错误",
+      "browseMessage": "无法加载导师列表。",
+      "appointmentsTitle": "预约错误",
+      "appointmentsMessage": "无法加载您的预约。",
+      "bookingTitle": "预约表单错误",
+      "bookingMessage": "预约表单目前不可用。",
+      "managementTitle": "管理错误",
+      "managementMessage": "预约管理器不可用。"
+    },
+    "sessions": {
+      "bookNew": "预约新课程"
+    },
     "AppointmentManagement": {
       "title": "预约管理",
       "showingCount": "显示 {current} / {total} 个预约",
@@ -1338,8 +1355,7 @@
     },
     "confirmDelete": "您确定要删除此空闲时间段吗？",
     "confirmDeleteIndividual": "您确定要删除此单个时间段吗？"
-  }
-  ,
+  },
   "HourlyRateManager": {
     "title": "每小时费率",
     "labels": {
@@ -1378,5 +1394,15 @@
       "error": "更新费率失败",
       "enterValidRate": "请输入有效的费率"
     }
+  },
+  "BrowseTutors": {
+    "title": "找到 {count} 位导师",
+    "filterPlaceholder": "按科目筛选...",
+    "noTutors": "未找到导师。",
+    "noTutorsFiltered": "未找到 \"{subject}\" 相关的导师。",
+    "subjectsLabel": "教学科目",
+    "availableSlots": "{count} 个空余时段",
+    "more": "更多",
+    "bookButton": "立即预约"
   }
 }

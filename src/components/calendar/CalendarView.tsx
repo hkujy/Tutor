@@ -26,11 +26,11 @@ export default function CalendarView() {
 
   const monthStart = currentDate ? startOfMonth(currentDate) : null
   const monthEnd = currentDate ? endOfMonth(currentDate) : null
-  
+
   // Get the start and end of the calendar view (including partial weeks)
   const calendarStart = monthStart ? startOfWeek(monthStart, { weekStartsOn: 0 }) : null // Sunday = 0
   const calendarEnd = monthEnd ? endOfWeek(monthEnd, { weekStartsOn: 0 }) : null
-  
+
   const calendarDays = calendarStart && calendarEnd ? eachDayOfInterval({ start: calendarStart, end: calendarEnd }) : []
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function CalendarView() {
   }
 
   const getAppointmentsForDate = (date: Date) => {
-    return appointments.filter(apt => 
+    return appointments.filter(apt =>
       isSameDay(new Date(apt.startTime), date)
     )
   }
@@ -88,16 +88,16 @@ export default function CalendarView() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bg-card rounded-lg shadow-lg p-6 border border-border">
       {/* Calendar Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-2xl font-bold text-foreground">
           {format(currentDate, 'MMMM yyyy')}
         </h2>
         <div className="flex gap-2">
           <button
             onClick={() => navigateMonth('prev')}
-            className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+            className="p-2 hover:bg-muted rounded-md transition-colors text-muted-foreground hover:text-foreground"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -105,13 +105,13 @@ export default function CalendarView() {
           </button>
           <button
             onClick={() => setCurrentDate(new Date())}
-            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+            className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
           >
             Today
           </button>
           <button
             onClick={() => navigateMonth('next')}
-            className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+            className="p-2 hover:bg-muted rounded-md transition-colors text-muted-foreground hover:text-foreground"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -123,7 +123,7 @@ export default function CalendarView() {
       {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-1 mb-2">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">
+          <div key={day} className="p-2 text-center text-sm font-medium text-muted-foreground">
             {day}
           </div>
         ))}
@@ -132,7 +132,7 @@ export default function CalendarView() {
       {loading ? (
         <div className="grid grid-cols-7 gap-1">
           {Array.from({ length: 42 }).map((_, i) => (
-            <div key={i} className="h-24 bg-gray-100 rounded animate-pulse" />
+            <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
           ))}
         </div>
       ) : (
@@ -148,17 +148,18 @@ export default function CalendarView() {
                 key={format(date, 'yyyy-MM-dd')}
                 onClick={() => handleDateClick(date)}
                 className={`
-                  h-24 p-2 border cursor-pointer rounded-md transition-colors
-                  ${isSelected ? 'bg-indigo-100 border-indigo-500' : 'border-gray-200 hover:bg-gray-50'}
-                  ${isToday ? 'bg-blue-50 border-blue-300' : ''}
-                  ${!isCurrentMonth ? 'bg-gray-50' : ''}
+                  h-24 p-2 border cursor-pointer rounded-md transition-all duration-200
+                  ${isSelected
+                    ? 'bg-primary/10 border-primary ring-1 ring-primary/20'
+                    : 'border-border hover:bg-accent/50 hover:border-accent-foreground/20'}
+                  ${isToday ? 'bg-blue-500/10 border-blue-500/50' : ''}
+                  ${!isCurrentMonth ? 'opacity-40 grayscale-[0.5]' : ''}
                 `}
               >
-                <div className={`text-sm font-medium ${
-                  isToday ? 'text-blue-600' : 
-                  !isCurrentMonth ? 'text-gray-400' : 
-                  'text-gray-900'
-                }`}>
+                <div className={`text-sm font-medium ${isToday ? 'text-blue-500 font-bold' :
+                  !isCurrentMonth ? 'text-muted-foreground' :
+                    'text-foreground'
+                  }`}>
                   {format(date, 'd')}
                 </div>
                 {dayAppointments.length > 0 && (
@@ -166,13 +167,13 @@ export default function CalendarView() {
                     {dayAppointments.slice(0, 2).map((apt) => (
                       <div
                         key={apt.id}
-                        className="text-xs p-1 rounded bg-indigo-100 text-indigo-800 truncate"
+                        className="text-[10px] px-1.5 py-0.5 rounded-sm bg-primary/20 text-primary-foreground font-medium truncate border border-primary/20"
                       >
                         {apt.subject}
                       </div>
                     ))}
                     {dayAppointments.length > 2 && (
-                      <div className="text-xs text-gray-500">
+                      <div className="text-[10px] text-muted-foreground font-medium pl-1">
                         +{dayAppointments.length - 2} more
                       </div>
                     )}
@@ -186,27 +187,26 @@ export default function CalendarView() {
 
       {/* Selected Date Details */}
       {selectedDate && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-lg font-medium text-gray-900 mb-3">
+        <div className="mt-6 p-4 bg-muted/30 rounded-lg border border-border/50">
+          <h3 className="text-lg font-medium text-foreground mb-3">
             {format(selectedDate, 'EEEE, MMMM d, yyyy')}
           </h3>
           {getAppointmentsForDate(selectedDate).length === 0 ? (
-            <p className="text-gray-500">No appointments scheduled for this date.</p>
+            <p className="text-muted-foreground text-sm italic">No appointments scheduled for this date.</p>
           ) : (
             <div className="space-y-2">
               {getAppointmentsForDate(selectedDate).map((apt) => (
-                <div key={apt.id} className="flex items-center justify-between p-3 bg-white rounded border">
+                <div key={apt.id} className="flex items-center justify-between p-3 bg-card rounded-md border border-border hover:border-primary/50 transition-colors shadow-sm">
                   <div>
-                    <h4 className="font-medium text-gray-900">{apt.subject}</h4>
-                    <p className="text-sm text-gray-500">
+                    <h4 className="font-semibold text-foreground">{apt.subject}</h4>
+                    <p className="text-sm text-muted-foreground">
                       {format(new Date(apt.startTime), 'h:mm a')} - {format(new Date(apt.endTime), 'h:mm a')}
                     </p>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    apt.status === 'SCHEDULED' ? 'bg-green-100 text-green-800' :
-                    apt.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase ${apt.status === 'SCHEDULED' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
+                    apt.status === 'COMPLETED' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
+                      'bg-muted text-muted-foreground border border-border'
+                    }`}>
                     {apt.status}
                   </span>
                 </div>

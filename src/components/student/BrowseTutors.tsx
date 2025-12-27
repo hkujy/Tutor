@@ -126,7 +126,7 @@ export default function BrowseTutors() {
                         >
                             {/* Tutor Info */}
                             <div className="mb-4">
-                                <h3 className="text-lg font-semibold text-foreground">
+                                <h3 data-testid="tutor-name" className="text-lg font-semibold text-foreground">
                                     {tutor.user.firstName} {tutor.user.lastName}
                                 </h3>
                                 <p className="text-sm text-muted-foreground">{tutor.user.email}</p>
@@ -149,7 +149,7 @@ export default function BrowseTutors() {
 
                             {/* Rate */}
                             <div className="mb-4">
-                                <p className="text-2xl font-bold text-foreground">
+                                <p data-testid="tutor-rate" className="text-2xl font-bold text-foreground">
                                     {formatCurrency(tutor.hourlyRate || 0, tutor.tutorProfile?.currency || 'USD')}
                                     <span className="text-sm text-muted-foreground font-normal">/hour</span>
                                 </p>
@@ -178,6 +178,7 @@ export default function BrowseTutors() {
                             </div>
 
                             <button
+                                data-testid="book-button"
                                 onClick={() => router.push(`/student?tutorId=${tutor.id}${subjectFilter ? `&subject=${subjectFilter}` : ''}`)}
                                 className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
                             >
