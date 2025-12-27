@@ -53,8 +53,11 @@ describe('Enhanced Validation', () => {
 
 
         it('should calculate password strength correctly', () => {
-            const weak = validatePassword('MyP@ss123!'); // 10 chars, score 4 (medium)
-            expect(weak.strength).toBe('medium');
+            // Any valid password (len>=12 + all char types) is automatically Strong (score >= 5)
+            // Invalid passwords (like short ones) are always Weak
+            const short = validatePassword('My123!');
+            expect(short.strength).toBe('weak');
+            expect(short.valid).toBe(false);
 
             const strong = validatePassword('MyP@ssw0rd123!@#');
             expect(strong.strength).toBe('strong');
