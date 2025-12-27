@@ -175,23 +175,6 @@
     "sessions": {
       "bookNew": "Book New Session"
     },
-    "errors": {
-      "calendarTitle": "Calendar Error",
-      "calendarMessage": "Unable to load the calendar view.",
-      "progressTitle": "Progress Error",
-      "progressMessage": "Could not load progress data.",
-      "browseTitle": "Browse Error",
-      "browseMessage": "Could not load tutors.",
-      "appointmentsTitle": "Appointments Error",
-      "appointmentsMessage": "Could not load your appointments.",
-      "bookingTitle": "Booking Error",
-      "bookingMessage": "Appointment form unavailable.",
-      "managementTitle": "Management Error",
-      "managementMessage": "Appointment manager unavailable."
-    },
-    "sessions": {
-      "bookNew": "Book New Session"
-    },
     "AppointmentManagement": {
       "title": "Appointment Management",
       "showingCount": "{current} of {total} appointments",
