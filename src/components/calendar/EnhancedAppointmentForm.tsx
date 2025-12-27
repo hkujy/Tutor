@@ -480,18 +480,18 @@ export default function EnhancedAppointmentForm({
 
         {selectedDate && (
           <div className="mb-6">
-            <h4 className="font-medium text-gray-700 mb-3">Select Time:</h4>
+            <h4 className="font-medium text-foreground mb-3">Select Time:</h4>
             <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto">
               {availableSlots.map((slot) => (
                 <button
                   key={slot.time}
                   onClick={() => slot.available && handleTimeSelect(slot.time)}
                   disabled={!slot.available}
-                  className={`p-2 text-sm rounded border transition-colors ${slot.available
+                  className={`p-2 text-sm rounded border transition-colors font-medium ${slot.available
                     ? selectedTime === slot.time
-                      ? 'border-indigo-500 bg-indigo-100 text-indigo-700'
-                      : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50'
-                    : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                      ? 'border-indigo-500 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200'
+                      : 'border-border bg-background hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950 text-foreground'
+                    : 'border-border bg-muted text-muted-foreground cursor-not-allowed opacity-50'
                     }`}
                   title={slot.conflictReason}
                   data-testid="time-slot"
